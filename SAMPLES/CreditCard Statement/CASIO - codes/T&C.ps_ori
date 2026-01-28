@@ -1,0 +1,3159 @@
+%!PS-Adobe-3.0
+%%Title: Microsoft Word - CardTnC Page revised_v0514-v11-2 column _final_.doc
+%%Creator: PScript5.dll Version 5.2.2
+%%CreationDate: 5/22/2014 20:19:53
+%%For: istormyadm01
+%%BoundingBox: (atend)
+%%Pages: (atend)
+%%Orientation: Portrait
+%%PageOrder: Special
+%%DocumentNeededResources: (atend)
+%%DocumentSuppliedResources: (atend)
+%%DocumentData: Clean7Bit
+%%TargetDevice: (Xerox DocuPrint 4850 NPS PS2) (2015.0) 0
+%%LanguageLevel: 2
+%%EndComments
+
+%%BeginDefaults
+%%PageBoundingBox: 0 0 595 842
+%%ViewingOrientation: 1 0 0 1
+%%EndDefaults
+
+
+%%BeginProlog
+%%BeginResource: file Pscript_WinNT_ErrorHandler 5.0 0
+/currentpacking where{pop/oldpack currentpacking def/setpacking where{pop false
+setpacking}if}if/$brkpage 64 dict def $brkpage begin/prnt{dup type/stringtype
+ne{=string cvs}if dup length 6 mul/tx exch def/ty 10 def currentpoint/toy exch
+def/tox exch def 1 setgray newpath tox toy 2 sub moveto 0 ty rlineto tx 0
+rlineto 0 ty neg rlineto closepath fill tox toy moveto 0 setgray show}bind def
+/nl{currentpoint exch pop lmargin exch moveto 0 -10 rmoveto}def/=={/cp 0 def
+typeprint nl}def/typeprint{dup type exec}readonly def/lmargin 72 def/rmargin 72
+def/tprint{dup length cp add rmargin gt{nl/cp 0 def}if dup length cp add/cp
+exch def prnt}readonly def/cvsprint{=string cvs tprint( )tprint}readonly def
+/integertype{cvsprint}readonly def/realtype{cvsprint}readonly def/booleantype
+{cvsprint}readonly def/operatortype{(--)tprint =string cvs tprint(-- )tprint}
+readonly def/marktype{pop(-mark- )tprint}readonly def/dicttype{pop
+(-dictionary- )tprint}readonly def/nulltype{pop(-null- )tprint}readonly def
+/filetype{pop(-filestream- )tprint}readonly def/savetype{pop(-savelevel- )
+tprint}readonly def/fonttype{pop(-fontid- )tprint}readonly def/nametype{dup
+xcheck not{(/)tprint}if cvsprint}readonly def/stringtype{dup rcheck{(\()tprint
+tprint(\))tprint}{pop(-string- )tprint}ifelse}readonly def/arraytype{dup rcheck
+{dup xcheck{({)tprint{typeprint}forall(})tprint}{([)tprint{typeprint}forall(])
+tprint}ifelse}{pop(-array- )tprint}ifelse}readonly def/packedarraytype{dup
+rcheck{dup xcheck{({)tprint{typeprint}forall(})tprint}{([)tprint{typeprint}
+forall(])tprint}ifelse}{pop(-packedarray- )tprint}ifelse}readonly def/courier
+/Courier findfont 10 scalefont def end errordict/handleerror{systemdict begin
+$error begin $brkpage begin newerror{/newerror false store vmstatus pop pop 0
+ne{grestoreall}if errorname(VMerror)ne{showpage}if initgraphics courier setfont
+lmargin 720 moveto errorname(VMerror)eq{userdict/ehsave known{clear userdict
+/ehsave get restore 2 vmreclaim}if vmstatus exch pop exch pop PrtVMMsg}{
+(ERROR: )prnt errorname prnt nl(OFFENDING COMMAND: )prnt/command load prnt
+$error/ostack known{nl nl(STACK:)prnt nl nl $error/ostack get aload length{==}
+repeat}if}ifelse systemdict/showpage get exec(%%[ Error: )print errorname
+=print(; OffendingCommand: )print/command load =print( ]%%)= flush}if end end
+end}dup 0 systemdict put dup 4 $brkpage put bind readonly put/currentpacking
+where{pop/setpacking where{pop oldpack setpacking}if}if
+%%EndResource
+userdict /Pscript_WinNT_Incr 230 dict dup begin put
+%%BeginResource: file Pscript_FatalError 5.0 0
+userdict begin/FatalErrorIf{{initgraphics findfont 1 index 0 eq{exch pop}{dup
+length dict begin{1 index/FID ne{def}{pop pop}ifelse}forall/Encoding
+{ISOLatin1Encoding}stopped{StandardEncoding}if def currentdict end
+/ErrFont-Latin1 exch definefont}ifelse exch scalefont setfont counttomark 3 div
+cvi{moveto show}repeat showpage quit}{cleartomark}ifelse}bind def end
+%%EndResource
+userdict begin/PrtVMMsg{vmstatus exch sub exch pop gt{[
+(This job requires more memory than is available in this printer.)100 500
+(Try one or more of the following, and then print again:)100 485
+(For the output format, choose Optimize For Portability.)115 470
+(In the Device Settings page, make sure the Available PostScript Memory is accurate.)
+115 455(Reduce the number of fonts in the document.)115 440
+(Print the document in parts.)115 425 12/Times-Roman showpage
+(%%[ PrinterError: Low Printer VM ]%%)= true FatalErrorIf}if}bind def end
+version cvi 2016 ge{/VM?{pop}bind def}{/VM? userdict/PrtVMMsg get def}ifelse
+105000 VM?
+%%BeginResource: file Pscript_Win_Basic 5.0 0
+/d/def load def/,/load load d/~/exch , d/?/ifelse , d/!/pop , d/`/begin , d/^
+/index , d/@/dup , d/+/translate , d/$/roll , d/U/userdict , d/M/moveto , d/-
+/rlineto , d/&/currentdict , d/:/gsave , d/;/grestore , d/F/false , d/T/true ,
+d/N/newpath , d/E/end , d/Ac/arc , d/An/arcn , d/A/ashow , d/D/awidthshow , d/C
+/closepath , d/V/div , d/O/eofill , d/L/fill , d/I/lineto , d/-c/curveto , d/-M
+/rmoveto , d/+S/scale , d/Ji/setfont , d/Lc/setlinecap , d/Lj/setlinejoin , d
+/Lw/setlinewidth , d/Lm/setmiterlimit , d/sd/setdash , d/S/show , d/LH/showpage
+, d/K/stroke , d/W/widthshow , d/R/rotate , d/L2? false/languagelevel where{pop
+languagelevel 2 ge{pop true}if}if d L2?{/xS/xshow , d/yS/yshow , d/zS/xyshow ,
+d}if/b{bind d}bind d/bd{bind d}bind d/xd{~ d}bd/ld{, d}bd/bn/bind ld/lw/Lw ld
+/lc/Lc ld/lj/Lj ld/sg/setgray ld/ADO_mxRot null d/self & d/OrgMx matrix
+currentmatrix d/reinitialize{: OrgMx setmatrix[/TextInit/GraphInit/UtilsInit
+counttomark{@ where{self eq}{F}?{cvx exec}{!}?}repeat cleartomark ;}b
+/initialize{`{/Pscript_Win_Data where{!}{U/Pscript_Win_Data & put}?/ADO_mxRot ~
+d/TextInitialised? F d reinitialize E}{U/Pscript_Win_Data 230 dict @ ` put
+/ADO_mxRot ~ d/TextInitialised? F d reinitialize}?}b/terminate{!{& self eq
+{exit}{E}?}loop E}b/suspend/terminate , d/resume{` Pscript_Win_Data `}b U `
+/lucas 21690 d/featurebegin{countdictstack lucas[}b/featurecleanup{stopped
+{cleartomark @ lucas eq{! exit}if}loop countdictstack ~ sub @ 0 gt{{E}repeat}
+{!}?}b E/snap{transform 0.25 sub round 0.25 add ~ 0.25 sub round 0.25 add ~
+itransform}b/dsnap{dtransform round ~ round ~ idtransform}b/nonzero_round{@ 0.5
+ge{round}{@ -0.5 lt{round}{0 ge{1}{-1}?}?}?}b/nonzero_dsnap{dtransform
+nonzero_round ~ nonzero_round ~ idtransform}b U<04>cvn{}put/rr{1 ^ 0 - 0 ~ -
+neg 0 - C}b/irp{4 -2 $ + +S fx 4 2 $ M 1 ^ 0 - 0 ~ - neg 0 -}b/rp{4 2 $ M 1 ^ 0
+- 0 ~ - neg 0 -}b/solid{[]0 sd}b/g{@ not{U/DefIf_save save put}if U/DefIf_bool
+2 ^ put}b/DefIf_El{if U/DefIf_bool get not @{U/DefIf_save get restore}if}b/e
+{DefIf_El !}b/UDF{L2?{undefinefont}{!}?}b/UDR{L2?{undefineresource}{! !}?}b
+/freeVM{/Courier findfont[40 0 0 -40 0 0]makefont Ji 2 vmreclaim}b/hfRedefFont
+{findfont @ length dict `{1 ^/FID ne{d}{! !}?}forall & E @ ` ~{/CharStrings 1
+dict `/.notdef 0 d & E d}if/Encoding 256 array 0 1 255{1 ^ ~/.notdef put}for d
+E definefont !}bind d/hfMkCIDFont{/CIDFont findresource @ length 2 add dict `{1
+^ @/FID eq ~ @/XUID eq ~/UIDBase eq or or{! !}{d}?}forall/CDevProc ~ d/Metrics2
+16 dict d/CIDFontName 1 ^ d & E 1 ^ ~/CIDFont defineresource ![~]composefont !}
+bind d
+%%EndResource
+%%BeginResource: file Pscript_Win_Utils_L2 5.0 0
+/rf/rectfill , d/fx{1 1 dtransform @ 0 ge{1 sub 0.5}{1 add -0.5}? 3 -1 $ @ 0 ge
+{1 sub 0.5}{1 add -0.5}? 3 1 $ 4 1 $ idtransform 4 -2 $ idtransform}b/BZ{4 -2 $
+snap + +S fx rf}b/rs/rectstroke , d/rc/rectclip , d/UtilsInit{currentglobal{F
+setglobal}if}b/scol{! setcolor}b/colspA/DeviceGray d/colspABC/DeviceRGB d
+/colspRefresh{colspABC setcolorspace}b/SetColSpace{colspABC setcolorspace}b
+/resourcestatus where{!/ColorRendering/ProcSet resourcestatus{! ! T}{F}?}{F}?
+not{/ColorRendering<</GetHalftoneName{currenthalftone @/HalftoneName known{
+/HalftoneName get}{!/none}?}bn/GetPageDeviceName{currentpagedevice @
+/PageDeviceName known{/PageDeviceName get @ null eq{!/none}if}{!/none}?}bn
+/GetSubstituteCRD{!/DefaultColorRendering/ColorRendering resourcestatus{! !
+/DefaultColorRendering}{(DefaultColorRendering*){cvn exit}127 string
+/ColorRendering resourceforall}?}bn>>/defineresource where{!/ProcSet
+defineresource !}{! !}?}if/buildcrdname{/ColorRendering/ProcSet findresource `
+mark GetHalftoneName @ type @/nametype ne ~/stringtype ne and{!/none}if(.)
+GetPageDeviceName @ type @/nametype ne ~/stringtype ne and{!/none}if(.)5 ^ 0 5
+-1 1{^ length add}for string 6 1 $ 5 ^ 5{~ 1 ^ cvs length 1 ^ length 1 ^ sub
+getinterval}repeat ! cvn 3 1 $ ! ! E}b/definecolorrendering{~ buildcrdname ~
+/ColorRendering defineresource !}b/findcolorrendering where{!}{
+/findcolorrendering{buildcrdname @/ColorRendering resourcestatus{! ! T}{
+/ColorRendering/ProcSet findresource ` GetSubstituteCRD E F}?}b}?
+/selectcolorrendering{findcolorrendering !/ColorRendering findresource
+setcolorrendering}b/G2UBegin{findresource/FontInfo get/GlyphNames2Unicode get
+`}bind d/G2CCBegin{findresource/FontInfo get/GlyphNames2HostCode get `}bind d
+/G2UEnd{E}bind d/AddFontInfoBegin{/FontInfo 8 dict @ `}bind d/AddFontInfo{
+/GlyphNames2Unicode 16 dict d/GlyphNames2HostCode 16 dict d}bind d
+/AddFontInfoEnd{E d}bind d/T0AddCFFMtx2{/CIDFont findresource/Metrics2 get ` d
+E}bind d
+%%EndResource
+end
+%%EndProlog
+
+%%BeginSetup
+statusdict begin (%%[ ProductName: ) print product print ( ]%%)= flush end
+[ 1 0 0 1 0 0 ] false Pscript_WinNT_Incr dup /initialize get exec
+featurebegin{
+%%BeginNonPPDFeature: JobTimeout 0
+0 /languagelevel where{pop languagelevel}{1}ifelse 2 ge{1 dict dup/JobTimeout  4 -1 roll put setuserparams}{statusdict/setjobtimeout get exec}ifelse
+%%EndNonPPDFeature
+}featurecleanup
+
+featurebegin{
+%%BeginNonPPDFeature: WaitTimeout 300
+300 /languagelevel where{pop languagelevel}{1}ifelse 2 ge{1 dict dup/WaitTimeout 4 -1 roll put setuserparams}{statusdict/waittimeout 3 -1 roll put}ifelse
+%%EndNonPPDFeature
+}featurecleanup
+
+featurebegin{
+%%BeginFeature: *PageSize A4
+1 dict dup /PageSize [595 842] put setpagedevice
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *MediaType Plain
+%1 dict dup /MediaType () put setpagedevice
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *MediaColor white
+%1 dict dup /MediaColor (white) put setpagedevice
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *Duplex None
+%noop
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *Collate True
+1 dict dup /Collate true put setpagedevice
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *StapleWhen None
+%noop
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *HighlightPrintingColor None
+%noop
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *HighlightMappingColor None
+%noop
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *HighlightMappingAlgorithm None
+%noop
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *MismatchedHighlightPrintingColor None
+%noop
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *Resolution 300dpi
+
+%%EndFeature
+}featurecleanup
+featurebegin{
+%%BeginFeature: *InstalledMemory None
+
+%%EndFeature
+}featurecleanup
+1 setlinecap 1 setlinejoin
+/mysetup [ 72 300 V 0 0 -72 300 V 0 842.0003 ] def 
+%%EndSetup
+
+userdict begin /ehsave save def end
+%%Page: 1 1
+%%PageBoundingBox: 0 0 595 842
+%%EndPageComments
+%%BeginPageSetup
+/DeviceRGB dup setcolorspace /colspABC exch def
+mysetup concat colspRefresh
+%%EndPageSetup
+
+0 0 0 1 scol Pscript_WinNT_Incr begin
+%%BeginResource: file Pscript_Text 5.0 0
+/TextInit{TextInitialised? not{/Pscript_Windows_Font & d/TextInitialised? T d
+/fM[1 0 0 1 0 0]d/mFM matrix d/iMat[1 0 0.212557 1 0 0]d}if}b/copyfont{1 ^
+length add dict `{1 ^/FID ne{d}{! !}?}forall & E}b/EncodeDict 11 dict d/bullets
+{{/bullet}repeat}b/rF{3 copyfont @ ` ~ EncodeDict ~ get/Encoding ~ 3 ^/0 eq{&
+/CharStrings known{CharStrings/Eth known not{! EncodeDict/ANSIEncodingOld get}
+if}if}if d E}b/mF{@ 7 1 $ findfont ~{@/Encoding get @ StandardEncoding eq{! T}{
+{ISOLatin1Encoding}stopped{! F}{eq}?{T}{@ ` T 32 1 127{Encoding 1 ^ get
+StandardEncoding 3 -1 $ get eq and}for E}?}?}{F}?{1 ^ ~ rF}{0 copyfont}? 6 -2 $
+! ! ~ !/pd_charset @ where{~ get 128 eq{@ FDV 2 copy get @ length array copy
+put pd_CoverFCRange}if}{!}? 2 ^ ~ definefont fM 5 4 -1 $ put fM 4 0 put fM
+makefont Pscript_Windows_Font 3 1 $ put}b/sLT{: Lw -M currentpoint snap M 0 - 0
+Lc K ;}b/xUP null d/yUP null d/uW null d/xSP null d/ySP null d/sW null d/sSU{N
+/uW ~ d/yUP ~ d/xUP ~ d}b/sU{xUP yUP uW sLT}b/sST{N/sW ~ d/ySP ~ d/xSP ~ d}b/sT
+{xSP ySP sW sLT}b/sR{: + R 0 0 M}b/sRxy{: matrix astore concat 0 0 M}b/eR/; , d
+/AddOrigFP{{&/FontInfo known{&/FontInfo get length 6 add}{6}? dict `
+/WinPitchAndFamily ~ d/WinCharSet ~ d/OrigFontType ~ d/OrigFontStyle ~ d
+/OrigFontName ~ d & E/FontInfo ~ d}{! ! ! ! !}?}b/mFS{makefont
+Pscript_Windows_Font 3 1 $ put}b/mF42D{0 copyfont `/FontName ~ d 2 copy ~ sub 1
+add dict `/.notdef 0 d 2 copy 1 ~{@ 3 ^ sub Encoding ~ get ~ d}for & E
+/CharStrings ~ d ! ! & @ E/FontName get ~ definefont}b/mF42{15 dict ` @ 4 1 $
+FontName ~ d/FontType 0 d/FMapType 2 d/FontMatrix[1 0 0 1 0 0]d 1 ^ 254 add 255
+idiv @ array/Encoding ~ d 0 1 3 -1 $ 1 sub{@ Encoding 3 1 $ put}for/FDepVector
+Encoding length array d/CharStrings 2 dict `/.notdef 0 d & E d 0 1 Encoding
+length 1 sub{@ @ 10 lt{! FontName length 1 add string}{100 lt{FontName length 2
+add string}{FontName length 3 add string}?}? @ 0 FontName @ length string cvs
+putinterval @ 3 -1 $ @ 4 1 $ 3 string cvs FontName length ~ putinterval cvn 1 ^
+256 mul @ 255 add 3 -1 $ 4 ^ findfont mF42D FDepVector 3 1 $ put}for & @ E
+/FontName get ~ definefont ! ! ! mF}b/mF_OTF_V{~ ! ~ ! 4 -1 $ ! findfont 2 ^ ~
+definefont fM @ @ 4 6 -1 $ neg put 5 0 put 90 matrix R matrix concatmatrix
+makefont Pscript_Windows_Font 3 1 $ put}b/mF_TTF_V{3{~ !}repeat 3 -1 $ !
+findfont 1 ^ ~ definefont Pscript_Windows_Font 3 1 $ put}b/UmF{L2?
+{Pscript_Windows_Font ~ undef}{!}?}b/UmF42{@ findfont/FDepVector get{/FontName
+get undefinefont}forall undefinefont}b
+%%EndResource
+end reinitialize
+Pscript_WinNT_Incr begin
+%%BeginResource: file Pscript_Encoding256 5.0 0
+/CharCol256Encoding[/.notdef/breve/caron/dotaccent/dotlessi/fi/fl/fraction
+/hungarumlaut/Lslash/lslash/minus/ogonek/ring/Zcaron/zcaron/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/space/exclam/quotedbl/numbersign
+/dollar/percent/ampersand/quotesingle/parenleft/parenright/asterisk/plus/comma
+/hyphen/period/slash/zero/one/two/three/four/five/six/seven/eight/nine/colon
+/semicolon/less/equal/greater/question/at/A/B/C/D/E/F/G/H/I/J/K/L/M/N/O/P/Q/R/S
+/T/U/V/W/X/Y/Z/bracketleft/backslash/bracketright/asciicircum/underscore/grave
+/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/braceleft/bar/braceright
+/asciitilde/.notdef/Euro/.notdef/quotesinglbase/florin/quotedblbase/ellipsis
+/dagger/daggerdbl/circumflex/perthousand/Scaron/guilsinglleft/OE/.notdef
+/.notdef/.notdef/.notdef/quoteleft/quoteright/quotedblleft/quotedblright/bullet
+/endash/emdash/tilde/trademark/scaron/guilsinglright/oe/.notdef/.notdef
+/Ydieresis/.notdef/exclamdown/cent/sterling/currency/yen/brokenbar/section
+/dieresis/copyright/ordfeminine/guillemotleft/logicalnot/.notdef/registered
+/macron/degree/plusminus/twosuperior/threesuperior/acute/mu/paragraph
+/periodcentered/cedilla/onesuperior/ordmasculine/guillemotright/onequarter
+/onehalf/threequarters/questiondown/Agrave/Aacute/Acircumflex/Atilde/Adieresis
+/Aring/AE/Ccedilla/Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute
+/Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute/Ocircumflex/Otilde/Odieresis
+/multiply/Oslash/Ugrave/Uacute/Ucircumflex/Udieresis/Yacute/Thorn/germandbls
+/agrave/aacute/acircumflex/atilde/adieresis/aring/ae/ccedilla/egrave/eacute
+/ecircumflex/edieresis/igrave/iacute/icircumflex/idieresis/eth/ntilde/ograve
+/oacute/ocircumflex/otilde/odieresis/divide/oslash/ugrave/uacute/ucircumflex
+/udieresis/yacute/thorn/ydieresis]def EncodeDict/256 CharCol256Encoding put
+%%EndResource
+end reinitialize
+
+%%IncludeResource: font Helvetica
+Pscript_WinNT_Incr begin
+%%BeginResource: file Pscript_Win_Euro_L2 5.0 0
+/UseT3EuroFont{/currentdistillerparams where{pop currentdistillerparams
+/CoreDistVersion get 4000 le}{false}ifelse}bind def/NewEuroT3Font?{dup/FontType
+get 3 eq{dup/EuroFont known exch/BaseFont known and}{pop false}ifelse}bind def
+/T1FontHasEuro{dup/CharStrings known not{dup NewEuroT3Font?{dup/EuroGlyphName
+get exch/EuroFont get/CharStrings get exch known{true}{false}ifelse}{pop false}
+ifelse}{dup/FontType get 1 eq{/CharStrings get/Euro known}{dup/InfoDict known{
+/InfoDict get/Euro known}{/CharStrings get/Euro known}ifelse}ifelse}ifelse}bind
+def/FontHasEuro{findfont dup/Blend known{pop true}{T1FontHasEuro}ifelse}bind
+def/EuroEncodingIdx 1 def/EuroFontHdr{12 dict begin/FontInfo 10 dict dup begin
+/version(001.000)readonly def/Notice(Copyright (c)1999 Adobe Systems
+Incorporated. All Rights Reserved.)readonly def/FullName(Euro)readonly def
+/FamilyName(Euro)readonly def/Weight(Regular)readonly def/isFixedPitch false
+def/ItalicAngle 0 def/UnderlinePosition -100 def/UnderlineThickness 50 def end
+readonly def/FontName/Euro def/Encoding 256 array 0 1 255{1 index exch/.notdef
+put}for def/PaintType 0 def/FontType 1 def/FontMatrix[0.001 0 0 0.001 0 0]def
+/FontBBox{-25 -23 1500 804}readonly def currentdict end dup/Private 20 dict dup
+begin/ND{def}def/NP{put}def/lenIV -1 def/RD{string currentfile exch
+readhexstring pop}def/-|{string currentfile exch readstring pop}executeonly def
+/|-{def}executeonly def/|{put}executeonly def/BlueValues[-20 0 706 736 547 572]
+|-/OtherBlues[-211 -203]|-/BlueScale 0.0312917 def/MinFeature{16 16}|-/StdHW
+[60]|-/StdVW[71]|-/ForceBold false def/password 5839 def/Erode{8.5 dup 3 -1
+roll 0.1 mul exch 0.5 sub mul cvi sub dup mul 71 0 dtransform dup mul exch dup
+mul add le{pop pop 1.0 1.0}{pop pop 0.0 1.5}ifelse}def/OtherSubrs[{}{}{}
+{systemdict/internaldict known not{pop 3}{1183615869 systemdict/internaldict
+get exec dup/startlock known{/startlock get exec}{dup/strtlck known{/strtlck
+get exec}{pop 3}ifelse}ifelse}ifelse}executeonly]|-/Subrs 5 array dup 0
+<8E8B0C100C110C110C210B>put dup 1<8B8C0C100B>put dup 2<8B8D0C100B>put dup 3<0B>
+put dup 4<8E8C8E0C100C110A0B>put |- 2 index/CharStrings 256 dict dup begin
+/.notdef<8b8b0d0e>def end end put put dup/FontName get exch definefont pop}bind
+def/AddEuroGlyph{2 index exch EuroEncodingIdx 1 eq{EuroFontHdr}if systemdict
+begin/Euro findfont dup dup/Encoding get 5 1 roll/Private get begin/CharStrings
+get dup 3 index known{pop pop pop pop end end}{begin 1 index exch def end end
+end EuroEncodingIdx dup 1 add/EuroEncodingIdx exch def exch put}ifelse}bind def
+/GetNewXUID{currentdict/XUID known{[7 XUID aload pop]true}{currentdict/UniqueID
+known{[7 UniqueID]true}{false}ifelse}ifelse}bind def/BuildT3EuroFont{exch 16
+dict begin dup/FontName exch def findfont dup/Encoding get/Encoding exch def
+dup length 1 add dict copy dup/FID undef begin dup dup/FontName exch def
+/Encoding 256 array 0 1 255{1 index exch/.notdef put}for def GetNewXUID{/XUID
+exch def}if currentdict end definefont pop/BaseFont exch findfont 1000
+scalefont def/EuroFont exch findfont 1000 scalefont def pop/EuroGlyphName exch
+def/FontType 3 def/FontMatrix[.001 0 0 .001 0 0]def/FontBBox BaseFont/FontBBox
+get def/Char 1 string def/BuildChar{exch dup begin/Encoding get 1 index get
+/Euro eq{BaseFont T1FontHasEuro{false}{true}ifelse}{false}ifelse{EuroFont
+setfont pop userdict/Idx 0 put EuroFont/Encoding get{EuroGlyphName eq{exit}
+{userdict/Idx Idx 1 add put}ifelse}forall userdict/Idx get}{dup dup Encoding
+exch get BaseFont/Encoding get 3 1 roll put BaseFont setfont}ifelse Char 0 3 -1
+roll put Char stringwidth newpath 0 0 moveto Char true charpath flattenpath
+pathbbox setcachedevice 0 0 moveto Char show end}bind def currentdict end dup
+/FontName get exch definefont pop}bind def/AddEuroToT1Font{dup findfont dup
+length 10 add dict copy dup/FID undef begin/EuroFont 3 -1 roll findfont 1000
+scalefont def CharStrings dup length 1 add dict copy begin/Euro{EuroFont
+setfont pop EuroGBBox aload pop setcachedevice 0 0 moveto EuroGName glyphshow}
+bind def currentdict end/CharStrings exch def GetNewXUID{/XUID exch def}if 3 1
+roll/EuroGBBox exch def/EuroGName exch def currentdict end definefont pop}bind
+def/BuildNewFont{UseT3EuroFont{BuildT3EuroFont}{pop AddEuroToT1Font}ifelse}bind
+def/UseObliqueEuro{findfont/FontMatrix get dup 2 get 0 eq exch dup 0 get exch 3
+get eq and UseT3EuroFont or}bind def
+%%EndResource
+end reinitialize
+7500 VM?
+/Helvetica FontHasEuro not
+{
+/Euro.Helvetica
+ [556 0 24 -19 541 703 ] 
+<A3F8C00DD4E90378DA01F779D301F808D301F904DA01F899F908156CB447AD338B08FB2D
+8B372B7BFB37085806724305D30644075B06724305DA06A0FB36E035F7218B08E08BCDB7
+939208EE077A71405E418B083F8B4CCE84F108F76506A3D305FB8306D207F79C06A3D305
+FBB10692E2B7E8F28B08E08BBE62A45A08090E>
+AddEuroGlyph
+/Euro /Helvetica /Helvetica-Copy BuildNewFont
+} if
+F /F0 0 /256 T /Helvetica mF 
+/F0S2A F0 [42 0 0 -42 0 0 ] mFS
+F0S2A Ji 
+165 115 M ( )S 
+315 115 M ( )S 
+465 115 M ( )S 
+615 115 M ( )S 
+765 115 M ( )S 
+915 115 M ( )S 
+1065 115 M ( )S 
+1215 115 M ( )S 
+1365 115 M ( )S 
+1515 115 M ( )S 
+1665 115 M ( )S 
+1815 115 M (      )[12 12 11 12 11  0]xS 
+Pscript_WinNT_Incr begin
+%%BeginResource: file Pscript_Win_Dib_L2 5.0 0
+/iw 0 d/ih 0 d/im_save 0 d/s 0 d/polarity 0 d/smoothflag 0 d/mystring 0 d/bpc 0
+d/maskcolor 0 d/mask? F d/setup1asciiproc{[currentfile mystring/readhexstring
+cvx/! cvx]cvx bind}b/setup1binaryproc{[currentfile mystring/readstring cvx/!
+cvx]cvx bind}b/setup2asciiproc{currentfile/ASCII85Decode filter/RunLengthDecode
+filter}b/setup2binaryproc{currentfile/RunLengthDecode filter}b/jpegasciiproc
+{currentfile/ASCII85Decode filter<</Relax 1>>/DCTDecode filter}b/jpegbinaryproc
+{currentfile<</Relax 1>>/DCTDecode filter}b/mycolorspace{colspABC}d/myimagedict
+{/myimagedict 10 dict d myimagedict @ `/ImageType 1 d/MultipleDataSource F d E}
+b/imageprocarray[/setup1binaryproc/setup1asciiproc/setup2binaryproc
+/setup2asciiproc/setup1binarydecodeproc/setup1asciidecodeproc]d/jpegprocarray[
+/jpegasciiproc/jpegbinaryproc]d/Q{/im_save save d scol imageprocarray ~ get/s ~
+, d/polarity ~ d/smoothflag ~ d +/dx 2 ^ d/dy 1 ^ d +S/mystring ~ string d/bpc
+~ d/ih ~ d/iw ~ d fx rf}b/X{/im_save save d/mask? ~ d/maskcolor ~ d
+imageprocarray ~ get/s ~ , d/polarity ~ d/smoothflag ~ d +/dx 2 ^ d/dy 1 ^ d +S
+/mystring ~ string d/bpc ~ d/ih ~ d/iw ~ d}b/Z{im_save restore}b/beginjpeg{
+/jpeg_save save d jpegprocarray ~ get/jpegimageproc ~ , d + +S/bpc ~ d/ih ~ d
+/iw ~ d bpc 24 eq{/DeviceRGB}{/DeviceGray}? setcolorspace myimagedict @ `
+/ImageType 1 d/Width iw d/Height ih d/Decode bpc 24 eq{[0 1 0 1 0 1]}{[0 1]}? d
+/ImageMatrix[iw 0 0 ih 0 0]d/BitsPerComponent 8 d/DataSource jpegimageproc d E
+image}b/endjpeg{jpeg_save restore}b/Y{scol myimagedict @ ` mask?{/polarity
+maskcolor 0 get 0 eq{T}{F}? d}if/Width iw d/Height ih d/Decode polarity{[1 0]}{
+[0 1]}? d/ImageMatrix[iw 0 0 ih 0 0]d/DataSource s d/BitsPerComponent 1 d
+/Interpolate smoothflag d E imagemask}bd/doclutimage{/rgbclut ~ d bpc @ 8 eq{!
+255}{@ 4 eq{! 15}{2 eq{3}{1}?}?}?/hival ~ d[/Indexed currentcolorspace hival
+rgbclut]setcolorspace myimagedict @ ` mask?{/ImageType 4 d/MaskColor maskcolor
+d}if/Width iw d/Height ih d/Decode[0 hival]d/ImageMatrix[iw 0 0 ih 0 0]d
+/DataSource s d/BitsPerComponent bpc d/Interpolate smoothflag d E image}b
+/doCMYKclutimage{/CMYKclut ~ d bpc @ 8 eq{! 255}{4 eq{15}{3}?}?/hival ~ d[
+/Indexed/DeviceCMYK hival CMYKclut]setcolorspace myimagedict @ ` mask?{
+/ImageType 4 d/MaskColor maskcolor d}if/Width iw d/Height ih d/Decode[0 hival]d
+/ImageMatrix[iw 0 0 ih 0 0]d/DataSource s d/BitsPerComponent bpc d/Interpolate
+smoothflag d E image}b/doNimage{bpc 24 eq{currentcolorspace}{colspA}?
+setcolorspace myimagedict @ ` mask?{/ImageType 4 d/MaskColor maskcolor d}if
+/Width iw d/Height ih d/Decode bpc 24 eq{[0 1 0 1 0 1]}{[0 1]}? d/ImageMatrix
+[iw 0 0 ih 0 0]d/DataSource s d/BitsPerComponent bpc 24 eq{8}{bpc}? d
+/Interpolate smoothflag d E image}b/doCMYKimage{/DeviceCMYK setcolorspace
+myimagedict @ ` mask?{/ImageType 4 d/MaskColor maskcolor d}if/Width iw d/Height
+ih d/Decode[0 1 0 1 0 1 0 1]d/ImageMatrix[iw 0 0 ih 0 0]d/DataSource s d
+/BitsPerComponent 8 d/Interpolate smoothflag d E image}b
+%%EndResource
+end reinitialize
+: 427 91 24 0 379 56 1884 59 F F 3 [ 0 0 0 ] F 
+X
+doNimage
+K)YiJs8N)bs8NDUrVt.8s3^`Dh>dKTnc/UhrIP!"s+13$s+13$s+13$s-<VKrsmTLs-pY#=af``
+9t^N9Z2Xe(TDnlkS,WHgU]1;oVuH_sX8`/"X8`/"VuH_sWW)r0_#O`#%m0e_C]B$Xs2!=eon!-o
+s+13$s+13$s+13$s/5mirs7*@s)X\0#<1'1!!("<!!'e6!!'e6!!'_4!!((>!!("<!!'k8!!("<
+!!((>!!(.@!!(@F!!(FH!!(FH!!("<!!'k8!!'q:!!'Y2!!'M.!!'k8!!(:D!"/#l(&q-\s1.%e
+nU^^ks+13$s+13$s+13$s0Ma)rs8/ns*'=S!#Md;!!')"!!'G,!!(FH!!)3^!!)Kf!!)Wj!!)or
+!!)Kf!!)Kf!!)Ed!!)Ed!!)Kf!!)Qh!!)ip!!)ip!!)Kf!!)Ed!!)Qh!!)Qh!!)Qh!!)Kf!!)Ed
+!!)'Z!!(4B!!'M.!!'"u!!'S0!!WBiBE-$0JcC<$JcC<$JcC<$JcC<$])Su6"hiId%55'f!!'A*
+!!'q:!!(LJ!!(jT!!)'Z!!)?b!!)9`!!)Qh!!)]l!!)Wj!!)]l!!)Ed!!)?b!!)?b!!)Wj!!)cn
+!!)cn!!)]l!!)Kf!!)Kf!!)Kf!!)Ed!!)Qh!!)]l!!)]l!!)?b!!)?b!!(pV!!(4B!!'Y2!!'/$
+!!&Yk!!V`i$ib43JcC<$JcC<$JcC<$JcC<$_#LhB"dc^G!#(k%!!'S0!!(dR!!)?b!!)ip!!)]l
+!!)Kf!!)Qh!!)Kf!!)Qh!!)Wj!!)Qh!!)3^!!)3^!!)Qh!!)]l!!)]l!!)]l!!)Wj!!)]l!!)]l
+!!)9`!!)3^!!)9`!!)9`!!)?b!!)Kf!!)ip!!)or!!)cn!!)Qh!!)Kf!!)3^!!(dR!!(LJ!!(:D
+!!')"!!'/$!!N=3GQ7Jis+13$s+13$s+13$s+13ks1A:7X3'B%'>a\K!5JO6!9=(Z!9O4\!9a@^
+!;6?l!:g'h!:Tpf!9sL`!;$3j!;$3j!:g'h!:0Xb!:g'h!;ZWp!;6?l!;$3j!:Tpf!:Bdd!:0Xb
+!:0Xb!9sL`!9a@^!:Tpf!:Bdd!:Bdd!:Tpf!:Bdd!:Tpf!:Tpf!;$3j!;HKn!;6?l!:Tpf!9sL`
+!:0Xb!9=(Z!8IMR!8%5N!6tND!2ohs!7h)L!rlu&JcC<$JcC<$JcC<$JcC<$bl>EW!pB<'rr<%q
+rr<&Vrr<&jrr<&rrr<&nrr<&jrr<&hrr<&frr<&hrr<&drr<&drr<&hrr<&frr<&jrr<&jrr<&h
+rr<&frr<&hrr<&lrr<&frr<&brr<&`rr<&`rr<&`rr<&drr<&hrr<&frr<&brr<&drr<&lrr<&j
+rr<&hrr<&jrr<&nrr<&nrr<&nrr<&frr<&brr<&drr<&`rr<&`rr<&`rr<&Nrr<&*rr<5I!#>O-
+bCT\Es+13$s+13$s+13$s3gqcrrM$Qqu6ckGDDah!!(FH!!)Ed!!)ip!!)ip!!)Qh!!)-\!!)'Z
+!!)?b!!)Ed!!)Qh!!)Wj!!)cn!!)cn!!)cn!!)Wj!!)Wj!!)Qh!!)Qh!!)Ed!!)Qh!!)Qh!!)Qh
+!!)Wj!!)cn!!)cn!!)cn!!)Wj!!)Wj!!)Qh!!)Qh!!)Qh!!)Wj!!)Wj!!)cn!!)cn!!)Wj!!)Wj
+!!)Wj!!)Qh!!)Ed!!)9`!!)3^!!(jT!!'q:!!';(!!N<P=o\AMs+13$s+13$s+13$s+14%s2b3B
+dj$r&rr<-#>DN(T!]ODgrr<&Frr<&\rr<'!rr<&frr<&drr<&Zrr<&brr<&hrr<&hrr<&jrr<&n
+rr<&nrr<&nrr<&jrr<&hrr<&hrr<&drr<&hrr<&hrr<&jrr<&jrr<&nrr<&nrr<&prr<&nrr<&n
+rr<&jrr<&hrr<&hrr<&hrr<&jrr<&jrr<&jrr<&jrr<&nrr<&nrr<&nrr<&jrr<&^rr<&drr<&j
+rr<&nrr<&drr<&>rr<&*rr<&4rr<-#^"7i8JcC<$JcC<$JcC<$JcFL)c2RdMs3puJ!58C4!5JO6
+!42\*!rl>SqYpUU@Boh4!8IMR!:Bdd!;6?l!:0Xb!9sL`!:Bdd!:g'h!:g'h!:g'h!;$3j!;$3j
+!;$3j!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h
+!:Bdd!:Bdd!:Bdd!:g'h!:g'h!:g'h!:g'h!;$3j!;$3j!;$3j!:g'h!:0Xb!:Tpf!:g'h!;$3j
+!;HKn!:Bdd!8%5N!5JO6!5&72!rlDYJcC<$JcC<$JcC<$JcC<$hZ(t&!fO1irr<&Jrr<&frr<&f
+rr<&Lrr<&$rr<-#>D`=Y!:Tsf!Y%<!rr<&Vrr<&nrr<&nrr<&jrr<&jrr<&hrr<&jrr<&hrr<&h
+rr<&hrr<&hrr<&hrr<&hrr<&drr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&drr<&brr<&brr<&b
+rr<&drr<&drr<&drr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&lrr<&lrr<&h
+rr<&frr<&drr<&hrr<&hrr<&`rr<&Prr<&,rr<,n.o1`rJcC<$JcC<$JcC<$JcF^/e,KJbLUmEb
+!6>*>!8IMR!:g'h!;6?l!9a@^!7h)L!4Dh,!rm2.rVm&is5<r&Zi:"*kPkM^kPkM^p&>!loD\dj
+oD\djp\t3noD\djoD\djoD\djnc&Rhnc&RhmJd.dli-qbmJd.dmJd.dnc&Rhnc&RhoD\djnc&Rh
+l2L_`jo5;\l2L_`l2L_`li-qbmJd.dnc&RhoD\djoD\djoD\djoD\djoD\djoD\djoD\djoD\dj
+oD\djp&>!lp&>!loD\djp&>!loD\djn,E@fn,E@fmJd.dkPkM^ci3tFXoAA(r<Y:[qgncus+13$
+s+13$s+13$s5s@4rrQ2AV>gMqci3tFmJd.doD\djjo5;\mJd.dnc&Rhnc&Rhec,ULU]1;qs*^gD
+rrVHbh>[HT_>aK8j8T)ZkPkM^oD\djoD\djoD\djoD\djnc&Rhnc&Rhnc&Rhnc&RhmJd.dmJd.d
+mJd.dmJd.dnc&Rhnc&RhoD\djnc&Rhli-qbl2L_`li-qbli-qbmJd.dnc&Rhnc&Rhnc&Rhnc&Rh
+nc&Rhnc&Rhnc&Rhnc&RhoD\djoD\djoD\djp\t3nq>UEpoD\djn,E@fl2L_`li-qbnc&Rhn,E@f
+n,E@fj8T)Zjo5;\[Jp41dfC]nn,7h;JcC<$JcC<$JcC<$JcG$8g&D+VGGG0<!7UrJ!9=(Z!:Bdd
+!:0Xb!9a@^!;HKn!;$3j!:Tpf!9a@^!6P6@!2ohs!rmP:rVlrRs2"^8!58C4!:0Xb!:g'h!:g'h
+!:Bdd!:Bdd!:0Xb!:0Xb!:Bdd!:g'h!;$3j!;$3j!;$3j!;$3j!:g'h!:g'h!:Bdd!:Bdd!;$3j
+!;HKn!;$3j!;$3j!;$3j!;$3j!:g'h!:Bdd!:Bdd!:Bdd!:Bdd!:Bdd!:Bdd!:g'h!;$3j!;$3j
+!;$3j!;6?l!:Tpf!9sL`!:Tpf!;6?l!;6?l!;6?l!;6?l!;HKn!;6?l!8IMR!2ohs"Qob(s7:gA
+JcC<$JcC<$JcC<$JcG*:h#@FeK:Dl@!7CfH!:Tpf!;6?l!9a@^!:0Xb!9a@^!:g'h!:Tpf!;HKn
+!:Tpf!9a@^!6P6@!1j,i!rm&&rVlr,gXZ<(!6P6@!9=(Z!:g'h!:Bdd!:0Xb!:0Xb!:0Xb!:Bdd
+!:g'h!;$3j!;$3j!;HKn!;HKn!;$3j!:g'h!:Bdd!:Bdd!;HKn!;ZWp!;HKn!;HKn!;HKn!;$3j
+!:g'h!:Bdd!:0Xb!:0Xb!:0Xb!:0Xb!:Bdd!:g'h!:g'h!;$3j!;$3j!;6?l!:0Xb!9a@^!:g'h
+!:g'h!:Tpf!;6?l!;HKn!;HKn!:g'h!:g'h!:0Xb!4Dh,"Pj%os8.BIJcC<$JcC<$JcC<$JcG3=
+hu<b3RC3%p!7CfH!9=(Z!;6?l!;$3j!:0Xb!9sL`!:0Xb!:Bdd!;$3j!;$3j!:Tpf!:Tpf!9O4\
+!71ZF!58C4!rmnTrVlqoa0#@A!71ZF!:0Xb!:g'h!:0Xb!:0Xb!:g'h!:Bdd!:Bdd!;$3j!:Tpf
+!:g'h!;ZWp!;ZWp!:g'h!:Tpf!;$3j!;$3j!:g'h!;$3j!;$3j!;$3j!:g'h!;HKn!;6?l!:0Xb
+!9sL`!9sL`!:0Xb!:g'h!:g'h!:Bdd!:Bdd!:g'h!:g'h!:g'h!:Bdd!:g'h!:g'h!:g'h!;$3j
+!;$3j!;$3j!;6?l!9sL`!:Bdd!7UrJ!6+s<!ri?SJcC<$JcC<$JcC<$JcC<$nGhMJ!jg"Nrr<&B
+rr<&jrr<&brr<&brr<&jrr<&hrr<&drr<&drr<&frr<&drr<&frr<&lrr<&drr<&jrr<&jrr<&B
+rr<&"rr<-#Krt=R!gUO2rr<&Lrr<&Xrr<&frr<&drr<&lrr<&drr<&frr<&drr<&drr<&jrr<&n
+rr<&lrr<&hrr<&hrr<&drr<&lrr<&hrr<&hrr<&jrr<&nrr<&prr<&lrr<&frr<&drr<&brr<&b
+rr<&brr<&hrr<&hrr<&hrr<&drr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&jrr<&f
+rr<&brr<&brr<&drr<&hrr<&Xrr<&<rr<-#=`K#mJcC<$JcC<$JcC<$JcG?Aj8T+irr<&(rr<&R
+rr<&hrr<&drr<&hrr<&frr<&hrr<&hrr<&prr<&prr<&hrr<&`rr<&frr<&frr<&`rr<&prr<&`
+rr<&8rr<&2rr<3%Ks1ORs8N.CS!F!R!6tND!9*qX!;HKn!;HKn!;$3j!;HKn!:Bdd!:0Xb!:g'h
+!;$3j!;HKn!;HKn!:Tpf!9a@^!:Bdd!:0Xb!:0Xb!:Tpf!;HKn!;HKn!;HKn!;6?l!:g'h!:g'h
+!:Bdd!:Bdd!:g'h!;$3j!;$3j!;$3j!:g'h!:Bdd!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:Tpf
+!;$3j!:Bdd!:g'h!9a@^!:Bdd!:Bdd!6+s<!3,tu!rnIjJcC<$JcC<$JcC<$JcC<$pAa7S!mfi%
+rr<&&rr<&Hrr<&Frr<&drr<&brr<&hrr<&jrr<&lrr<&nrr<'!rr<&rrr<&brr<&`rr<&brr<&b
+rr<&drr<&\rr<&jrr<&6rr<%grr<-#Oh(Gj!bI(frr<&Frr<&Vrr<&hrr<&trr<&nrr<&drr<&`
+rr<&brr<&drr<&frr<&drr<&brr<&brr<&hrr<&hrr<&frr<&hrr<&prr<&nrr<&hrr<&jrr<&j
+rr<&hrr<&hrr<&hrr<&hrr<&jrr<&nrr<&jrr<&hrr<&drr<&hrr<&hrr<&hrr<&hrr<&hrr<&h
+rr<&drr<&lrr<&^rr<&frr<&hrr<&`rr<&brr<&Xrr<&6rr<&2rr<-#ea%edJcC<$JcC<$JcC<$
+ec-N-c2X32s-'SbNNN5;V>lUWs+d0FO.ZHO[D2b$rrqTWlQJEjrr<&Drr<&brr<&rrr<&rrr<&n
+rr<&hrr<&frr<&lrr<&prr<&drr<&`rr<&drr<&drr<&jrr<&nrr<&lrr<&Xrr<&Hrr<&6rr<3%
+NO/Z`s8N-X?`j>.!6tND!;6?l!;HKn!;HKn!9a@^!9O4\!:Tpf!:g'h!:Bdd!9sL`!9sL`!:Tpf
+!<)ot!;HKn!:0Xb!9a@^!9sL`!:Bdd!;$3j!;6?l!:g'h!:Bdd!:Bdd!:g'h!:g'h!;$3j!:g'h
+!:g'h!:Bdd!:Bdd!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:Bdd!;HKn!:g'h!9a@^!:g'h!:Tpf
+!9a@^!9a@^!9O4\!4Dh,!pK\8JcC<$JcC<$JcC<$JcF=$"3gfhRK!6eVuH_s]Dhj2]Dhj2^]+96
+\c2X0Sc8ZiQi@$es53Xhs6K[iiU*rr3WH_9qYpVBS^[T=!5&72!8[YT!9O4\!:Bdd!:Tpf!:Tpf
+!:Tpf!:g'h!:Tpf!:0Xb!:Tpf!:0Xb!:Tpf!;$3j!;6?l!:g'h!<<'!!6+s<!2]\q"TOh's6'F^
+!Zt.Krr<&Rrr<&jrr<&frr<&`rr<&Trr<&Nrr<&Nrr<&Rrr<&Trr<&Vrr<&Zrr<&brr<&drr<&d
+rr<&`rr<&^rr<&`rr<&frr<&jrr<&drr<&brr<&drr<&hrr<&jrr<&jrr<&hrr<&drr<&drr<&d
+rr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&jrr<&frr<&nrr<&frr<&`rr<&drr<&hrr<&nrr<&f
+rr<&Nrr<&*rr<-#?\s@6JcC<$JcC<$JcC<$g&D0C!#*KS!!(jT!!)Ed!!)?b!!)?b!!)Wj!!(@F
+!!')"!!<2TqniC"rr_L-5F)6K!5ng:"og_qs5E_NrrqH]q%#onrr<&Nrr<&Zrr<&^rr<&hrr<&f
+rr<&frr<&jrr<&frr<&hrr<&^rr<&prr<&brr<&lrr<&hrr<&drr<&brr<&<rr<&<rr<3%PIpkV
+s8N-#/#iOK!9O4\!:Tpf!8IMR!7UrJ!5ng:!4Dh,!42\*!4i+0!4Vt.!4Vt.!7UrJ!7h)L!87AP
+!8IMR!9O4\!:Tpf!;ZWp!;HKn!:0Xb!9sL`!:0Xb!:g'h!;$3j!;$3j!;$3j!:g'h!:Bdd!:Bdd
+!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!;HKn!9a@^!:g'h!;$3j!;6?l!:g'h!:g'h!9sL`!;6?l
+!:0Xb!6+s<!6+s<!rq<ZQi@'Ws8O7Yjo:+<s&k!S4(nRD=oTpRs".OV7rSEEOoLi_s3'a.rIk1N
+p&G$lmJm1dkPtP^jo>>\li6tbnc/Uhp](6nrPSX8rVultq>^Hpq>^Hpqu?Zrp](6nnc/Uhp](6n
+oDegjnc/UhoDegjn,NCfnc/Uhp](6nrVultrJLUTqu?Zrnc/Uhli6tbmJm1dli6tbmJm1doqhZg
+q>^Hpq>^Hpq>^Hpp&G$ln,NCfn,NCfnc/Uhnc/Uhnc/Uhnc/Uhp&G$lrIP!"s6osio`,<Err<&d
+rr<&jrr<&hrr<&drr<&lrr<&Hrr<%urr<-#fC?`Xmf*?RZ)Ra'!71ZF!8%5N!3cD&!6>*>!rn[r
+rVllrs8N.IXhXl9!5&72!6P6@!9=(Z!9sL`!:g'h!:g'h!:Bdd!:Tpf!;$3j!9a@^!9sL`!:0Xb
+!;ZWp!;ZWp!:g'h!:Tpf!6P6@!4Dh,$3-X6s5j::!"YFr!!'5&!!';(!!(jT!#Y_F4o[`^s'(-U
+B93'uNW2S$ru"i2!$/cQ!!&_m!!'5&!!((>!!(^P!!)!X!!)?b!!)Ed!!)Ed!!)Qh!!)Wj!!)Wj
+!!)Wj!!)Qh!!)Qh!!)Ed!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Kf!!)Wj!!)]l!!)Ed!!)Qh
+!!)?b!!)]l!!)Wj!!)Ed!!)3^!!)Kf!!'_4!!;a47A0Ydh=LYRIEMU(U]1;oTDnlkSc8ZiWW)qu
+Zi:"*Z2Xe(YQ"S&Zi:"*XoAA$X8`/"RK!6ePQ(U_V>gN$b5`deDi=YSo:>mkmJ['QZ2[=,jTdB\
+!!0;'!!&eo!!&Ge!!&Ge!!&Ge!!&Si!!&kq!!'G,!"I<U)<DYts&!k;Q*:5Pkl21:;-V3S/(4J7
+d/X^'!"6XC!!("<!!'k8!!'G,!!'M.!!'M.!!'G,!!'"u!!&eo!!&eo!!'"u!!'"u!!&eo!!&eo
+!!'5&!!'S0!"IHY([VMjs#XlnMm<<NV>gPis8NJ)_>dANgC5gV!"6(3!!&kq!!&Ge!!&5_!!&Ac
+!!&Mg!!&qs!!'G,!"RNZ($,fXq*eThO/;m6o?I:FZcBNi1X?%EeGp-%!!U@A!!((>!!'e6!!'M.
+!!'Y2!!'_4!!'G,!!')"!!'"u!!'/$!!'"u!!&eo!!&Si!!';(!"HmI&)dsTs%@)+UV6^+JcC<$
+rVlp!&(COY!:0Xb!:Tpf!9sL`!:g'h!;$3j!6P6@!3uP(!rq0R_Z0*)!7h)L!7h)L!:0Xb!:g'h
+!7h)L!5ng:!4Dh,"oeQUs3:<:rrqlkm3=uprr<&Frr<&frr<&rrr<&frr<&^rr<&hrr<&nrr<&h
+rr<&jrr<&drr<&frr<&hrr<&lrr<&hrr<&Trr<&:rr<&$rr<-#WOMm,"nPlFs0:87rrqHQs(-\r
+rr<%urr<&8rr<&frr<&nrr<&nrr<&lrr<&hrr<&lrr<&frr<&hrr<&hrr<&hrr<&hrr<&hrr<&h
+rr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&`rr<&H
+rr<%crr<-#]AK^i!;ZZp"ad0#!!fA#!!'M.!!'k8!!(.@!!(@F!!(dR!!(jT!!)!X!!)!X!!(jT
+!!(pV!!(dR!!(jT!!(dR!!(RL!!(4B!!'k8!!'S0!!&qs!!VZg&-%9eXT&IAj8VPfci3tFXoAA$
+XoAA$^]+96_>aK8_uB]:_>aK8_>aK8bPqPBc2RbDbPqPBao;>@ao;>@ao;>@_>aK8^]+96\c2X0
+VuH_sHiF'Is(RbdrrVTbQi@$cQ2^ga]Dhj2_>aK8_uB]:_>aK8_uB]:a8Z,>bPqPBa8Z,>bPqPB
+_uB]:`W#o<bPqPBci3tFc2RbDao;>@c2RbDc2RbDao;>@a8Z,>a8Z,>_>aK8_uB]:\,QF.X8`/"
+dJj1Ms%dk=g[VfR"lK.U?%^]-!!'/$!!';(!!'S0!!'S0!!'_4!!'q:!!((>!!(4B!!(:D!!(@F
+!!(@F!!(4B!!((>!!'k8!!'_4!!'Y2!!&kq!!&#Y!!;OB<RCaI=bVG,!!';(!!'q:!!'e6!!'_4
+!!("<!!(.@!!(.@!!(.@!!(:D!!(:D!!(4B!!(4B!!(@F!!(4B!!'q:!!'q:!!'q:!!(.@!!(.@
+!!'k8!!'5&!!'"u!!W)s+odD$JcCH("8`'/fDbgNli-qboD\djnc&Rhnc&Rhnc&Rhci3tFWW)r"
+s53Xhs7-*jJ![kK!!)Ed!!)Wj!!)Ed!!)Wj!!)'Z!!)Kf!!("<!!&kq!!N=3J,f?BrrS%\ci3tF
+bPqPBg]%6Rg]%6RkPkM^l2L_`n,E@fq>UEpoD\djmJd.dmJd.doD\djli-qbiVrlX_>aK8\c2X0
+bPqPDs0K8\rro7<rsLp)rr<&Nrr<&Rrr<&brr<&jrr<&jrr<&^rr<&hrr<&hrr<&hrr<&hrr<&h
+rr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&frr<&`
+rr<&Prr<&0rr<,t#<B!f!dU!Crr<%srr<&Drr<&Xrr<&Xrr<&hrr<&`rr<&drr<&lrr<&rrr<&t
+rr<&prr<&hrr<&frr<&hrr<&jrr<&nrr<&prr<&prr<&nrr<&jrr<&^rr<&Nrr<&"rr<5I!"]+%
+]t"(GWQX#s0;8CG!4i+0!87AP!9*qX!;6?l!;lcr!:Tpf!:Tpf!:0Xb!9sL`!:0Xb!:g'h!:g'h
+!:g'h!;$3j!;ZWp!;6?l!;6?l!;$3j!8[YT!3uP(!rmVNmf*@KqmHG(!5ng:!:Bdd!:g'h!:g'h
+!:g'h!;6?l!:Tpf!:Bdd!:Tpf!;$3j!;$3j!:g'h!;6?l!;HKn!:g'h!:Tpf!;$3j!:g'h!:Bdd
+!9sL`!:0Xb!:0Xb!;ZWp!;HKn!9*qX!6bBB!58C4!3,tu"T(Vts80_6"j>lj-UjC%!!'/$!!("<
+!!)'Z!!)Wj!!)cn!!)?b!!)9`!!)Ed!!)Ed!!)Qh!!)Wj!!)ip!!)ip!!)cn!!)Wj!!)Qh!!)Qh
+!!)]l!!(pV!!'S0!!<0pIF.uq8V*rB!!(XN!!)9`!!)3^!!)?b!!)Kf!!)Qh!!)-\!!)Qh!!)Wj
+!!)Kf!!)9`!!)Qh!!)cn!!)]l!!)?b!!)9`!!)cn!!)Wj!!)Wj!!)ip!!)]l!!(pV!!(@F!!'"u
+!!U1=%KEu`JcCZ."8;d+ec,ULl2L_`oD\djoD\djoD\djnc&Rhci3tFWW)r"s4dFfs760iZ2Xe(
+\,QF.l2L_`p&>!lmJd.dmJd.djo5;\g]%6RfDbgNa8Z,>YQ"S+m/R[sQc&e%"kWGI'gK8/!!(.@
+!!)-\!!)Wj!!)?b!!)cn!!)Wj!!)Qh!!)Wj!!)3^!!(jT!!'_4!!'q:!!<19M8B2q\'`(n$bcQ?
+!87AP!9O4\!:0Xb!9sL`!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h
+!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!;$3j!;6?l!;6?l!9a@^!87AP!3?,"!rom[\Gl`UlgFfm
+^&J'4]Dhj2ec,ULiVrlXn,E@foD\djli-qbli-qbl2L_`n,E@foD\djp\t3np\t3np&>!loD\dj
+mJd.dmJd.doD\djp\t3np\t3noD\djmJd.dl2L_`iVrlXci3tFa8Z,>\,QF2s"Rs^o>CS3e+<SM
+6+d-s!5ng:!6bBB!87AP!8meV!9sL`!<)ot!;ZWp!:Tpf!:Tpf!:0Xb!9O4\!:Bdd!:g'h!:g'h
+!:g'h!;$3j!;$3j!;$3j!;$3j!:g'h!71ZF!3,tu!roU[mf*@KrO`(0!6tND!;ZWp!;ZWp!;HKn
+!:Bdd!;$3j!;$3j!;6?l!;HKn!:Tpf!:g'h!9sL`!:Tpf!;$3j!;ZWp!;ZWp!;6?l!:Bdd!9sL`
+!9O4\!9a@^!9sL`!9a@^!9sL`!:0Xb!9O4\!8IMR!6P6@!4Vt."l0.js39TKrrD6^rrOQJ]Dhj2
+Z2Xe(bPqPBfDbgNiVrlXl2L_`l2L_`n,E@fq>UEpqu6WrmJd.dli-qbnc&RhoD\djoD\djoD\dj
+oD\djoD\djq>UEpp\t3np\t3nh>[HTX8`/$s,4G7rrPK7]Dhj2g]%6Rn,E@fnc&RhmJd.dl2L_`
+n,E@fn,E@fp\t3noD\djq>UEpp\t3nn,E@fli-qbn,E@fnc&Rhn,E@fn,E@fp\t3nnc&Rhn,E@f
+nc&Rhjo5;\h>[HTg&D$P\c2X0VuH_us+-kps,R*]o)KHOrr<&\rr<&hrr<&nrr<&nrr<&jrr<&H
+rr<&$rr<-#g&&Ydo`"uZ^Qng!!7UrJ!:Tpf!:Bdd!:g'h!:0Xb!:g'h!:Tpf!9=(Z!9a@^!8IMR
+!5&72!3uP("TL2Vs69R`!;6Bl!dUckrr<&8rr<&Frr<&Xrr<&brr<&frr<&drr<&Xrr<&Jrr<&$
+rr<2d!$VC(oD\gZs8N)jao;E4F1;/L!5\[8!8IMR!:0Xb!9O4\!:g'h!:g'h!:g'h!:g'h!:g'h
+!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!:g'h!;$3j!;HKn!;6?l!:0Xb
+!9sL`!42\*!p:^q]Dhqr[B]`3!5\[8!9O4\!9sL`!9a@^!;HKn!;6?l!9sL`!:0Xb!:Tpf!:Tpf
+!:Tpf!:g'h!:Tpf!:g'h!:g'h!:g'h!:Bdd!:Bdd!:g'h!:g'h!;$3j!:g'h!:0Xb!9sL`!:0Xb
+!:Tpf!:g'h!8IMR!3,tu"m#_1s6op/rrSC\\,QF.^&J'4g]%6RoD\djl2L_`n,E@fp&>!loD\dj
+oD\djp\t3noD\djoD\djmJd.dn,E@fmJd.dmJd.dmJd.dnc&Rhnc&Rhnc&Rhnc&Rhnc&Rhnc&Rh
+`W#o<S,WHhs68qN!os6krr<&Drr<&prr<&prr<&nrr<&nrr<&frr<&\rr<&hrr<&nrr<&prr<&h
+rr<&hrr<&brr<&drr<&lrr<&jrr<&jrr<&frr<&`rr<&^rr<&Xrr<&`rr<&brr<&drr<&brr<&d
+rr<&jrr<&hrr<&brr<&0rr<&2rr<-#e*5?]!jgRprr<&,rr<&Prr<&jrr<&frr<&hrr<&drr<&f
+rr<&hrr<&nrr<&prr<&lrr<&drr<&brr<&hrr<&jrr<&hrr<&drr<&hrr<&hrr<&nrr<&nrr<&l
+rr<&Nrr<%orr<-#\`(p8!^D%Jrr<&Trr<&\rr<&\rr<&jrr<&hrr<&drr<&frr<&drr<&drr<&f
+rr<&hrr<&jrr<&frr<&jrr<&nrr<&hrr<&jrr<&frr<&lrr<&hrr<&\rr<&brr<&nrr<&drr<&b
+rr<&4rr<%[rr<-#Og0K;OoGOT!#*]Y!!)'Z!!)Ed!!)cn!!)cn!!)Wj!!(FH!!')"!!<2RqniC+
+rr_Wg)9`$[!8[YT!:g'h!:Tpf!;$3j!;ZWp!;6?l!;$3j!:g'h!9sL`!9a@^!8meV!7UrJ!58C4
+!8[YT"TNtVs82ir"m,dK%lpKd!!(.@!!)-\!!)cn!!)Kf!!(4B!!&Si!!<0hC%VE*n,NCh5BF%.
+!!';(!!<2BiQD0%\';D^!!'e6!!(jT!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh
+!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)ip!!)]l!!)Kf!!)]l!!)Ed!!(:D!!&qs
+!!<2FmD8f(>C!4J!!'e6!!(jT!!)3^!!)3^!!)Ed!!)'Z!!)-\!!)ip!!)Wj!!)?b!!)Kf!!)Ed
+!!)Ed!!)Ed!!)Kf!!)Kf!!)Qh!!)Qh!!)Kf!!)9`!!)9`!!)Ed!!)Qh!!)Qh!!)Ed!!)Ed!!)9`
+!!)Wj!!)3^!!(dR!!'A*!!M$V"omc3rrPc%U]1;o`W#o<ec,ULj8T)Zp&>!lmJd.dl2L_`li-qb
+nc&Rhp\t3nq>UEpqu6WroD\djn,E@fp&>!lnc&RhmJd.dmJd.dli-qbli-qbmJd.doD\djp\t3n
+oD\dj_>aK8Qi@'OrrV6Z\,QF.ao;>@oD\djoD\djnc&Rhnc&Rhn,E@fmJd.dnc&Rhnc&Rhq>UEp
+jo5;\mJd.dli-qbli-qbnc&Rhq>UEpqu6Wrqu6WroD\djmJd.dp&>!lmJd.dli-qbli-qbl2L_`
+l2L_`oD\djp&>!lnc&Rhj8T)Z_uB]<i;a,6rrQu.\c2X0ao;>@g&D$PkPkM^jo5;\oD\djp&>!l
+n,E@fn,E@fn,E@fnc&RhoD\djp&>!loD\djoD\djoD\djnc&RhmJd.dli-qbli-qbli-qbnc&Rh
+p&>!lnc&RhdJj1HXoAA&s3^elrrPW5\c2X0ec,ULn,E@fp&>!lli-qbkPkM^li-qbrVlitn,E@f
+mJd.dkPkM^li-qboD\djli-qbjo5;\n,E@fp\t3noD\djn,E@fnc&RhmJd.dj8T)Zj8T)Zli-qb
+nc&RhmJd.dkPkM^ci3tFZi:",s5!9ts-3Nco)KHKrr<&Vrr<&brr<&hrr<&jrr<&hrr<&Frr<%u
+rr<-#h>+qfp\t<Jjfe[a!9sL`!:0Xb!:g'h!:0Xb!<)ot!<)ot!<)ot!;HKn!:Bdd!;ZWp!:g'h
+!:Tpf!9sL`!:g'h!6bBB!1Eie#MT5+s2F7&rVum!FeRdo!!'k8!!(.@!!'_4!!';(!!<1KTCi-b
+NOuUu!!')"!!(LJ!!'_4!!'"u!!<2Bji[T)g\8nk!!'S0!!(pV!!)?b!!)Qh!!)Qh!!)Qh!!)Qh
+!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)cn!!)]l!!)Kf!!)]l
+!!)Wj!!(jT!!';(!!<0dF2\([9l66s!!(:D!!)?b!!)Kf!!)?b!!)-\!!)Qh!!)Kf!!)9`!!)cn
+!!)Wj!!)ip!!)]l!!)Kf!!)?b!!)9`!!)9`!!)Ed!!)Qh!!)Qh!!)Qh!!)3^!!)9`!!)Ed!!)Qh
+!!)Wj!!)Qh!!)Ed!!)-\!!)or!!)Kf!!)9`!!(jT!!'S0!!;*Z&(LU]pF/n;rr<&Trr<&Rrr<&j
+rr<&prr<&frr<&brr<&frr<&brr<&nrr<&prr<&prr<&prr<&jrr<&frr<&drr<&jrr<&hrr<&d
+rr<&brr<&brr<&drr<&jrr<&nrr<&jrr<&6rr<,.!!DQe!os6grr<&@rr<&hrr<&drr<&brr<&h
+rr<&jrr<&frr<&frr<&drr<&jrr<&Zrr<&Rrr<&Jrr<&Lrr<&Trr<&Vrr<&^rr<&brr<&hrr<&l
+rr<&hrr<&frr<&frr<&hrr<&jrr<&jrr<&frr<&frr<&frr<&lrr<&jrr<&4rr<-#>C50*!b[.f
+rr<&Xrr<&frr<&lrr<&^rr<&hrr<&lrr<&rrr<&rrr<&lrr<&drr<&`rr<&frr<&lrr<&nrr<&n
+rr<&jrr<&hrr<&brr<&brr<&brr<&brr<&drr<&jrr<&frr<&@rr<&:rr<*"l-KA27sDB@!!(jT
+!!)Qh!!)]l!!)3^!!)Kf!!)Kf!!(dR!!(RL!!';(!!'/$!!'M.!!'S0!!'M.!!'_4!!'Y2!!'M.
+!!'M.!!("<!!)-\!!)Qh!!)?b!!)Kf!!)cn!!)Kf!!)Ed!!)Ed!!)Qh!!'e6!!;$q6%T'#rr_oo
+'@6[Y!8meV!:0Xb!:Bdd!:g'h!:g'h!71ZF!2]\q!rq0R_Z0B1!`<U>rr<&drr<&prr<&hrr<&j
+rr<&^rr<&hrr<&nrr<&jrr<&nrr<&hrr<&brr<&`rr<&frr<&lrr<&lrr<&Frr<&4rr<&Drr<3%
+4)=lXs8N8CiVs][L]7>SNW/t[s+.0DrrDlprrNj&Zi:"*_>aK8h>[HTj8T)ZiVrlX_uB]:_uB]<
+s3pAXrrUO.ec,ULao;>@j8T)ZoD\djnc&Rhnc&Rhnc&Rhnc&Rhnc&Rhnc&RhmJd.dmJd.dmJd.d
+mJd.dmJd.dmJd.dnc&Rhnc&RhmJd.dnc&Rhli-qbli-qbnc&Rhl2L_`e,KCJec,WirrR,*Zi:"*
+c2RbDhu<ZVp&>!lnc&Rhp&>!ll2L_`jo5;\mJd.dnc&Rhp\t3nqu6Wrq>UEpnc&RhkPkM^iVrlX
+iVrlXiVrlXj8T)ZiVrlXn,E@fn,E@fnc&RhoD\djp\t3np\t3noD\djnc&RhoD\djl2L_`mJd.d
+p&>!lli-qbjo5;\j8T)Z\,QF0s"Rm6rrP?)Zi:"*ec,ULl2L_`jo5;\l2L_`mJd.doD\djp&>!l
+p&>!lli-qbn,E@fmJd.dnc&Rhq>UEpp&>!lnc&Rhl2L_`p&>!lp\t3nmJd.dli-qbmJd.dmJd.d
+mJd.dnc&Rhp\t3n_>aK:koW.UrrV0V^&J'4bPqPBnc&Rhl2L_`l2L_`mJd.dnc&RhmJd.doD\dj
+q>UEph>[HTe,KCJ\c2X0XoAA$X8`/"YQ"S&\,QF._uB]:ci3tFh>[HTl2L_`p&>!loD\djn,E@f
+mJd.dmJd.dnc&Rhp&>!lrVlitp&>!lnc&Rhn,E@f^]+96YQ"U[rrQVWYQ"S&bPqPBjo5;\mJd.d
+oD\djl2L_`jo5;\oD\djq>UEpq>UEpoD\djkPkM^jo5;\mJd.doD\djp&>!loD\djnc&Rhn,E@f
+n,E@fmJd.dnc&Rhn,E@fnc&Rhn,E@fnc&Rh^]+98df:?3rrPW5]Dhj2jo5;\n,E@fnc&RhmJd.d
+li-qbfDbgNec,U\ruG2@bN&Wgnc/4Vs6]X^mJm1djo>>d_<Lu^\+MCQ\,QF.^]+96l2L_`kPkM^
+mJd.dqu6WroD\djli-qbnc&Rhli-qb`W#o<[Jp4.s53X's-N`fpAb`Srr<&`rr<&hrr<&drr<&d
+rr<&jrr<&Hrr<%urr<-#ht=kdq#:?3rr<&<rr<&nrr<&drr<&jrr<&drr<&frr<&jrr<&jrr<&l
+rr<&lrr<&hrr<&jrr<&frr<&brr<&lrr<&drr<&lrr<&`rr<&Lrr<&.rr<&Lrr<3%UV6]rs8N4[
+YQ&a5p\tE[q98mS\,QF.hu<ZVli-qboD\djnc&Rhl2L_`l2L_`_uB]:Z2Xe*s2jBFrrTOc_uB]:
+c2RbDli-qbmJd.dnc&RhmJd.dmJd.dmJd.dmJd.dnc&Rhnc&RhmJd.dmJd.dnc&Rhnc&Rhnc&Rh
+nc&RhoD\djn,E@fmJd.dmJd.dli-qboD\djjo5;\`W#o>s0^1trrTU]WW)qua8Z,>q>UEpqu6Wr
+oD\djp\t3nn,E@fp\t3nnc&Rhli-qbnc&Rhli-qbj8T)Ze,KCJ_uB]:^&J'4`W#o<bPqPBci3tF
+c2RbDbPqPB\,QF._uB]:dJj1Hj8T)ZmJd.doD\djoD\djoD\djmJd.dp&>!lp&>!lmJd.doD\dj
+l2L_`l2L_`c2RbDV>gMss/!orrrS%R[Jp4,h>[HTl2L_`nc&Rhnc&Rhli-qbmJd.doD\djqu6Wr
+p&>!lnc&RhmJd.dkPkM^jo5;\ec,UL_uB]:\,QF.YQ"S&^]+96^]+96\,QF.[Jp4,]Dhj2^]+96
+^]+96`W#o<ec,ULVuH_us&jF/rrV0V^&J'4bPqPBnc&Rhl2L_`l2L_`l2L_`p\t3noD\djn,E@f
+n,E@fe,KCbrr=5B5B$R+L&YM6s'pc_?\AAGC]=Pog&D$P^]+96ec,ULli-qbmJd.dmJd.dli-qb
+mJd.dnc&RhoD\djqu6WrmJd.dn,E@fci3tFV>gMss/jc3rrT[W\c2X0fDbgNg&D$PkPkM^nc&Rh
+n,E@fn,E@fli-qbq>UEps8N'!q>UEpn,E@fh>[HTfDbgNdJj1HbPqPBa8Z,>^]+96[Jp4,Z2Xe(
+\,QF.\c2X0\c2X0^]+96ao;>@`W#o<ci3tFU]1;qdi1<lrrPW5]Dhj2kPkM^p&>!loD\djl2L_`
+mJd.dj8T)Z\c2X2s&4R3rrps?rs(^1rr<&\rr<'!rr<&frr<&lrr<&brr<&drr<&brr<&Lrr<%o
+rr<-#OgTc?Qi@0^!"7?W!!)?b!!)Wj!!)Ed!!)Ed!!)Qh!!(FH!!')"!!<2Votpb*rrTskTDnlk
+c2RbDoD\djnc&Rhp&>!lnc&Rhnc&Rhnc&RhmJd.dli-qbli-qbnc&Rhp\t3nnc&Rhnc&Rhnc&Rh
+nc&Rhnc&Rhli-qbjo5;\fDbgN^]+96YQ"S*s".1Lq=agili5B4!!'S0!!(jT!!)Kf!!)Kf!!)ip
+!!)?b!!)Ed!!)Ed!!(pV!!'e6!!(.@!!<2Tn]Lk5JZlE[!!(dR!!)Qh!!)9`!!)3^!!)Kf!!)3^
+!!)Ed!!)Qh!!)Wj!!)Qh!!)Qh!!)Wj!!)Wj!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh!!)Ed!!)Ed!!)Ed
+!!)Qh!!'Y2!!<0h?-rTQqu>4H!!((>!!)-\!!)cn!!)Qh!!)Qh!!)Qh!!)cn!!)or!!)ip!!)Wj
+!!)3^!!(jT!!'_4!!'"u!"/<>8,o-js5!;HrVZZqnc/Upe*6mt[JqaW\c2X0[Jp4,g]%6Rn,E@f
+nc&Rhnc&RhoD\djoD\djp\t3noD\djmJd.dmJd.dmJd.dj8T)Zc2RbFjT#JDrrUg@_>aK8ao;>@
+kPkM^n,E@fnc&Rhnc&RhmJd.dmJd.dn,E@fn,E@fq>UEpq>UEpl2L_`iVrlX^&J'4TDnlkZ2XeC
+mjV-6CQJLNXoFHgs,X5\GF/>.H2/[X_Z1.<rr<%irr<%Err<-#Q)j6N!oa*krr<&@rr<&hrr<&b
+rr<&brr<&hrr<&hrr<&hrr<&hrr<&hrr<&>rr<-#LU$(C!fO&"rr<&>rr<&Zrr<&hrr<&`rr<&d
+rr<&brr<&jrr<&rrr<&jrr<&jrr<&Nrr<%orr<-#D3*o\!r`/:rr<&>rr<&brr<&brr<&brr<&j
+rr<&jrr<&drr<&drr<&prr<&nrr<&lrr<&`rr<&Xrr<&<rr<%mrr<&4rr=#<)bp?6J,bA%s-'M`
+Ml$H'Sc;i>od`hm!$/3A!!&Ac!!%0A!!;OpHd2Ql7ru6@!!(pV!!)Qh!!)Qh!!)Qh!!)]l!!(pV
+!!'G,!!<1%L#W+9rVuBf+j9lc!:g'h!:g'h!;$3j!:0Xb!:Tpf!:Bdd!8%5N!3?,"!rl,AJcD):
+"7lKtci3tFli-qboD\djnc&RhmJd.dli-qbbPqPBWW)r"s5!Lfs8)`s96I<8!!(XN!!)9`!!)]l
+!!)Kf!!)ut!!)Kf!!)Ed!!)Qh!!)-\!!)3^!!)or!!)Qh!!)Wj!!)Qh!!)Qh!!)Qh!!)Qh!!)Qh
+!!)Ed!!)?b!!)9`!!'A*!!&#Y!!3,sp\t?7*BT\h!!(4B!!)9`!!)Ed!!)Qh!!)]l!!)9`!!)Ed
+!!)Wj!!)Ed!!)Qh!!'S0!!'_4!!<2VpWEL;'2QOG!!(XN!!)Ed!!)Qh!!)-\!!)?b!!)?b!!)Wj
+!!)Wj!!)Qh!!)Qh!!)Wj!!)cn!!)Qh!!)Qh!!)Wj!!)Wj!!)Qh!!)Ed!!)Ed!!)Ed!!)Wj!!(.@
+!!'A*!7CfKof60grr<&\rr<&jrr<&jrr<&`rr<&frr<&prr<&frr<&jrr<&nrr<&Xrr<&>rr<&(
+rr<3%*Dc_&iVrs<?ap%8!6bBB!9=(Z!;$3j!:g'h!:g'h!;$3j!;$3j!:Bdd!:Bdd!:Bdd!:Bdd
+!:Tpf!3uP(!ro+5k5PPX%5Y9h!!(dR!!)Qh!!)Kf!!)Wj!!)]l!!)ip!!)Ed!!)?b!!)Qh!!)Ed
+!!)!X!!(:D!!'M.!!WB?7K:9ehu<o(nc+ZVs7P[W!oa*krr<&Brr<&hrr<&hrr<&hrr<&jrr<&j
+rr<&drr<&drr<&hrr<&2rr<-#Q+Q/X!iO;Xrr<&Rrr<&`rr<&frr<&brr<&hrr<&frr<&jrr<&n
+rr<&drr<&Trr<&&rr<-#5A03[!^gn*rr<&Vrr<&prr<&hrr<&drr<&drr<&drr<&drr<&hrr<&j
+rr<&nrr<&^rr<&Brr<%urr<6&"#Kt\fAHT.g].9VQbWRRlcoG27ru6@!!(jT!!)Ed!!)Qh!!)Wj
+!!)cn!!(pV!!';(!!<1)J`$J/\^eOr!!)cn!!)!X!!)Kf!!)?b!!)Wj!!)9`!!)'Z!!'S0!!<0Z
+?%N$Brr_im#LEDM!9O4\!;$3j!;$3j!:g'h!:0Xb!6P6@!3,tu!rq*P_Z0N5"2b*NZ2Xe(g]%6R
+nc&RhoD\djoD\djjo5;\p\t3nqu6WroD\djmJd.dli-qboD\djoD\djnc&Rhnc&RhoD\djoD\dj
+p\t3np\t3nnc&Rhli-qbiVrlX[Jp4.s,!NFrr_6Us5F"X!Yml%rr<&6rr<&brr<&hrr<&brr<&d
+rr<&frr<&rrr<&lrr<&hrr<&^rr<&Drr<&>rr<-#g%!>e!nmUWrr<&Jrr<&hrr<&drr<&drr<&d
+rr<&brr<&nrr<&nrr<&hrr<&hrr<&nrr<&nrr<&jrr<&jrr<&jrr<&jrr<&hrr<&drr<&drr<&h
+rr<&jrr<&Hrr<%Wrr<-#iV1q'!lNurrr<&@rr<&lrr<&jrr<&jrr<&drr<&brr<&`rr<&hrr<&j
+rr<&Xrr<&<rr<&6rr<-#S%%)N!hm04rr<&@rr<&`rr<&brr<&brr<&drr<&drr<&drr<&drr<&d
+rr<&brr<&^rr<&,rr<,P!%[:5!jB_@rr<&@rr<&^rr<&lrr<&hrr<&nrr<&nrr<&hrr<&drr<&d
+rr<&brr<&Vrr<&,rr<5]!!3,?ft77chu1Ck!!(:D!!)cn!!)cn!!)Wj!!)cn!!)Wj!!)Ed!!)?b
+!!)?b!!'G,!!<1e\)RDh(H]8/!!)Ed!!)Wj!!)Qh!!)]l!!)Ed!!)]l!!)Kf!!)Kf!!(RL!!'G,
+!!<0VA*a-rdHAFI!!((>!!)9`!!)Wj!!)Qh!!)?b!!)-\!!)-\!!)9`!!)Ed!!)Qh!!)'Z!!'k8
+!!(FH!!<1oZ^q*t7ru6@!!(jT!!)Qh!!)Ed!!)Qh!!)]l!!(pV!!';(!!<1)J`$J/li6#F!!(jT
+!!)9`!!)9`!!)Kf!!)Qh!!*'!!!)9`!!'M.!!<0^@Gh(bp](7>_;YEZ\c6H3s$(<!*DQPC62pp:
+rr=kT%nHXOAcGbes+.BR_ro)?!;kaT!;ZZp(oPd]?&S_3:&bqgrrk:['hSEmIK,GEs6&)8"7lKt
+ci3tFj8T)Znc&Rhqu6Wrqu6WrmJd.dao;>@V>gMss5!LqrrE#ls8)a!H_]a($,QWA!5&72!6P6@
+!87AP!:0Xb!9sL`!:g'h!;$3j!:g'h!;$3j!;$3j!:g'h!:g'h!:g'h!:g'h!:g'h!;HKn!;HKn
+!;$3j!9O4\!6tND!posqq#:Hl>ChY2!"&Zc?iS=Bs)"=arr<&6rr<&>rr<&Vrr<&drr<&jrr<&n
+rr<&rrr<&lrr<&lrr<&`rr<&>rr<&,rr<-#jn6mu!aC/\rr<&`rr<&nrr<&drr<&drr<&drr<&n
+rr<&nrr<&hrr<&hrr<&nrr<&nrr<&jrr<&jrr<&jrr<&hrr<&drr<&drr<&hrr<&jrr<&jrr<&R
+rr<%qrr<-#JYC]q"8rg#YQ"S&kPkM^qu6WroD\djn,E@fp\t3nli-qbmJd.dj8T)ZmJd.dc2RbD
+\c2X2s,XG6rrS=d^]+96fDbgNj8T)Zli-qbli-qbmJd.dnc&Rhnc&Rhli-qbli-qbmJd.de,KCJ
+TDnlms3^N+rr^jT/$JsQ!9O4\!9O4\!;6?l!;HKn!;ZWp!:g'h!9sL`!:0Xb!:0Xb!9sL`!58C4
+"ks"Zs5!@XrrV*V_>aK8c2RbDq>UEpoD\djoD\djoD\djoD\djmJd.dli-qbl2L_`[Jp4.s-L4S
+rrR+m\,QF.l2L_`oD\djq>UEpoD\djnc&Rhn,E@fkPkM^n,E@fe,KCJZ2Xe*s%S"0rr`3c?*XD0
+!9sL`!:0Xb!:g'h!;$3j!:g'h!9sL`!9O4\!9sL`!9sL`!:Bdd!71ZF!8IMR!romcRf<FZF1M;N
+!8meV!:g'h!:Bdd!:Bdd!:Tpf!8IMR!3uP(!rlJQhu<cTs6K[b!9*qX!9O4\!9a@^!9sL`!:Bdd
+!<<'!!9*qX!3?,"!rlDQkl1q)fDfK9`rHpdrr<&&rr<&"rr<&*rr<&,rr<&4rr<&<rr<&Frr<&F
+rr<&>rr<&0rr<&&rr<%orr<&&rr<&.rr<6&4'DU$g"cT/bN4T\!!&eo!!'5&!!'M.!!'G,!!'M.
+!!&Ac!!$m9!!3,upAY<VoCY=RYQ"S&VuH_sZ2Xe(Zi:"*\c2X0\c2X0^&J'4\,QF.TDnlk[Jp41
+m4Cp0kO[X3"8)X!ci3tFj8T)Znc&Rhs8N'!s8N'!nc&RhbPqPBX8`/$s4R;5rrQ\]TDnlkX8`/"
+Zi:"*XoAA$WW)quYQ"S&Zi:"*X8`/"Sc8ZnK`D5Tg#rA7p\t6js8N87chT@u^&J'4XoAA$dJj1H
+j8T)Zn,E@fl2L_`oD\djoD\djiVrlXnc&RhoD\djnc&Rhl2L_`l2L_`nc&RhoD\djnc&RhfDbgN
+WW)r"s*_$GrrT[iVuH_sYQ"S&^&J'4l2L_is+dr\^#T,)41kLm!7h)L!9O4\!:Bdd!:Bdd!;$3j
+!:Bdd!;HKn!:g'h!9O4\!4Vt."PEb[s6Ir0!5&72!8meV!:Tpf!;$3j!;6?l!:g'h!;$3j!;$3j
+!:g'h!:g'h!;$3j!;HKn!;$3j!;$3j!:g'h!:g'h!:Bdd!:Bdd!:g'h!;$3j!;$3j!9=(Z!5\[8
+!rj?<g&D-2o=+`"!8IMR!:g'h!;ZWp!;ZWp!:Tpf!;$3j!:Bdd!9=(Z!;$3j!9=(Z!5\[8!rkc+
+c2Ri"Bs[g>!8IMR!:Bdd!:g'h!:g'h!;$3j!:g'h!:0Xb!:0Xb!;6?l!8%5N!42\*!rlVgmf*@;
+pRhHc!6tND!:g'h!:Tpf!:g'h!;HKn!<)ot!9sL`!:Bdd!9sL`!9*qX!7UrJ!8%5N!rq0P[Jp<g
+rO`(0!6bBB!;$3j!:Bdd!:0Xb!:0Xb!:Bdd!:Bdd!:Bdd!:Bdd!5&72!rnOpir9'sK=1^Z!9sL`
+!:g'h!;6?l!:g'h!;$3j!9a@^!:g'h!9sL`!8%5N!2KPo!rn=nmf*@Os1SF4!6bBB!9a@^!9O4\
+!:0Xb!;ZWp!;lcr!;$3j!:Bdd!:0Xb!9O4\!7CfH!6>*>!rogaQi@+WF1M;N!9=(Z!;$3j!:g'h
+!:Bdd!9sL`!7h)L!3cD&!rlJQhu<cPs69O`!9*qX!9a@^!:Bdd!:Bdd!;6?l!9sL`!7h)L!2ohs
+!rnCjmf*?re$]2U!42\*!42\*!5\[8!5ng:!71ZF!87AP!8IMR!8IMR!87AP!8IMR!8meV!9*qX
+!9a@^!9=(Z!8meV!7h)L!7UrJ!71ZF!4Vt.!58C4"TKK8s6\eF!k6j<rr<&&rr<&@rr<&Frr<&H
+rr<&Hrr<&$rr<%?rr<-#iVE?M!c+4;rr<&*rr<&6rr<&Jrr<&Trr<&Vrr<&\rr<&^rr<&Xrr<&T
+rr<&Lrr<&Brr<&(rr<&,rr<-#WQjK'"8)X!dJj1Hl2L_`oD\djp\t3np\t3nnc&RhdJj1HZi:",
+s4@/6rrTso\,QF.\c2X0bPqPBao;>@dJj1Hci3tFci3tFc2RbDao;>@Qi@$elWJ$#s8Ds&]?Te[
+J,eX+qYpQUs8N7DVu6T1\c2X0YQ"S&`W#o<ci3tFiVrlXli-qbli-qboD\djoD\djl2L_`jo5;\
+mJd.dnc&RhmJd.da8Z,>a8Z,?s6oga"76(/`W#o<jo5;\e,KCJ^]+96VuH`'rte!$^[;&8VqM(M
+!6P6@!87AP!9O4\!9sL`!:Bdd!9a@^!:Bdd!:g'h!9=(Z!3,tu!l5C'c2Rhk:W*24!8meV!<)ot
+!:g'h!:g'h!:g'h!:g'h!:Bdd!:g'h!;$3j!;$3j!;$3j!:g'h!:g'h!:g'h!:Bdd!:Bdd!:g'h
+!;$3j!;$3j!9sL`!71ZF!rDs8g&D+jMn/if!;HKn!;6?l!;lcr!;HKn!;$3j!:Bdd!:g'h!:Bdd
+!9*qX!71ZF!9sL`b5VP-s0r".!6tND!:Bdd!;$3j!;HKn!;$3j!:g'h!:Bdd!:Bdd!:g'h!:0Xb
+!6bBB!qu[<mf*>[H*RAL!9=(Z!;HKn!;HKn!:g'h!;6?l!:g'h!:Tpf!9a@^!:0Xb!7CfH!3?,"
+!rmD:ZMt!drO;e,!6P6@!;$3j!:Bdd!:0Xb!9sL`!:0Xb!:g'h!:g'h!:Bdd!5&72!rnOlj8T5U
+'fio+!!)Wj!!)Qh!!)Kf!!)]l!!)Wj!!)Qh!!)cn!!)Qh!!'e6!!&qs!!3,gmJd6/S#u\j!9*qX
+!;$3j!9sL`!:0Xb!;ZWp!<<'!!;ZWp!;$3j!:g'h!8IMR!4Dh,!rkoKPlCeTF1M;N!9=(Z!;$3j
+!:g'h!:0Xb!9a@^!7CfH!3cD&!rlDShu<bigUI1_!:0Xb!;$3j!:Bdd!;6?l!;6?l!9a@^!5&72
+!3uP(!WV?MrrSIrSc8Zic2RbDli-qbli-qbmJd.dli-qbli-qbli-qbmJd.dmJd.dnc&Rhp&>!l
+p\t3nq>UEpoD\djmJd.dmJd.dnc&RhoD\djnc&Rhhu<ZVU]1;o_>aK:s5W_4rrT1ITDnlkec,UL
+nc&Rhnc&RhrVlitp\t3nao;>@V>gN%s4?rDnc/>@=.T?k!7UrJ!8IMR!:Bdd!;lcr!;6?l!;lcr
+!<)ot!:Bdd!:0Xb!<)ot!;ZWp!;$3j!:Tpf!7UrJ!58C4!rp$]k5PPV!"7?W!!)?b!!)cn!!)Qh
+!!)Qh!!)Qh!!(LJ!!'A*!!<2Pqs==_Zi:"*]Dhj2li-qbnc&Rhnc&RhmJd.dqu6Wrp\t3nhu<ZV
+_uB]<r;\);s8N$#fe#RJrr<%urr<;g!!E7.L]?''rrq*Os':&^rr<%irr<&0rr<&Xrr<&brr<&n
+rr<&nrr<&brr<&`rr<&brr<&brr<&`rr<&0rr<-#5Ag8s!jg:^rr<&Vrr<&Zrr<&jrr<&\rr<&N
+rr<&8rr<&Rrr<B*8V-o\qu6seYQ"S&a8Z,>hu<ZVkPkM^nc&RhoD\djnc&RhkPkM^_uB]<ZN(<V
+rrTOUXoAA$h>[HTnc&Rhn,E@fp&>!lmJd.dmJd.dmJd.dmJd.dnc&Rhnc&Rhnc&Rhnc&Rhnc&Rh
+nc&RhmJd.dmJd.dnc&Rhnc&Rhnc&Rhli-qbj8T)Zg&D$Qs8CaQ"3CNJ^]+96n,E@fp&>!lp&>!l
+nc&RhoD\djnc&Rhqu6Wrq>UEpg]%6R[Jp4.s)jsSrrPQ'\c2X0mJd.dp\t3nq>UEpp\t3noD\dj
+nc&Rhnc&RhoD\djnc&RhfDbgNfDbgOs7Pp^"6TXbhu<ZVli-qbn,E@fn,E@foD\djp\t3nli-qb
+nc&RhkPkM^mJd.d\c2X2blA?ZrrV6\[Jp4,bPqPBp\t3noD\djmJd.dl2L_`li-qbnc&Rhnc&Rh
+li-qb[Jp4.s-^.RrrTae]Dhj2g]%6Rp&>!lq>UEpnc&Rhp\t3nnc&Rhp&>!ln,E@foD\dj^]+98
+q__OBrrN0V`W#o<hu<ZVoD\djmJd.dnc&Rhp\t3np\t3np\t3np\t3np\t3nci3tFYQ"TbrrP]3
+\c2X0h>[HTmJd.dmJd.dmJd.dl2L_`fDbgN[Jp4.s&FX.rr`--29#Rq!:Bdd!9=(Z!;$3j!;$3j
+!:0Xb!:Bdd!4Vt.!qeQVli.$ie"cpC!7UrJ!:g'h!:g'h!;$3j!:Tpf!:Tpf!:Bdd!:Bdd!:Tpf
+!:Tpf!:Bdd!;6?l!;HKn!:g'h!9a@^!9a@^!:g'h!;HKn!:Bdd!8%5N!7UrJ!3,tu"P!Jas7,:P
+!iaSJrr<&Hrr<&jrr<'!rr<&`rr<&jrr<&Nrr<&4rr<9'^Zkb)4/`)Y!87AP!:0Xb!:0Xb!:Bdd
+!9sL`!<<'!!;HKn!;HKn!;HKn!:g'h!:0Xb!:Tpf!;6?l!:Tpf!:Tpf!6+s<!m^iQk5PPV!"7?W
+!!)Ed!!)Wj!!)?b!!)?b!!)Qh!!(LJ!!')"!!<2TqsOIc&P^%?!!)!X!!)9`!!)Kf!!)Ed!!)9`
+!!)3^!!)Qh!!((>!!'q:!!3,cp](6m"3UZP_uB]:g]%6Rao;>@WW)quOoGCe`;h"[H("]mrVc`r
+n,NCkT?[BD6eD><!58C4!6tND!7h)L!8IMR!9=(Z!9sL`!:0Xb!9=(Z!2ohs!rp0uqu6cS!%Gba
+!!)]l!!)Qh!!)9`!!)Ed!!)?b!!)Ed!!(XN!!'/$!"&#m$3,dms)4b*rr<&8rr<&Drr<&Xrr<&b
+rr<&frr<&jrr<&<rr<2@!"8i(c2RdWrr<&:rr<&hrr<&rrr<&hrr<&drr<&brr<&drr<&drr<&d
+rr<&drr<&drr<&drr<&hrr<&jrr<&hrr<&drr<&hrr<&hrr<&hrr<&drr<&drr<&$rr<*"n)"'G
+oDamO!!(:D!!)-\!!)]l!!)Wj!!)]l!!)Kf!!)Wj!!)cn!!)cn!!(XN!!((>!!<2ZrQ"p>e*3e1
+!!)9`!!)Wj!!)cn!!)Wj!!)Qh!!)Wj!!)Wj!!)Qh!!)Ed!!)3^!!'q:!!<2FiUm-Ol2S$g!!)3^
+!!)Kf!!)cn!!)]l!!)Ed!!)cn!!)Qh!!)Kf!!)Qh!!)-\!!')"!!<1gX0;O)jo;ag!!(4B!!)ip
+!!)cn!!)Qh!!)?b!!)?b!!)Wj!!)Qh!!)?b!!'S0!!<1aXm#cdcfrpY!!("<!!)'Z!!)]l!!)Qh
+!!)]l!!)Qh!!)Wj!!)Qh!!)'Z!!(FH!!(LJ!!<2\q<n7aqu=_:!!(pV!!)9`!!)Qh!!)Qh!!)Qh
+!!)Wj!!)Wj!!)Wj!!)Wj!!)cn!!'e6!!<0tFcl\*7ru*<!!(dR!!)Ed!!)Qh!!)Qh!!)?b!!(dR
+!!'M.!!<1#J`?\29lmZ@!!(RL!!)3^!!)Wj!!)?b!!)]l!!)'Z!!(@F!!'k8!!<2XpZqh\c0qY3
+!!(:D!!)3^!!)Ed!!)9`!!)-\!!)!X!!(XN!!(@F!!(@F!!(FH!!(:D!!(XN!!(jT!!(pV!!)!X
+!!)-\!!)Kf!!)Wj!!)9`!!)Ed!!)!X!!(:D!!&kq!!<1!IH^\4WQhLD!!(dR!!)cn!!)?b!!)]l
+!!)Ed!!(RL!!)Wj!!E698(7J<!9=(Z!:Tpf!;$3j!9=(Z!9a@^!9=(Z!9*qX!:Bdd!:0Xb!:Tpf
+!;$3j!;$3j!:g'h!:g'h!;$3j!<<'!!87AP!3cD&!rmbFl2LkY!"[W[!!)?b!!)Qh!!)9`!!)9`
+!!)Qh!!(LJ!!'"u!!3,SnG`QDV7Za-!9a@^!9a@^!:Tpf!:0Xb!:0Xb!9=(Z!8meV!6tND!42\*
+!rp6sp&G$k!2ohs!6>*>!:Tpf!9O4\!8IMR!6tND!5\[8!5&72!7h)L$NC)Vs*^aDc1h86s8N)X
+s8N7DS)"&\Zi:"*Z2Xe(fDbgNl2L_`l2L_`hu<ZV^]+<1rrU=6U]1;oci3tFli-qbmJd.doD\dj
+n,E@fp&>!lkPkM^l2L_`iVrlXbPqPBfDbgWrteE0NP#3,7D8^$!6P6@!9=(Z!:Tpf!;$3j!6>*>
+!m(EKbPq\90iPFY!!)?b!!*'!!!)Qh!!)Qh!!)Ed!!)Ed!!)Ed!!)Qh!!)Qh!!)Ed!!)Ed!!)Qh
+!!)Wj!!)Qh!!)Qh!!)Ed!!)Ed!!)Ed!!)Ed!!)Ed!!')"!!<2<hr"G8O0tb_!!(:D!!)-\!!)Ed
+!!)Wj!!)Wj!!)Qh!!)Qh!!)Qh!!)cn!!'q:!!;a,42V!t`W#o<g&D$PoD\djoD\djli-qboD\dj
+p&>!ln,E@fn,E@fn,E@fli-qb\,QF0s/EX&rrSCj[Jp4,nc&RhmJd.dp\t3nli-qbnc&RhoD\dj
+nc&Rhnc&Rhn,E@fg]%6Rao;>Bs6KQcrrV6\[Jp4,bPqPBp\t3noD\djnc&Rhli-qbnc&RhmJd.d
+oD\djmJd.d`W#o>s*^U2rrD$XrroUXs".Zurr<&8rr<&Prr<&`rr<&Zrr<&brr<&`rr<&`rr<&j
+rr<&brr<&>rr<%qrr<-#O/M=D!k6^frr<&Xrr<&brr<&drr<&drr<&drr<&hrr<&lrr<&jrr<&h
+rr<&drr<&2rr<-#cfL;h!_7=>rr<&Nrr<&frr<&rrr<&jrr<&frr<&Vrr<&*rr<-#<IO*2"hEOj
+#s$!)!!(XN!!)?b!!)Kf!!)cn!!)cn!!)]l!!(RL!!&_m!!<1WX6BQbp&Clg!!'e6!!)3^!!)3^
+!!)!X!!(:D!!'G,!!&qs!!')"!!'A*!!'S0!!'S0!!'G,!!')"!!'k8!!(XN!!)3^!!)]l!!)Ed
+!!)?b!!)Ed!!)?b!!(jT!!(FH!!(:D!!3,ulMgp`bGkLA!7h)L!;HKn!:Tpf!;6?l!:Bdd!:0Xb
+!<)ot!:Bdd!9O4\!:Tpf!:g'h!:g'h!8IMR!8%5N!4i+0!6>*>!8%5N!9*qX!9a@^!;HKn!9sL`
+!:Tpf!:Tpf!:0Xb!9sL`!9O4\!5ng:!r2g<l2LkW!"[KW!!)9`!!)Ed!!)9`!!)?b!!)Kf!!(FH
+!!'"u!!<2Pqt0mi_r8N5!!(RL!!)9`!!)3^!!)?b!!)Kf!!)'Z!!)9`!!(@F!!&qs!!<1?RI^@[
+s6K][rr<&<rr<&frr<&hrr<&jrr<&nrr<&hrr<&frr<&Trr<&6rr<&$rr<&4rr<<&*DQR)_>j'*
+rrDNfrroOVs!_O0rr<&@rr<&2rr<&*rr<,X!"o)-!a1G^rr<&Lrr<&frr<&frr<&drr<&jrr<&`
+rr<&frr<&lrr<&hrr<&jrr<&Rrr<&6rr<&Trr<9'Bq,-"M=(<C!6bBB!8[YT!9=(Z!5ng:"NLKG
+s81%?!e$E=rr<&brr<&jrr<&prr<&jrr<&hrr<&drr<&hrr<&jrr<&jrr<&drr<&drr<&hrr<&j
+rr<&hrr<&hrr<&drr<&drr<&drr<&drr<&drr<%urr<-#V8M3j!_msFrr<&Hrr<&\rr<&drr<&j
+rr<&jrr<&hrr<&drr<&drr<&hrr<&2rr<-#BoBk."7lL'ec,ULjo5;\n,E@fn,E@fmJd.doD\dj
+oD\djmJd.dmJd.dn,E@f\,QF0s,3H?rrQ&?\c2X0oD\djnc&Rhnc&RhmJd.doD\djnc&Rhp\t3n
+oD\djkPkM^e,KCLpAb`*rrV6\\,QF.ao;>@nc&Rhnc&Rhnc&Rhnc&Rhn,E@fp&>!loD\djn,E@f
+bPqPBl2L_olMr$e!$g"o)rUcChZ+V/rr<&"rr<&4rr<&Drr<&`rr<&brr<&\rr<&^rr<&^rr<&X
+rr<&frr<&Prr<&8rr<&&rr<-#EK02^!eHuGrr<&Zrr<&drr<&brr<&`rr<&brr<&brr<&jrr<&h
+rr<&brr<&Vrr<&@rrA)Z!_7=>rr<&Trr<&drr<&lrr<&trr<&lrr<&Prr<&Frr=#<*Dc^[j8\B:
+s6]^`hsp`ghuB7Ts%@@j!%5J[!!'e6!!(XN!!)Kf!!)3^!!)9`!!)]l!!)!X!!((>!!&eo!!<1'
+GN8]'Q2^gaU&P)mWW)qu]Dhj2c2RbTrr=;D;h+h<_>h.%s39m0iW&oc_;kR/j8X+mo`-5Irr<&H
+rr<&^rr<&lrr<&jrr<&drr<&jrr<&frr<&Zrr<&6rr<-#Z,u>3!iaMFrr<&Lrr<&jrr<&hrr<&n
+rr<&brr<&^rr<&jrr<&Zrr<&drr<&jrr<&^rr<&Drr<&.rr<&<rr<B*$T\59<W<%NfDbgNci3tF
+g]%6Rli-qbli-qbli-qbnc&Rhli-qbh>[HTiVrlXfDbj8rr_im&'t7U!9O4\!:Bdd!:Tpf!:0Xb
+!;HKn!7UrJ!3cD&!WUpHrr_Wg(W$+O!9=(Z!:Tpf!:0Xb!:0Xb!:Bdd!:Tpf!9*qX!3uP(!rXcT
+n,ELic2F@9!!'e6!!)-\!!)?b!!)Qh!!)Wj!!)]l!!)Wj!!)Wj!!)Kf!!(^P!!(@F!!'e6!!'A*
+!!(XN!!iNI7K9!ts82ir!;$6j"bWr7$Sul(!!;aZ?i0j*lMq[?rr<&`rr<&frr<&nrr<&hrr<&^
+rr<&`rr<&hrr<&jrr<&prr<&lrr<&`rr<&Rrr<&Brr<&>rr<B*!%Ir)a8Z,qYQ"S&dJj1H\c2X2
+^AnS_rrU*e[Jp4,li-qbn,E@fqu6Wrp\t3noD\djnc&Rhnc&Rhp\t3np\t3nnc&RhmJd.dnc&Rh
+nc&RhoD\djnc&RhmJd.dli-qbmJd.dmJd.dli-qbX8`/$s+-`urrNEa`W#o<h>[HTmJd.doD\dj
+p\t3np\t3nnc&Rhl2L_`l2L_`li-qbXoAA&s1R%#rrO9<ao;>@g&D$Pli-qbn,E@fli-qbnc&Rh
+p\t3noD\djmJd.dnc&Rh\,QF0s(-QMrr_!Z/\h;c!;$3j!;6?l!:Tpf!:Tpf!;$3j!9sL`!;6?l
+!:g'h!9*qX!6P6@!rjK@XT&@\s0r".!5ng:!:0Xb!:0Xb!:0Xb!;HKn!:Tpf!;6?l!:Bdd!:Bdd
+!:Bdd!7h)L!5\[8!5\[8!5&72!58C4!5\[8!6P6@!7h)L!9*qX!:0Xb!:Bdd!;lcr!:g'h!:Bdd
+!:Bdd!9a@^!8%5N!4Vt.!2'8k!rnUpk5PPT4^5,i!!)9`!!)Ed!!)Kf!!)Ed!!)Kf!!)?b!!)Kf
+!!)Qh!!)-\!!(@F!!;Hd&!$Yk7ru6@!!)!X!!)cn!!)Qh!!)Qh!!*'!!!)]l!!)!X!!(RL!!'5&
+!!&eo!!'/$!!';(!!'S0!!'Y2!!'S0!!'_4!!(@F!!(^P!!)Kf!!)Ed!!)?b!!)9`!!(^P!!'G,
+!!&Ge!!<1MQf.lGRfF%5rr<;c,>%p;_uKPkrrQnsTDnlkg]%6RoD\djoD\djnc&Rhnc&Rhp\t3n
+jo5;\X8`/$s':!;rrT1IWW)que,KCJnc&RhmJd.dn,E@fli-qbli-qbqu6Wrp&>!ln,E@fj8T)Z
+^&J'4\c2X2s+@0?rrqN[pAc5Irr<&Rrr<&jrr<&frr<&jrr<&hrr<&`rr<&Xrr<&*rr<-#dGsTn
+"7lL+c2RbDj8T)ZmJd.dn,E@fmJd.dnc&Rhc2RbDWW)r!s5!DK!aB`Vrr<&Trr<&brr<&nrr<&j
+rr<&\rr<&frr<&Rrr<&:rr<2\!#P\2mf*Ch\*Kmj!!'q:!!)3^!!)3^!!)Kf!!)Qh!!)Wj!!)ip
+!!)Kf!!)or!!)ip!!)or!!)]l!!(jT!!(XN!!'A*!!&Ac!!&kq!!iNkD?%$&s7u]p!:0[b!T!;E
+rrV`jZi:"*\,QF.e,KCJiVrlXl2L_`oD\djn,E@fmJd.dp&>!lqu6Wrq>UEpn,E@fnc&Rhl2L_`
+l2L_`iVrlX^]+96_uB]@s#YB'>Eeg]!!'"u!!9D*%Ee\PgZuo[!!)9`!!)Wj!!)]l!!)cn!!)cn
+!!)Qh!!)Qh!!)ip!!)ip!!)Wj!!)Qh!!)Qh!!)Qh!!)Wj!!)Qh!!)Ed!!)Ed!!)Ed!!)Ed!!)9`
+!!'A*!!<13L#Dt5nGj0Orr<&`rr<&jrr<&nrr<&nrr<&nrr<&hrr<&`rr<&\rr<&\rr<&"rr<-#
+j7gCi!_%%>rr<&Rrr<&^rr<&`rr<&brr<&prr<&lrr<&hrr<&hrr<&lrr<&2rr<-#9kF"t"31BF
+bPqPBnc&RhoD\djnc&Rhp&>!lnc&Rhn,E@foD\djn,E@fhu<ZV\,QF0s&49GrrV0Z\,QF._uB]:
+li-qbl2L_`mJd.doD\djq>UEpoD\djmJd.dn,E@fp&>!loD\djp\t3nnc&Rhn,E@fli-qbl2L_`
+nc&Rhn,E@fn,E@fnc&Rhp&>!lp&>!lq>UEpnc&Rhn,E@fkPkM^qu6X!rs;-ogZ&58d0Co*rr<&d
+rr<&drr<&hrr<&hrr<&frr<&brr<&frr<&hrr<&Zrr<&8rr<-#)+BSc!_7=Brr<&Nrr<&lrr<&j
+rr<&hrr<&frr<&jrr<'!rr<&prr<&drr<&brr<&lrr<'!rr<&trr<&lrr<&frr<&hrr<&frr<&d
+rr<&frr<&drr<&hrr<&Nrr<&drr<6&"$ut7p"]QLZ,-J/ec,[s:X/n>!:Tpf!;6?l!;ZWp!;6?l
+!;$3j!:Bdd!4Vt.!oG4ili.$adB!9I!8%5N!:g'h!:Bdd!9sL`!9a@^!:Bdd!;HKn!;ZWp!9*qX
+!5JO6!7CfH!WV'ErrUmJ]Dhj2dJj1Hl2L_`n,E@fnc&Rhnc&RhoD\djiVrlXZi:",s0'E.rr_im
+'?U7S!9=(Z!:g'h!;$3j!:g'h!;HKn!71ZF!2ohs!rq$PqYpW!c'eS3!7UrJ!:Bdd!;6?l!<<'!
+!9*qX!;ZWp!9sL`!6P6@!5JO6!rpmNm/I1fV9uLH!!(RL!!)Wj!!)]l!!)Qh!!)Ed!!)Kf!!)cn
+!!)]l!!)or!!)ip!!)Ed!!)Ed!!)Ed!!)!X!!(LJ!!(LJ!!(XN!!("<!!(4B!!)'Z!!N='IK/d4
+rr`3qEP;AP!2'8k!5ng:!87AP!9sL`!:Tpf!<)ot!;$3j!:Bdd!;$3j!;lcr!:g'h!:0Xb!9a@^
+!9a@^!9O4\!8%5N!87AP!<<'!#ldhcrrY9b!#s)\!orn.rr<&`rr<&jrr<&hrr<&jrr<&jrr<&h
+rr<&hrr<&nrr<&prr<&jrr<&hrr<&hrr<&hrr<&jrr<&jrr<&hrr<&hrr<&hrr<&hrr<&frr<&.
+rr<-#:NPIo!9O4\!7h)L!:Bdd!;ZWp!;ZWp!;HKn!;HKn!:g'h!:0Xb!9O4\!9*qX!5&72!WV>u
+rrQVcZi:"*g]%6Rli-qbli-qbmJd.dqu6Wrq>UEpoD\djnc&Rhp&>!l]Dhj4q*AB^rrVTf_uB]:
+c2RbDmJd.dli-qboD\djp&>!loD\djp\t3noD\djmJd.dg&D$PV>gMss)jg4rrV*X^&J'4ao;>@
+nc&Rhnc&RhoD\djq>UEprVlitmJd.dmJd.dmJd.dli-qbp&>!ls8N'!s8N'!p\t3njo5;\kPkM^
+nc&RhoD\djnc&Rhp&>!lnc&Rhnc&Rhp&>!lnc&Rhli-qbkPkM^qu6X"rrkjkXjc>1!5&72!5\[8
+!:0Xb!:0Xb!:Bdd!:Bdd!:0Xb!9sL`!:Bdd!;$3j!9*qX!4i+0!rk8jNrK/NF1)#J!8%5N!9a@^
+!9sL`!;6?l!;$3j!:Bdd!:g'h!:Tpf!9a@^!:0Xb!:g'h!;6?l!;ZWp!;ZWp!:Tpf!9a@^!:g'h
+!;HKn!;lcr!:g'h!;$3j!9=(Z!<<'!"og/gs1-serrTUQYQ"S&p&>!lp\t3ns8N'!p\t3np&>!l
+q>UEp`W#o>b5`RKrrT%EYQ"S&fDbgNn,E@fmJd.dli-qbli-qbli-qbli-qbl2L_`dJj1Ha8Z,@
+s2jNirr_Ea,JX6Y!9=(Z!;lcr!:Bdd!:Tpf!:Tpf!9sL`!5&72!ro7=m/I1V!#*KS!!)'Z!!)Qh
+!!)ut!!)Qh!!)or!!(@F!!'/$!!<2LoDS[jp&E)4!!("<!!)-\!!)Qh!!*'!!!)ip!!)ip!!)-\
+!!(dR!!'/$!!<2*bN]$/s..32rr<&Nrr<&rrr<&prr<&prr<&brr<&brr<&^rr<&lrr<&lrr<&p
+rr<&jrr<&drr<&hrr<&drr<&brr<&`rr<&rrr<&lrr<&^rr<&:rr<%Mrr<-#S$i+m$d%f9_t!b@
+Qi@%)g]%6R`W#o<dJj1Hg]%6Rg]%6Rl2L_`p&>!lnc&Rhjo5;\n,E@fn,E@fn,E@fqu6WroD\dj
+jo5;\c2RbDe,KCOrsqQuQ+P3=!q#sHrr<&`rr<&brr<&frr<&hrr<&drr<&drr<&hrr<&jrr<&j
+rr<&jrr<&jrr<&drr<&drr<&hrr<&jrr<&jrr<&hrr<&hrr<&jrr<&nrr<&2rr<,t7;(QY!9O4\
+!8%5N!:g'h!;ZWp!;$3j!:g'h!;$3j!:g'h!:g'h!:0Xb!8meV!6P6@!WVE"rrR&*Z2Xe(ec,UL
+li-qbmJd.dmJd.dp\t3np\t3noD\djnc&RhoD\dj\c2X2s$L;jrrV*R^&J'4c2RbDli-qbnc&Rh
+nc&RhoD\djp&>!lp\t3noD\djmJd.ddJj1HV>gMss+deZrrV0Z]Dhj2ao;>@nc&Rhnc&RhoD\dj
+rVlitp\t3nmJd.dkPkM^mJd.dn,E@fp&>!lrVlitnc&RhrVlitq>UEpmJd.dl2L_`nc&Rhnc&Rh
+n,E@fmJd.dp&>!loD\djoD\djmJd.dj8T)Zg&D$P_uB]:V>gMuo-Hp,oB?2SZ2Xe(`W#o<li-qb
+li-qbmJd.dli-qbmJd.dmJd.dn,E@fp\t3nj8T)ZZi:",s$:L^rrP]3[Jp4,ec,ULnc&Rhn,E@f
+nc&RhmJd.dnc&Rhn,E@fmJd.dp&>!lp&>!lp\t3noD\djn,E@fmJd.dl2L_`mJd.dli-qbp&>!l
+s8N'!q>UEpnc&Rhjo5;\bPqPB\,QF.Zi:".r@q%Hos+Muq>[;k!!)Kf!!)Wj!!)or!!)cn!!)ip
+!!)ip!!((>!!:%<%I=#qUX?:F!!(RL!!)?b!!)Ed!!)Ed!!)Kf!!)Kf!!)Qh!!)!X!!'M.!!<1-
+Mrjs?6YEn.!!)3^!!)Ed!!)cn!!)Ed!!)?b!!)Kf!!'q:!!<1s`U*U,mf4*Irr<&\rr<&jrr<&l
+rr<&nrr<&hrr<&Drr<&&rr<-#e+N_?"77I/YQ"S&mJd.dmJd.doD\djp\t3nnc&Rhn,E@fg&D$P
+X8`/$s&FX4rr`:tdAR!E!71ZF!:g'h!;ZWp!;6?l!:0Xb!9sL`!9a@^!;$3j!:Tpf!:Tpf!:0Xb
+!9O4\!:g'h!<<'!!:Bdd!:0Xb!;HKn!;lcr!:0Xb!7UrJ!3,tu!rm8$rVlqAOfA?\&,uVIs)"D.
+_=.E)hu>o\a8Z,>TDnlk_uB]:iVrlXl2L_`mJd.dmJd.djo5;\p\t3nq>UEpoD\djp\t3nl2L_`
+ec,ULe,KCJYQ"S(gB01QrrVH^g]%6RkPkM^kPkM^mJd.dl2L_`l2L_`mJd.dmJd.dmJd.dmJd.d
+oD\djoD\djmJd.dmJd.dnc&RhoD\djoD\djoD\djoD\djp\t3nqu6Wr_>aK:s%@:grrD*Z!!(XN
+!!)?b!!)Qh!!)?b!!)?b!!)Ed!!)Qh!!)Wj!!)Qh!!)-\!!'q:!!<2`rPAL8@?7nt!!(XN!!)Kf
+!!)Kf!!)?b!!)Kf!!)Qh!!)Qh!!)Qh!!)Wj!!'Y2!!<0tEVKJ7g\82W!!(.@!!)?b!!)Wj!!)Wj
+!!)Kf!!)Qh!!)Qh!!)Kf!!)Kf!!(FH!!')"!!<1IVl]n"iW$Ce!!("<!!)Ed!!)?b!!)?b!!)Ed
+!!)Kf!!)Ed!!)Kf!!)Kf!!)Wj!!)?b!!)9`!!)Qh!!)Kf!!)Qh!!)Qh!!)?b!!)?b!!)Ed!!)Wj
+!!)]l!!)Qh!!)Ed!!)Wj!!)Ed!!)-\!!)Qh!!)!X!!(:D!!'5&!!UgO$ie37m/I'drr<&>rr<&d
+rr<&frr<&brr<&drr<&hrr<&rrr<&nrr<&rrr<&\rr<&,rr<-#3G4BP!_7=>rr<&Prr<&brr<&h
+rr<&prr<&nrr<&jrr<&^rr<&`rr<&hrr<&brr<&^rr<&frr<&jrr<&frr<&drr<&frr<&drr<&\
+rr<&nrr<'!rr<&frr<&Zrr<&Zrr<&Xrr<&Lrr<&.rr<&Prr<-#`UU;7!29Dm!:Bdd!:Tpf!;$3j
+!:g'h!;6?l!:Bdd!58C4!l4jGli.$]dBW]O!8%5N!:Tpf!:0Xb!:Tpf!:Bdd!:Bdd!:g'h!6P6@
+!5\[8ir9'kLTURV!:g'h!:Tpf!:0Xb!:Bdd!:0Xb!:Tpf!6>*>!ro%1m/I1V!#<o]!!)Ed!!)ip
+!!)Kf!!)ip!!)9`!!(FH!!'S0!!`J4iW!PWWW)quc2RbDjo5;\n,E@foD\djoD\djp\t3nli-qb
+\,QF0mh\FQrr`;-iMZ\U!6P6@!:0Xb!;$3j!;$3j!9sL`!:Bdd!:Tpf!:Bdd!:Tpf!:0Xb!:0Xb
+!:Tpf!;$3j!;$3j!;6?l!:g'h!:g'h!;$3j!:g'h!7UrJ!4i+0!rl>QrVlq-J#E;H!6P6@!2KPo
+!4i+0#QFf`s+@f\huE][IBWYN4kou:!58C4!6+s<!7UrJ!8[YT!;6?l!;$3j!;lcr!:Bdd!:Tpf
+!:g'h!:0Xb!5ng:!l4j?b5VOtn^[X>!:0Xb!:g'h!9sL`!9O4\!9O4\!:Bdd!:Bdd!:0Xb!:0Xb
+!;$3j!;$3j!:Bdd!:Bdd!:g'h!:g'h!;$3j!;$3j!;$3j!;HKn!;ZWp!6+s<!rlDMi;Wf1rr<&L
+rr<&`rr<&drr<&`rr<&`rr<&drr<&hrr<&jrr<&hrr<&drr<&&rr<-#ht+\a!_IULrr<&Trr<&j
+rr<&hrr<&drr<&hrr<&frr<&brr<&hrr<&jrr<&4rr<-#@=S%O!o*ISrr<&Drr<&`rr<&nrr<&n
+rr<&brr<&`rr<&lrr<&frr<&lrr<&Prr<&(rr<-#B9B:q!os<err<&:rr<&brr<&brr<&brr<&d
+rr<&hrr<&brr<&prr<&hrr<&\rr<&Nrr<&@rr<&@rr<&@rr<&Frr<&Hrr<&Frr<&Lrr<&Xrr<&^
+rr<&brr<&frr<&lrr<&^rr<&brr<&`rr<&drr<&lrr<&lrr<&Vrr<&2rr<5G!!3,gqsXObVuH_s
+ao;>@nc&Rhnc&Rhl2L_`mJd.dn,E@frVlitp&>!lq>UEpjo5;\^&J'6s!_$0rrP]3\c2X0h>[HT
+oD\djp\t3nq>UEpoD\djjo5;\h>[HTc2RbD]Dhj2[Jp4,Zi:"*YQ"S&Z2Xe(\,QF.]Dhj2^]+96
+_uB]:fDbgNmJd.dp\t3nnc&Rhli-qbn,E@fmJd.dp\t3nli-qb`W#o<_uB];s5CHe!n6\Mrr<&^
+rr<&drr<&jrr<&frr<&frr<&^rr<&6rr<,>!"nPs!i+/Hrr<&Jrr<&drr<&hrr<&lrr<&hrr<&f
+rr<&drr<&&rr<-#CQ7?R!b[@rrr<&frr<&frr<&frr<&drr<&^rr<&nrr<&6rr<-#UVH0q"7lL+
+ec,ULmJd.dq>UEpoD\djn,E@fn,E@fg&D$PbPqPEs)Xskrr<&Jrr<&\rr<&`rr<&frr<&drr<&b
+rr<&Trr<&<rr<&Prr<*"oA]cPs1ds%rr<&Drr<&frr<&drr<&jrr<&lrr<&hrr<&hrr<&hrr<&h
+rr<&hrr<&hrr<&hrr<&hrr<&jrr<&nrr<&hrr<&hrr<&brr<&`rr<&Nrr<&2rr<-#/RA>T!aUAX
+rr<&Trr<&Lrr<&Jrr<&Brr<&Hrr<&Nrr<T0#=\Z2U]80ts(.&[!"l41!!'Y2!!(pV!!)Kf!!)ip
+!!)cn!!)Ed!!)Ed!!)?b!!(4B!!LOH!WW&@rrU6s_uB]:li-qbp&>!loD\djl2L_`l2L_`li-qb
+mJd.dmJd.dmJd.dnc&Rhnc&RhmJd.dmJd.dnc&Rhnc&RhmJd.dmJd.doD\djp\t3nqu6Wr]Dhj4
+s)4%Xrr_9]!R^oI!9sL`!:g'h!:0Xb!:0Xb!:g'h!:g'h!:g'h!:0Xb!9O4\!2KPo!rp0i_>aQ]
+9u$].!8meV!;$3j!:Tpf!:g'h!;$3j!;$3j!;6?l!:0Xb!:Tpf!3cD&!rnUjp\t<RqlB_s!6>*>
+!:g'h!<<'!!<<'!!:Bdd!:0Xb!;ZWp!;HKn!;lcr!8IMR!5&72!rkPtXT&@`s0M_*!5ng:!:0Xb
+!:Bdd!:g'h!;$3j!:g'h!;$3j!;HKn!;HKn!87AP!4i+0!29Dm!3uP(!2]\q!2]\q!2KPo!1Eie
+!2ohs!6P6@!87AP!:Bdd!:g'h!:Tpf!:g'h!9*qX!9sL`!;lcr!;6?l!;$3j!;$3j!8%5N!3uP(
+!mq#bn,EBmrr<&>rr<&jrr<&jrr<&hrr<&hrr<&jrr<&lrr<&nrr<&brr<&\rr<&Hrr<-#!%j62
+!_7=Brr<&Rrr<&hrr<&frr<&lrr<&brr<&Rrr<&8rr=#<!$VA`S,\,=s+RHPK;8HnS,Zi@lR,-I
+!#ML3!!&qs!!(jT!!)?b!!)cn!!)?b!!)Ed!!)Ed!!)Qh!!)Wj!!(jT!!'M.!!:CF&^^Oc[F>.m
+PQ)q)nGj<Srr<&0rr<&(rr<&"rr<&6rr<&Lrr<&brr<&brr<&frr<&brr<&drr<&drr<&8rr<,6
+!"J8o!iOA@rr<&Hrr<&jrr<&hrr<&lrr<&nrr<&drr<&Hrr<&4rr<-#fBqSt!bmS!rr<&hrr<&h
+rr<&hrr<&drr<&drr<&drr<&8rr<-#V8M[""8)X-ec,ULl2L_`oD\djp&>!ls8N'!oD\djli-qb
+iVrlXs8N'!h>[HTiVrlXnc&RhoD\djli-qbl2L_`mJd.da8Z,>Zi:",s3()nrr`;[s.fSo!6P6@
+!:Bdd!;$3j!;$3j!:Tpf!:g'h!:g'h!:g'h!:g'h!:g'h!;$3j!:g'h!:g'h!:g'h!;HKn!;HKn
+!:Tpf!9sL`!:Bdd!9*qX!6tND!ri6RrVlq'J$8kP!:0Xb!:Tpf!9a@^!<<'!!:0Xb!9=(Z!5JO6
+!5&72!6bBB%0%JDs*:C>Mnf92=o\L%!7h)L!7h)L!7UrJ!8[YT!9sL`!:Bdd!5\[8!6P6@b5VO.
+Z*XH1!:Tpf!;6?l!:g'h!:0Xb!9sL`!:Bdd!:g'h!:Bdd!:Bdd!:g'h!:g'h!:Bdd!:Bdd!:g'h
+!:g'h!:Bdd!:Bdd!:g'h!:g'h!;lcr!4i+0!rnCbi;WoP!#s8a!!)-\!!)Qh!!)Ed!!)Ed!!)Wj
+!!)Wj!!)Ed!!)?b!!)9`!!'S0!!<1YUVd$5mf3gArr<&Xrr<&hrr<&lrr<&jrr<&jrr<&frr<&h
+rr<&hrr<&brr<&2rr<-#[EJ=E!pflurr<&>rr<&nrr<&rrr<&nrr<&frr<&`rr<&prr<&prr<&p
+rr<&\rr<&6rr<-#$Sea_!os<grr<&:rr<&drr<&hrr<&jrr<&prr<&lrr<&frr<&drr<&nrr<&R
+rr<3%;htD3s8N)`s8N)bs8N)`s8NJ]q>[eOs)FD*"#J.#!!'q:!!(^P!!)-\!!)cn!!)?b!!)-\
+!!)Kf!!)ip!!)ip!!)cn!!)Kf!!(.@!!')"!!<1m\aob#]Dhj2`W#o<p\t3nnc&RhmJd.dnc&Rh
+nc&RhoD\djoD\djli-qbkPkM^fDbgNn,EBJrrP]3\c2X0h>[HToD\djnc&Rhp&>!lli-qbe,KCJ
+_uB]<s$q(mrrq6Ws':]7rr<&<rr<&Xrr<&brr<&`rr<&drr<&brr<&nrr<&^rr<&Prr<%srr<-#
+J!\sj"fK-.0i+qO!!'"u!!')"!!("<!!(4B!!(XN!!)'Z!!)Wj!!)Qh!!)Ed!!)Qh!!)3^!!)Ed
+!!)Kf!!)?b!!)Ed!!)Qh!!'q:!!9t:%I=#qWR%@>!!(FH!!)Qh!!)]l!!)cn!!)ip!!)9`!!(@F
+!!(LJ!!3,uiVrsnMmNE`!:g'h!:g'h!:g'h!:g'h!:Bdd!:Bdd!58C4!ro%5m/I1^!#*o_!!)-\
+!!)Qh!!)cn!!)cn!!)ut!!)?b!!)?b!!)3^!!)?b!!)Qh!!)ip!!)]l!!)Wj!!)Ed!!(pV!!(@F
+!!<1_^"r\js82hkrr<&>rr<&brr<&frr<&frr<&`rr<&jrr<&hrr<&hrr<&drr<&drr<&hrr<&h
+rr<&hrr<&jrr<&nrr<&nrr<&frr<&^rr<&lrr<&lrr<&Xrr<&frrE#t!dC!Arr<&frr<&`rr<&f
+rr<&frr<&hrr<&Zrr<&`rr<&Nrr<&Drr<&Frr<&Nrr<'!rr<K-+^P+nXoE%!rr="Wrr<&.rr<&>
+rr<&\rr<&@rr<,D!!CFE"8t`$\,QF.li-qbp&>!lq>UEpmJd.dmJd.doD\djoD\djnc&RhmJd.d
+nc&Rhnc&RhmJd.dmJd.dnc&Rhnc&RhoD\djnc&Rhli-qbli-qbnc&RhZi:",s1?\9rrNE__>aK8
+hu<ZVnc&RhoD\djp\t3np\t3np\t3nnc&Rhnc&Rhq>UEp^]+98s#F6!rrBh6!!)-\!!)9`!!)Qh
+!!)or!!)]l!!)Wj!!)?b!!)Qh!!)Ed!!(pV!!'q:!!<2`p\4[krVsh:"3:EA!;$3j!:Tpf!;$3j
+!:g'h!9a@^!9sL`!:0Xb!9sL`!9a@^!7CfH!9*qXXT&@\s0r".!6+s<!:g'h!;$3j!;HKn!;$3j
+!;6?l!;$3j!:g'h!;ZWp!5ng:!rn=bkl1hDp%&/8Zi:"*ec,ULli-qbmJd.dnc&RhrVlitqu6Wr
+qu6Wrnc&Rhn,E@fiVrlXZi:",nGj[%rr^FE)86%M!:Bdd!:0Xb!:0Xb!:Bdd!:Bdd!:Bdd!:Bdd
+!;$3j!;$3j!9*qX!6+s<NrK/NF1M;N!8meV!;6?l!;$3j!:g'h!:Tpf!7UrJ!4Dh,!rlJWir92<
+pY,ZgZi:"*mJd.dp\t3nq>UEpqu6Wrnc&Rhq>UEphu<ZV^]+98gAhW@rrmbKjT#gtrr<&2rr<&F
+rr<&Prr<&Rrr<&Nrr<&Trr<&\rr<&`rr<&hrr<&nrr<&trr<&jrr<&lrr<&hrr<&jrr<&brr<&h
+rr<&jrr<&>rr<,<!"%uk!iaM@rr<&Hrr<&frr<&jrr<&nrr<&nrr<&^rr<&Jrr<,t!#shq!bmS%
+rr<&jrr<&hrr<&hrr<&hrr<&drr<&drr<&4rr<-#UVlHu"8;d/ec,ULjo5;\mJd.dl2L_`n,E@f
+p\t3nmJd.dn,E@fkPkM^iVrlXp&>!ln,E@fqu6Wrp\t3nmJd.dkPkM^ec,UNs39lcs8N$#])VlN
+rr<&brr<&^rr<&brr<&brr<&jrr<&jrr<&jrr<&hrr<&hrr<&hrr<&hrr<&hrr<&jrr<&jrr<&f
+rr<&drr<&^rr<&nrr<&nrr<&brr<&>rr<9'fC/a7_7T^I!;6?l!9sL`!:0Xb!:Bdd!:g'h!:Bdd
+!9a@^!:g'h!;ZWp!:0Xb!9a@^!6bBB!4Dh,!3uP(%.+#us$_#/H)ps"C&e25!9a@^!4Vt.!k/.7
+bPq[`!#NEM!!)'Z!!)Wj!!)]l!!)Qh!!)Qh!!)Wj!!)Wj!!)Qh!!)Ed!!)Qh!!)Qh!!)Qh!!)Qh
+!!)Ed!!)Qh!!)Wj!!)Qh!!)?b!!)9`!!)?b!!';(!!<2ZoABQL1LIco!!(dR!!)Ed!!)cn!!)ip
+!!)ip!!)cn!!)Wj!!)Wj!!)or!!(:D!!:aP(W?=T^Z2Nt!!)Kf!!)Qh!!)Qh!!)cn!!)cn!!)Kf
+!!)?b!!)Qh!!)!X!!(FH!!;*Z!V66md/Y3/rr<&jrr<&jrr<&hrr<&drr<&brr<&^rr<&^rr<&^
+rr<&`rr<&Xrr<&:rr<-#e`j:;!oO$irr<&@rr<&hrr<&nrr<&nrr<&jrr<&hrr<&frr<&`rr<&`
+rr<&:rr<-#RC2)T"8rB`^]+96iVrlXoD\djn,E@fp\t3np&>!lq>UEpn,E@fli-qbn,E@fh>[HT
+X8`1jrr_F79=b'&!9a@^!:Tpf!:Tpf!:Tpf!9sL`!:0Xb!9sL`!;$3j!;6?l!:Bdd!4Dh,!roCC
+OoGJQF1M;N!8[YT!:g'h!;HKn!;$3j!;HKn!8[YT!4Dh,!rl2Khu<c>qq(iJ!8[YT!:Bdd!;$3j
+!;lcr!;$3j!:Bdd!9sL`!8meV!4i+0!rq0Rli..;l/N(+VuH_sbPqPBjo5;\nc&Rhp\t3np&>!l
+li-qbmJd.djo5;\j8T)ZiVrlXl2L_`jo5;\kPkM^n,E@fq>UEpoD\djp&>!ln,E@fnc&RhoD\dj
+a8Z,@`rHG3rrT1GU]1;odJj1Hnc&Rhp&>!lp\t3nnc&Rhj8T)Zc2RbFrrFk3rrQnm\,QF.oD\dj
+nc&Rhnc&Rhnc&RhmJd.dmJd.d^&J'6s.dKurr_uq'@m*_!9O4\!:0Xb!:0Xb!9a@^!:Bdd!:Bdd
+!9a@^!8IMR!9=(Z!9*qX!:g'h!;HKn!;6?l!;HKn!:Tpf!58C4!q-pah>dKS"5abT^]+96n,E@f
+jo5;\l2L_`mJd.dnc&Rhp\t3nq>UEpp\t3noD\djmJd.dmJd.dnc&Rhnc&Rhn,E@fli-qbli-qb
+li-qbnc&Rhnc&RhmJd.d\,QF4s)F%u\(B+/!!)?b!!)?b!!)Kf!!)Kf!!)?b!!)Qh!!)?b!!)cn
+!!)Kf!!)Kf!!)?b!!)'Z!!(dR!!(FH!!(LJ!!((>!!(pV!"T#/$i`),s(.c$(I?(\29l.&j8YtU
+!!'_4!!)?b!!)Wj!!)Qh!!)Wj!!)Wj!!)cn!!)Wj!!)Qh!!)Qh!!)Wj!!)Wj!!)cn!!)Wj!!)Ed
+!!)?b!!)Qh!!)Qh!!)Ed!!)9`!!)'Z!!'k8!8RSUJZ5RI!!(RL!!)Ed!!)Qh!!)Wj!!)cn!!)cn
+!!)Wj!!)Wj!!)ip!!(FH!!'5&!!<2BkK*Z*o-78Irr<&brr<&hrr<&hrr<&frr<&jrr<&brr<&b
+rr<&drr<&Trr<&*rr<-#2.?(U"8=ZW^&J'4qu6Wrp&>!lmJd.dli-qbmJd.dli-qbmJd.dli-qb
+li-qbmJd.d[Jp4.s&XQNrrV0Z]Dhj2bPqPBoD\djoD\djnc&RhmJd.djo5;\mJd.dnc&Rhli-qb
+_>aK:s,XMGrrTgiiVrlXn,E@fli-qbp\t3noD\djnc&Rhp\t3noD\djmJd.dl2L_`hu<ZVVuH_u
+s4-B+rrR2"\,QF.nc&Rhq>UEpnc&Rhn,E@fkPkM^li-qbmJd.dl2L_`li-qbnc&Rh^]+98s!LO'
+rrP]3[Jp4,g]%6Rn,E@fqu6Wrp&>!lnc&Rhh>[HT^]+98s&Fj0rrQ,QYQ"S&h>[HTqu6Wrq>UEp
+q>UEpjo5;\j8T)Zjo5;\^&J'6s-:"[rrT1AYQ"S&\c2X0dJj1Hjo5;\mJd.dkPkM^kPkM^li-qb
+oD\djnc&Rhg]%6RfDbgNdJj1Ha8Z,>^]+96_uB]:jo5;\p\t3np\t3nq>UEpp&>!loD\djnc&Rh
+_uB]<`rH;/rrT1GU]1;oc2RbDn,E@fp&>!lp&>!loD\djjo5;\bPqPDrs(L?rrQnm\,QF.oD\dj
+nc&Rhnc&Rhnc&RhmJd.dmJd.d^&J'6s.dKurr_uq'@m*_!9O4\!:0Xb!:0Xb!9*qX!:Tpf!8%5N
+!6bBB"9/?;ci3tFjo5;\oD\djoD\djqu6WroD\djl2L_`ci3tFX8`/$s(.&Fs8Ds!=a@FT!!)Kf
+!!)?b!!)?b!!)Qh!!)Wj!!)ip!!)ip!!)cn!!)Wj!!)Ed!!)Ed!!)Qh!!)Qh!!)?b!!)9`!!)Ed
+!!)Kf!!)Qh!!)Kf!!)Qh!!'k8!!_Nb(]VJ?p\t3nfDbgNkPkM^p&>!ln,E@fnc&RhoD\djn,E@f
+oD\djp\t3nnc&Rhnc&RhkPkM^nc&RhoD\djnc&Rhp&>!lj8T)Zci3tFa8Z,>_>aK=pAc66M5/>q
+!b$q`rr<&Hrr<&frr<&jrr<&lrr<&nrr<&nrr<&nrr<&jrr<&jrr<&hrr<&jrr<&nrr<&prr<&n
+rr<&brr<&`rr<&drr<&hrr<&hrr<&`rr<&Jrr<&XrrCjS!n$\%rr<&Drr<&brr<&drr<&hrr<&j
+rr<&jrr<&jrr<&hrr<&hrr<&Nrr<&(rr<-#4))k;!mC>3rr<&Jrr<&brr<&hrr<&jrr<&frr<&f
+rr<&brr<&brr<&brr<&Jrr<%irr<-#WQju5!fO%Urr<&jrr<&hrr<&frr<&hrr<&`rr<&drr<&f
+rr<&drr<&lrr<&frr<&:rr<&:rr<*"n$2loiW$Oi!!(:D!!)cn!!)Qh!!)Ed!!)Qh!!)?b!!)9`
+!!)Ed!!)Wj!!'Y2!!<1e^#8njkPkM^hu<ZVmJd.dmJd.dkPkM^p&>!lp&>!lp&>!lli-qbkPkM^
+li-qbWW)r"s/3R&rrTOM[Jp4,nc&RhoD\djoD\djnc&Rhli-qboD\djnc&Rhl2L_`kPkM^nc&Rh
+bPqPBV>gMrs6Z$M!_7=>rr<&Vrr<&^rr<&prr<&nrr<&drr<&Nrr<&4rr<-#<Irs*!k[Wprr<&R
+rr<&lrr<&rrr<&frr<&hrr<&\rr<&hrr<&,rr<-#D3+5e!isA6rr<&Frr<&Xrr<&`rr<&brr<&d
+rr<&^rr<&Prr<&8rr<&6rr<&0rr<&Nrr<T"!"8f,-iXQ9s!LbF)cP)_!!)Wj!!)Wj!!)ip!!)]l
+!!)Wj!!)Ed!!'k8!!:%<"mc0iWR%@>!!(:D!!)Qh!!)Wj!!)Wj!!)Qh!!)-\!!(.@!!<0(2;eE8
+BoBJ#!!)Wj!!)Qh!!)Qh!!)Qh!!)Ed!!)Ed!!'_4!!<1q_sIC*pAblWrr<&\rr<&drr<&`rr<&b
+rr<&frr<&Frr<&4rr<0$Oi@(p!!((>!!)-\!!)ip!!)]l!!)9`!!)Kf!!)?b!!'q:!!'e6!!<2<
+fAlo0rrSat^&J'4n,E@foD\djoD\djoD\djq>UEpq>UEpq>UEpp\t3noD\djmJd.dmJd.doD\dj
+oD\djli-qbli-qbn,E@fp&>!lp&>!lp\t3np&>!lg&D$P\c2X6s,4Mh!%Yte!!)'Z!!)?b!!)or
+!!)Kf!!)Ed!!)Ed!!)cn!!)Kf!!)ip!!)Kf!!)Ed!!)Ed!!)Ed!!)9`!!)Kf!!)'Z!!)Qh!!(dR
+!!((>!!'"u!!9\2%F4tUi;a&%rr<&brr<&brr<&^rr<&frr<&nrr<&nrr<&jrr<&hrr<&jrr<&j
+rr<&nrr<&nrr<&prr<&nrr<&brr<&`rr<&drr<&hrr<&jrr<&\rr<&:rr<-#'0k4N!3?,"!5\[8
+!9sL`!:0Xb!:0Xb!:Bdd!:Bdd!:Bdd!:0Xb!9a@^!9sL`!8meV!5JO6!rqHXc2RhK4i.-u!:0Xb
+!;6?l!;$3j!:Tpf!:Bdd!:Bdd!:g'h!:g'h!;6?l!6P6@"N:?Gs8DHe!o*7Wrr<&Zrr<&drr<&h
+rr<&hrr<&`rr<&hrr<&jrr<&jrr<&rrr<&hrr<&Trr<&2rr<-#4`@Y+!oa0grr<&Brr<&nrr<&h
+rr<&hrr<&jrr<&trr<&rrr<&jrr<&drr<&&rr<-#T>0=a"7Z@)e,KCJkPkM^n,E@foD\djnc&Rh
+oD\djp&>!ln,E@foD\djrVlitVuH_us/j32rrVZhec,ULiVrlXli-qbnc&Rhp\t3np\t3nqu6Wr
+q>UEpnc&Rhn,E@fmJd.dg]%6R_>aK:rt.P]rrP]3[Jp4,g]%6RmJd.dnc&Rhp&>!loD\djg&D$P
+^&J'6s&Xj.rrUsTQi@$cdJj1Hli-qboD\djl2L_`li-qbnc&Rhn,E@f\,QF0s(-oVrrW#r^]+96
+_>aK8hu<ZVqu6Wrp\t3nli-qbmJd.dg]%6RSc8Ztd/X:K=+C7njo=fHo`#!]s0M_*!:Bdd!:Bdd
+!:Tpf!:0Xb!:Bdd!9sL`!5&72!l4j?li.$cc_LL?!6tND!:g'h!:Tpf!;6?l!:g'h!9=(Z!6P6@
+!riQchu<ajMmr]d!;$3j!:g'h!:g'h!:g'h!:Bdd!:Bdd!58C4!ro%5m/I1^!#*o_!!)-\!!)Qh
+!!)ip!!)ip!!)]l!!(jT!!'M.!!`J@nc+*BX8`/"h>[HTq>UEpnc&RhmJd.dq>UEpjo5;\iVrlX
+]Dhj6cN"4Mp#Z5PrrU[2c2RbDkPkM^nc&RhoD\djoD\djoD\djp\t3np\t3np\t3noD\djmJd.d
+li-qbnc&Rhnc&Rhn,E@foD\djnc&RhoD\djnc&RhoD\djnc&Rhj8T)Z`W#oBrr=qVA!*bj!!(dR
+!!)cn!!)Qh!!)Qh!!)Wj!!)Kf!!)]l!!)cn!!)or!!)Qh!!)]l!!)?b!!)?b!!)Wj!!)Ed!!)Kf
+!!)3^!!)Ed!!)Kf!!'Y2!!9t:#LNJPV7j/6!!)3^!!)?b!!)]l!!)9`!!)Qh!!)Wj!!)cn!!)Qh
+!!)Ed!!)Qh!!)Wj!!)Wj!!)cn!!)ip!!)Wj!!)?b!!)9`!!)Ed!!)Qh!!)Wj!!(pV!!'M.!!<1!
+IG4]'mitQ;rr<&`rr<&`rr<&`rr<&brr<&drr<&drr<&drr<&brr<&drr<&`rr<&:rr<,j)ai!P
+!b6_prr<&Zrr<&frr<&rrr<&jrr<&brr<&frr<&`rr<&lrr<&hrr<&jrr<&*rr<-#@=deF!8[YT
+!7CfH!9O4\!:g'h!:0Xb!:Bdd!;$3j!;ZWp!;6?l!;ZWp!:Bdd!:0Xb!7UrJ!5\[8!rnn)[Jp<g
+s0r".!6bBB!;$3j!:g'h!:Bdd!:g'h!;ZWp!;6?l!;$3j!:Tpf!4i+0!rnb#i;Wf+rr<&Lrr<&\
+rr<&^rr<&lrr<&drr<&frr<&jrr<&jrr<&jrr<&hrr<&*rr<-#_q4JZ"8;d;`W#o<h>[HToD\dj
+p\t3nqu6Wrqu6Wrp\t3noD\djoD\djli-qbli-qbiVrlX_uB]<s*'NjrrP]3[Jp4,g&D$PoD\dj
+p&>!lmJd.dmJd.de,KCJ\,QF0s&FF$rrTmuTDnlkec,ULl2L_`n,E@fp\t3nli-qbl2L_`li-qb
+]Dhj4s*^C/rrPi)YQ"S&jo5;\q>UEpoD\djoD\djl2L_`ec,UL^]+9:s$:H#n*9oSg#oL;!!)?b
+!!)?b!!)Ed!!)?b!!)Ed!!)?b!!'e6!!9t:"mc0iWR%@>!!(:D!!)Qh!!)Ed!!)]l!!)?b!!(dR
+!!((>!!<0,2rFW:B8a8!!!)Wj!!)Qh!!)Qh!!)Qh!!)Ed!!)Ed!!'_4!!<1q_sIC*pAblWrr<&\
+rr<&hrr<&lrr<&prr<&trr<&Nrr<&$rr<B*c1V,6s8<m(`W#o<jo5;\nc&RhmJd.dmJd.doD\dj
+mJd.de,KCJU]1;qs#XNKs82frj8T)Zec,ULli-qbn,E@fmJd.doD\djoD\djp&>!lp\t3noD\dj
+mJd.dl2L_`li-qbmJd.dnc&Rhqu6Wrn,E@fli-qbli-qbl2L_`l2L_`nc&Rhhu<ZVjo5;_s(RnO
+rr<&Nrr<&lrr<&frr<&jrr<&hrr<&hrr<&jrr<&jrr<&nrr<&nrr<&jrr<&jrr<&jrr<&hrr<&d
+rr<&drr<&drr<&drr<&drr<&:rr<,<!!UdM"4[AXc2RbDp\t3np&>!lli-qbnc&Rhli-qboD\dj
+oD\djnc&RhmJd.dmJd.dnc&RhoD\djoD\djoD\djn,E@fmJd.dli-qbp&>!loD\djp&>!lg&D$P
+S,WHis1RIGrrT%7^]+96jo5;\kPkM^jo5;\n,E@fjo5;\p\t3nnc&Rhp\t3nq>UEpp&>!lg]%6R
+Z2Xe*s%e-qrrQtq\c2X0fDbgNl2L_`mJd.dl2L_`l2L_`mJd.dq>UEpli-qbp\t3nkPkM^hu<ZV
+[Jp4-s7ts[!_7+6rr<&Prr<&lrr<&frr<&drr<&jrr<&nrr<&nrr<&jrr<&drr<&`rr<&Zrr<&>
+rr<&,rr<-#S%lK5!os<irr<&@rr<&hrr<&drr<&brr<&drr<&`rr<&drr<&hrr<&lrr<&6rr<-#
+T>BOe!gg+*rr<&Zrr<&lrr<&jrr<&brr<&frr<&drr<&`rr<&lrr<&nrr<&frr<&$rr<*"p[J1a
+GFb`5!!(dR!!)Qh!!)Ed!!)]l!!)Wj!!)]l!!)Wj!!)Qh!!)Wj!!)-\!!)Kf!!(^P!!'Y2!!<1?
+Odc:O7ru*<!!(pV!!)3^!!)]l!!)Kf!!)Ed!!(^P!!'5&!!<1)J_^8,>Dp&l!!)!X!!)?b!!)Qh
+!!)Ed!!)Kf!!)3^!!)9`!!'_4!!<1o]D)=,qu<5e!!'e6!!)-\!!)Kf!!)Kf!!)Qh!!(jT!!'5&
+!!<0^@HILjK:T4G!!)'Z!!)?b!!)Wj!!)Wj!!)Wj!!)Qh!!'q:!!:1@$1%TmWR%@>!!(@F!!)?b
+!!)Qh!!)Qh!!)Ed!!(pV!!((>!!<0.2rFW:B8a8!!!)Wj!!)Qh!!)Qh!!)Qh!!)Ed!!)Ed!!'_4
+!!<1q_sIC*pAblWrr<&\rr<&drr<&frr<&jrr<&jrr<&@rr<%urr<-#fD5CF!qH<&rr<&Drr<&\
+rr<&brr<&frr<&prr<&drr<&`rr<&Rrr<&$rr<-#YKQ21qYpU5:W*24!9*qX!9sL`!;lcr!:0Xb
+!9a@^!9sL`!;6?l!;HKn!:g'h!:Bdd!:Bdd!:g'h!;HKn!;6?l!;6?l!;$3j!8meV!9O4\!;6?l
+!:Tpf!:g'h!87AP#6+Z.rs:^7rr<&`rr<&frr<&`rr<&drr<&hrr<&jrr<&jrr<&nrr<&nrr<&j
+rr<&jrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&hrr<&>rr<2H!"8i*ec,\rS!F!R!9*qX!<)ot
+!:g'h!;lcr!:Bdd!;$3j!:g'h!:g'h!:g'h!:Bdd!:Bdd!:Bdd!:g'h!:g'h!:Bdd!:0Xb!;$3j
+!:Tpf!:g'h!;lcr!;6?l!6tND!2]\qeGfO'rr<&Nrr<&\rr<&\rr<&^rr<&prr<&jrr<&prr<&t
+rr<&^rr<&rrr<&^rr<&Zrr<&(rr<3%03A2NiVs)Ss77[2YQ"S&ec,ULjo5;\p\t3nl2L_`p&>!l
+kPkM^l2L_`n,E@fmJd.dp\t3nh>[HTXoAA&s&4X8rrVTfRK!6efDbgNoD\djoD\djn,E@fp\t3n
+p\t3noD\djnc&RhmJd.dmJd.dli-qbhu<ZVa8Z,>XoAA(s#4<bl.H"9n`ToRiW$Oi!!(.@!!)Qh
+!!)Ed!!)?b!!)-\!!)?b!!)Kf!!)Qh!!)Wj!!'q:!!<1a[H7Dig%E8_!!(:D!!)or!!)Kf!!)Wj
+!!)Qh!!)Ed!!)3^!!)Wj!!)?b!!)9`!!(jT!!'q:!:Kjgn,L0&!!(4B!!)Kf!!)Wj!!)-\!!)Kf
+!!)]l!!)Kf!!)Ed!!)-\!!)]l!!)cn!!)Ed!!(^P!!')"!!VNt1&p;*f)Gd4qp#-B7ru*<!!(jT
+!!)Qh!!)Qh!!)Qh!!)3^!!(LJ!!'G,!!<1#H/JW*qu?0d#M&hS!9*qX!:Bdd!:Bdd!9sL`!9=(Z
+!9=(Z!9=(Z!4i+0!WVEXrrSh7PQ(U_a8Z,>li-qbl2L_`oD\djoD\djec,ULa8Z,@s3Kljrr_?`
+0>7Ac!9O4\!:Bdd!;6?l!;6?l!;HKn!;HKn!6>*>!lk9Mli.$cc_LL?!71ZF!:0Xb!:g'h!:g'h
+!:Bdd!8[YT!6>*>!riWehu<ajMmr]d!:g'h!:g'h!:g'h!:g'h!:Bdd!:Bdd!58C4!ro%5m/I1^
+!#*o_!!)-\!!)Ed!!)?b!!)Ed!!)?b!!((>!!'"u!!<2Tq>1*mH)IeE!!(@F!!)-\!!)Kf!!)]l
+!!)Wj!!)Wj!!)Kf!!(:D!!';(!!3,cli6h]!/:HVrr<&Frr<&`rr<&brr<&^rr<&drr<&drr<&n
+rr<&nrr<&lrr<&jrr<&lrr<&lrr<&lrr<&nrr<&lrr<&hrr<&hrr<&`rr<&`rr<&frr<&frr<&X
+rr<&Brr<0$"$Q,Q!!)!X!!)9`!!)9`!!)?b!!)Ed!!)Qh!!)Wj!!)Wj!!)Wj!!)Qh!!)Ed!!)Kf
+!!)Kf!!)Wj!!)]l!!)]l!!)]l!!)]l!!(@F!!:CF"kN\Tcf_k=!!((>!!)?b!!)Wj!!)Ed!!)Ed
+!!)Wj!!)cn!!)Qh!!)Qh!!)Wj!!)Qh!!)?b!!)?b!!)Ed!!)Ed!!)9`!!)Kf!!)9`!!)Ed!!)ip
+!!)cn!!)Wj!!(.@!!:US1"6.(A!ab+!!(LJ!!)?b!!)]l!!)cn!!)ip!!)cn!!)3^!!)]l!!)Ed
+!!)3^!!)Wj!!(XN!!'k8!!(:D!!WBsJ,d.8nc&Ufs8N83iVu&`c2RbD^&J'4bPqPBj8T)Znc&Rh
+li-qbn,E@fl2L_`li-qbnc&Rhp&>!loD\djkPkM^^]+98`rH;'rr_jA8\+j$!;$3j!;$3j!<)ot
+!;$3j!;$3j!:g'h!:g'h!:g'h!:g'h!:g'h!:0Xb!9=(Z!5ng:!4Vt.!5JO6$NC,es+.BR^YSq_
+oD\g\s8NJIhuA8&s$_)!!#LLl!!:V<@I*pph>b=k!!(4B!!)Wj!!)Wj!!)Wj!!)Wj!!)Ed!!)Ed
+!!)Ed!!)Qh!!(4B!!<1OVsF?_rVum!J#1iu!!(@F!!)?b!!)Ed!!)Wj!!)Ed!!)?b!!)Ed!!)Qh
+!!)Wj!!)ip!!(^P!!'G,!!<0P>O2:jD2GCp!!)Ed!!)-\!!)]l!!)cn!!)Qh!!)]l!!)]l!!)9`
+!!)9`!!)Kf!!)Wj!!)-\!!(pV!!((>!!'A*!"/N%/cTgYs1dCikO\]Rl2Ubk`TR8\\,TZhkl<#\
+rr<,6'0XV?!_7=Brr<&Rrr<&nrr<&lrr<&jrr<&drr<&Lrr<&*rr<-#>CYQ1!_[=<rr<&Trr<&`
+rr<&lrr<&brr<&^rr<&jrr<&\rr<&Brr<,d!"&;t!`+BHrr<&Xrr<&lrr<&hrr<&nrr<&nrr<&B
+rr<&LrrD0\!gUa2rr<&Brr<&jrr<&jrr<&prr<&lrr<&nrr<&prr<&@rr<,<!"nPs!iaMBrr<&F
+rr<&brr<&hrr<&hrr<&drr<&Trr<&>rr<-#$THuC!b[G#rr<&hrr<&hrr<&drr<&hrr<&drr<&d
+rr<&4rr<-#UVlHu"8;d/ec,ULjo5;\mJd.dmJd.dli-qbn,E@fci3tFYQ"S(s4?r=rr_!Z/[><U
+!9sL`!;$3j!;$3j!<<'!!;$3j!;lcr!8IMR!58C4!rW?gm/Qq^!pBTSrr<%orr<&0rr<&*rr<&4
+rr<&&rr<&*rr<&6rr<&:rr<&:rr<&<rr<&<rr<&8rr<&0rr<&8rr<&<rr<&<rr<&(rr<&&rr<&4
+rr<&0rr<&4rr<&.rr<%irr<&,rr<&Zrr<%urr<&"rr<&*rr<&*rr<&,rr<&2rr<&6rr<&6rr<&2
+rr<&0rr<&,rr<&,rr<&0rr<&2rr<&6rr<&6rr<&6rr<&2rr<%err<,(!"7K["o\JK!#`'A!!)-\
+!!)9`!!)cn!!)9`!!)Kf!!)Wj!!)Kf!!)Qh!!)Qh!!)Wj!!)Wj!!)Ed!!)?b!!)Ed!!)Ed!!)9`
+!!)Qh!!)-\!!)Ed!!)Wj!!)Kf!!)Wj!!'_4!!<1YX4.(Pnc.,>$,QWA!9a@^!9sL`!;HKn!;6?l
+!;$3j!:Bdd!9a@^!9O4\!:g'h!;lcr!<)ot!:0Xb!7h)L!42\*!4Dh,!5\[8%+>1ujVL)G*CJQ]
+---#c!5&72!58C4!6tND!9a@^!:g'h!;$3j!:0Xb!;ZWp!:g'h!:Bdd!;6?l!:Tpf!9sL`!9=(Z
+!8%5N!4Vt.!ro15ir9)=pV6_.!71ZF!9O4\!;lcr!;$3j!:g'h!:g'h!:g'h!;$3j!;$3j!;$3j
+!:g'h!9sL`!:Tpf!:Bdd!87AP!6>*>!58C4!3cD&!3uP(!4Vt.!4i+0!4Vt.!3uP(!42\*!42\*
+!3uP(!42\*!6P6@!4Dh,!m_$!li.%BrPSX8!6bBB!;$3j!;$3j!;$3j!;$3j!;$3j!;$3j!:Tpf
+!9a@^!6+s<)#jh&s+@HRS\+p*`W*'Xs/Wp7H'@tE5KEd(!42\*!87AP!;HKn!:g'h!;$3j!:g'h
+!:g'h!9a@^!:g'h!:Tpf!;$3j!:0Xb!71ZF!2KPo!rp$kli..cs5*eYa8Z,>jo5;\iVrlXp&>!l
+q>UEpmJd.dp\t3nn,E@fkPkM^nc&Rhp&>!lq>UEpl2L_`nc&RhiVrlX_uB]:Zi:"*\c2X0[Jp4,
+YQ"S&YQ"S&\,QF.^]+96^&J'4\,QF.\,QF.XoAA$^&J'4YQ"S*b5`4Un^%4:7ru6@!!)!X!!)ip
+!!)cn!!)Qh!!)]l!!(jT!!';(!!<1!J*$\6l2CW@=/Z&u!6>*>!:0Xb!:g'h!:Tpf!9sL`!9a@^
+!:0Xb!9=(Z!4i+0!rlJUo`"t9=hjt:!8meV!:g'h!;ZWp!;HKn!;6?l!7UrJ!6tND!WVQPrrqH_
+irBV1rr<&Zrr<&drr<&jrr<&prr<&lrr<&nrr<&prr<&Brr<,<!"nPs!iOA@rr<&Frr<&brr<&h
+rr<&hrr<&drr<&Vrr<&>rr<-#$THuC!bmS%rr<&hrr<&drr<&drr<&hrr<&drr<&drr<&4rr<-#
+UVlHu"8;d/ec,ULjo5;\mJd.dn,E@fmJd.dnc&RhdJj1HYQ"S(s3pN4rrUU8_uB]:ci3tFkPkM^
+oD\djn,E@fp&>!loD\djnc&Rhj8T)Z]Dhj4s)!bas7cPCXhFaEJ,a/6s'^?UAUXSmKE#S6s'^KY
+@=A/_H2h)is%dG18R_WpAcFu#s%.M97<SW-Hi$BOs%.)-96'u-F88+;s&"FK<J0a3C%kD?s$pr+
+9m-J/DuWIKs$q#-7rSDtDuW=Es%.)-8T"K#DuWIKs%.//8T4W#DuWIK#ld\=moON'NLec&!Yn)1
+rr<&\rr<&^rr<&hrr<&drr<&drr<&frr<&jrr<&hrr<&hrr<&hrr<&jrr<&jrr<&hrr<&drr<&d
+rr<&drr<&drr<&brr<&hrr<&hrr<&\rr<&`rr<&Zrr<&6rr<*"pWrj@QaO$s!!(LJ!!)-\!!)cn
+!!)Qh!!)Wj!!)9`!!)9`!!)Kf!!)Kf!!)Wj!!)]l!!)Wj!!)9`!!(dR!!(:D!!(.@!!(:D!!'k8
+!!'A*!!'_4!!(4B!!(:D!!)'Z!!)Ed!!)9`!!)]l!!)]l!!)or!!)cn!!)]l!!)Kf!!)]l!!)Qh
+!!)Ed!!(@F!!&Yk!!<13KA?J.Bp#1j!!(RL!!)Qh!!)Wj!!)Wj!!)Qh!!)Qh!!)Wj!!)Wj!!)Qh
+!!)Ed!!)?b!!)3^!!)'Z!!)'Z!!(pV!!(XN!!(LJ!!(.@!!("<!!(4B!!(LJ!!(FH!!(@F!!(:D
+!!(:D!!(RL!!)9`!!("<!!'A*!:0Xdh>P1i!!(:D!!)Wj!!)Wj!!)Qh!!)Ed!!)?b!!)9`!!)?b
+!!)Ed!!)!X!!(.@!!'S0!!'M.!!'5&!!'G,!!'S0!!'Y2!!("<!!(:D!!(:D!!(dR!!)Kf!!)or
+!!)Kf!!)]l!!)]l!!)?b!!)?b!!)Kf!!)Kf!!)9`!!'M.!!:go4lu\FRD56k!!(:D!!)Wj!!)?b
+!!)Kf!!)Kf!!)Ed!!)cn!!)Qh!!)Qh!!)9`!!)9`!!)Kf!!*'!!!)Wj!!)Kf!!)3^!!(XN!!(@F
+!!'q:!!'e6!!(.@!!(@F!!(FH!!(LJ!!)!X!!)!X!!(jT!!'S0!!'M.!!<2^q9]-C7ru6@!!)3^
+!!)Ed!!)Qh!!)cn!!)Qh!!(pV!!(@F!!iNQ@K4UFs69R`!;6Bl!;HNn!<)rt!;$6j#hAhPZ/P^=
+CXrFb!4Dh,!7UrJ!9sL`!:Bdd!9O4\!:0Xb!:Bdd!;ZWp!;ZWp!7CfH!5JO6!WVc_rrO3>_uB]:
+jo5;\nc&RhoD\djmJd.dli-qbj8T)Z_>aK:s)4V!rrpU1o`,lOrr<&^rr<&drr<&hrr<&hrr<&l
+rr<&nrr<&prr<&jrr<&<rr<,:!"nPs!iOA@rr<&Hrr<&brr<&hrr<&hrr<&drr<&Vrr<&>rr<-#
+$THuC!bmS%rr<&hrr<&drr<&drr<&hrr<&drr<&drr<&4rr<-#UVlHu"8;d/ec,ULjo5;\mJd.d
+n,E@fnc&Rhnc&Rhc2RbDXoAA&s4R);rrQ8WWW)quh>[HTmJd.dmJd.dmJd.dn,E@fli-qbkPkM^
+ci3tF_>aK:s1-nTs7H<knc/Uhjo>>biVif6qu>XTrrD$XrtXAes5!YRj88l:q>]@Ls5!MNh=^gH
+JcG`L!\$jIrr<&Vrr<&Xrr<'!rr<&lrr<&`rr<&frr<&brr<&frr<&prr<&hrr<&drr<&hrr<&h
+rr<&jrr<&jrr<&hrr<&hrr<&jrr<&`rr<&nrr<&brr<&drr<&Rrr<&.rr<-##;aO&!]=8[rr<&<
+rr<&^rr<&jrr<&jrr<&hrr<&jrr<&frr<&nrr<&brr<&jrr<&hrr<&lrr<&frr<&nrr<&jrr<&h
+rr<&frr<&frr<&lrr<&frr<&`rr<&drr<&lrr<&drr<&jrr<&hrr<&prr<&nrr<&jrr<&jrr<&d
+rr<&Xrr<&Drr<%irr<-#4_<7F"6UIhU]1;oec,ULl2L_`nc&Rhnc&Rhnc&RhoD\djoD\djnc&Rh
+mJd.dl2L_`kPkM^oD\djp&>!lli-qbli-qbli-qbli-qbp&>!lnc&RhoD\djp\t3nqu6Wrnc&Rh
+jo5;\kPkM^p\t3nec,ULU&P,YrrV*V_>aK8ao;>@nc&RhoD\djnc&RhmJd.dmJd.dmJd.dli-qb
+kPkM^p&>!ll2L_`li-qbjo5;\oD\djp&>!lnc&Rhs8N'!p\t3nh>[HTn,E@fq>UEpn,E@fjo5;\
+p&>!lp\t3nkPkM^rVlitl2L_`mJd.dg]%6R^]+96_>aK9s7,(J!^gb$rr<&Jrr<&Rrr<&`rr<&h
+rr<&jrr<&hrr<&jrr<&hrr<&drr<&brr<&^rr<&hrr<&nrr<'!rr<&rrr<&rrr<&jrr<&drr<&b
+rr<&hrr<&jrr<&jrr<&jrr<&nrr<&nrr<&nrr<&Jrr<%krr<-#c0<UT!_7=Brr<&Rrr<&hrr<&d
+rr<&hrr<&drr<&prr<&Vrr<&:rr<&6rr<&,rr<&8rr<&:rr<&8rr<&2rr<%qrr<%irr<&2rr<&T
+rr<&^rr<&hrr<&hrr<&brr<&hrr<&drr<&jrr<&brr<&Xrr<&(rr<-#MllOL!_I[Drr<&`rr<&p
+rr<&brr<&`rr<&jrr<&Xrr<&Lrr<&Frr<-#H(4R.!;$6j!d0XIrr<&8rr<&frr<&prr<&brr<&T
+rr<&brr<&frr<&jrr<&jrr<&drr<&8rr<,:!"\Dq!iOA@rr<&Hrr<&frr<&jrr<&jrr<&hrr<&V
+rr<&>rr<-#$THuC!bmS%rr<&hrr<&drr<&drr<&hrr<&drr<&drr<&4rr<-#UVlHu"8;d/ec,UL
+jo5;\mJd.dnc&Rhnc&Rhnc&RhbPqPBX8`/$s4d;?rrr)qhZ+V/rr<&^rr<&Zrr<&hrr<&`rr<&j
+rr<&nrr<&Zrr<&:rr<,X!"8Atp&>#crr<%krr<&2rr<&:rr<&4rr<&0rr<&4rr<&.rr<&(rr<&*
+rr<&8rr<&:rr<&,rr<&Lrr<*"hhV43qu?Zt#sYit!!(FH!!)'Z!!)?b!!)?b!!)cn!!)or!!)Kf
+!!)Wj!!)?b!!)Wj!!)Qh!!)Ed!!)?b!!)Ed!!)cn!!)ip!!)Wj!!)Wj!!)cn!!)Wj!!)cn!!)?b
+!!)]l!!(4B!!')"!!<1k\]FdQfaT=:rr<&Vrr<&\rr<&prr<&rrr<&hrr<&jrr<&hrr<&jrr<&b
+rr<&frr<&^rr<&jrr<&lrr<&brr<&drr<&frr<&hrr<&jrr<&frr<&nrr<&frr<&jrr<&jrr<&^
+rr<&Xrr<&brr<&jrr<&drr<&frr<&brr<&Hrr<%err<-#4^ZV:"5a(tZ2Xe(dJj1Hl2L_`nc&Rh
+oD\djoD\djoD\djoD\djnc&RhkPkM^mJd.dp\t3np&>!loD\djn,E@fmJd.dp\t3nmJd.dmJd.d
+oD\djoD\djn,E@fl2L_`mJd.dp&>!lnc&Rhec,ULTDnlms39s!rrV*V]Dhj2_uB]:li-qboD\dj
+oD\djoD\djli-qbmJd.dp&>!loD\djnc&RhmJd.dnc&Rhn,E@fmJd.dl2L_`oD\djq>UEpp\t3n
+n,E@fl2L_`jo5;\l2L_`l2L_`li-qbmJd.dp&>!loD\djoD\djl2L_``W#o<WW)r"s1R+@rrO'*
+WW)quec,ULnc&RhkPkM^qu6Wrl2L_`p&>!lnc&RhoD\djmJd.dmJd.dmJd.dp&>!loD\djn,E@f
+nc&Rhnc&Rhnc&Rhnc&Rhli-qbli-qbn,E@fnc&Rhs8N'!p&>!ln,E@fec,ULU&P)os.doerrP]3
+\c2X0hu<ZVl2L_`l2L_`p&>!lnc&RhmJd.dp&>!ll2L_`ao;>@`W#o<ao;>@a8Z,>a8Z,>c2RbD
+e,KCJg&D$PiVrlXli-qbnc&RhoD\djoD\djs8N'!j8T)Zli-qbn,E@ffDbgNU]1;qs#k#_rrSV+
+Sc8Zici3tFmJd.dkPkM^li-qbli-qbmJd.diVrlXe,KCJ\c2X0_uB]:hu<ZVci3tF\c2X0[Jp4,
+c2RbDg]%6RoD\djnc&Rhnc&RhkPkM^l2L_`mJd.dli-qbl2L_`li-qb_>aK:`rHY9rrT+EV>gMq
+dJj1Hn,E@foD\djoD\djnc&Rhhu<ZVa8Z,@rsLdCrrQnm\,QF.nc&RhmJd.dmJd.dnc&RhmJd.d
+mJd.d^&J'6s.dKurr_uq'@m*_!9O4\!:Bdd!:Tpf!;$3j!;HKn!71ZF!3?,"!rpsHnc&[2j0/I_
+!7UrJ!:g'h!:0Xb!:Bdd!:0Xb!;HKn!:g'h!8[YT!3uP(!rkc/p&F[a!`<s8rr<&Brr<&Xrr<&`
+rr<&brr<&hrr<&jrr<&frr<&drr<&nrr<&hrr<&jrr<&2rr<2H!"]+mNW01*jj*o;]Dhj2iVrlX
+mJd.dl2L_`kPkM^kPkM^p\t3nq>UEpq>UEpli-qbq>UEpn,E@fnc&RhmJd.dli-qbmJd.dp\t3n
+q>UEpoD\djoD\djp&>!lq>UEpq>UEpnc&RhkPkM^^]+98b5_R[rr_Kc)7BJE!8%5N!:0Xb!:Tpf
+!;lcr!;6?l!9sL`!:Bdd!:0Xb!9sL`!:Bdd!:g'h!;$3j!9sL`!:0Xb!:g'h!:g'h!;6?l!;$3j
+!:g'h!;$3j!;6?l!:g'h!8IMR!9*qX!:Bdd!:g'h!:Bdd!7CfH!6+s<!3Q8$!rlPOc2RtGs6Bh5
+TDnlka8Z,>j8T)Znc&Rhp\t3np\t3nnc&RhmJd.dl2L_`mJd.dp\t3ns8N'!n,E@fl2L_`q>UEp
+n,E@fnc&RhmJd.dnc&Rhnc&RhoD\djoD\djnc&Rhn,E@fqu6Wrec,ULV>gMss-LLgrrV0X\,QF.
+^&J'4l2L_`oD\djp\t3nnc&Rhn,E@fnc&RhoD\djq>UEpnc&Rhqu6Wrnc&Rhnc&Rhnc&Rhl2L_`
+oD\djp\t3noD\djnc&RhkPkM^n,E@fli-qbmJd.dl2L_`n,E@fli-qbl2L_`fDbgN]Dhj2\c2X2
+s1R%8rrOWBYQ"S&bPqPBkPkM^kPkM^n,E@fn,E@fp&>!loD\djl2L_`nc&Rhl2L_`li-qbli-qb
+nc&RhmJd.doD\djp&>!loD\djli-qbli-qbn,E@foD\djnc&RhrVlitoD\djfDbgNZ2Xe*s'qVH
+rrP]3[Jp4,h>[HTn,E@fli-qbj8T)ZoD\djqu6Wrqu6Wrp&>!lp&>!lmJd.dn,E@fnc&Rhnc&Rh
+nc&Rhp&>!lp\t3noD\djn,E@fp\t3np\t3np\t3nli-qbn,E@fhu<ZVci3tFVuH_us!pt4rrVrp
+U&P)ma8Z,>li-qbmJd.dkPkM^mJd.dmJd.dnc&Rhn,E@fq>UEpli-qbjo5;\h>[HTkPkM^li-qb
+li-qbn,E@fj8T)Zec,UOrr=Rurr<&Vrr<&drr<&^rr<&`rr<&`rr<&8rr<,>!"%uk!iaMBrr<&H
+rr<&frr<&jrr<&jrr<&hrr<&Zrr<&>rr<-#$THuC!bmM%rr<&jrr<&drr<&drr<&hrr<&hrr<&d
+rr<&4rr<-#UVlHu"8;d/ec,ULjo5;\mJd.dmJd.dn,E@fq>UEpec,ULZ2Xe*s4?r3rrPuAYQ"S&
+g&D$PoD\djn,E@fnc&Rhp&>!lli-qbnc&Rhci3tFQi@$es/43<s7H<pp&F2,;oAV8!5\[8!8%5N
+!9a@^!:Tpf!:g'h!;6?l!;6?l!:Tpf!:Bdd!:Tpf!8IMR!4i+055tTfs!LhH02qm2?iMi\s#!sZ
+1L'l8>Q6E^s"RaX0jFZ6>Q6E^s"dgX0jFZ6?2lcjs"Rs^4)*kPD?%;oc2RiFFiXL^!58C4!9*qX
+!;6?l!;$3j!:Tpf!9sL`!:0Xb!:g'h!;$3j!:g'h!:g'h!;HKn!;HKn!;$3j!:Bdd!:0Xb!:0Xb
+!;$3j!;$3j!:g'h!:g'h!;$3j!:Bdd!;6?l!:g'h!9=(Z!4Dh,!rmh@^Ae6j?*F8.!6bBB!9O4\
+!;$3j!:g'h!:Tpf!:Tpf!:Bdd!:0Xb!:0Xb!:Bdd!:g'h!:Bdd!:Tpf!;$3j!;$3j!;$3j!;$3j
+!;HKn!;HKn!;$3j!:Tpf!9a@^!:0Xb!;6?l!;6?l!8[YT!3?,"!58C4!rnh#`;]m)=fq](!5&72
+!9O4\!;6?l!<)ot!9O4\!9=(Z!9a@^!9sL`!;6?l!;ZWp!:Tpf!:Bdd!;$3j!;ZWp!:g'h!:g'h
+!:0Xb!:0Xb!;$3j!;$3j!:g'h!:Tpf!;$3j!8meV!42\*!rl\imf*@GqmZS*!5\[8!9*qX!;HKn
+!;6?l!:Bdd!:Bdd!:g'h!;$3j!;HKn!;$3j!:Bdd!:Bdd!:g'h!;$3j!:g'h!:Tpf!:g'h!;6?l
+!:Bdd!9sL`!;$3j!9sL`!;$3j!:0Xb!:0Xb!9=(Z!71ZF!42\*"iUHds53Y!rrQhkZi:"*]Dhj2
+h>[HTli-qbnc&Rhnc&Rhnc&RhmJd.dn,E@foD\djn,E@fn,E@foD\djn,E@fnc&Rhp&>!loD\dj
+mJd.dli-qbnc&Rhnc&RhoD\djoD\djp\t3nj8T)Z_>aK:s!;+#rrP]3\,QF.g]%6Rli-qbli-qb
+n,E@foD\djoD\djoD\djoD\djnc&Rhnc&Rhnc&Rhnc&RhmJd.dmJd.dnc&Rhn,E@fnc&RhoD\dj
+nc&Rhn,E@foD\djli-qbfDbgN\,QF.X8`/$s%@FprrPu9\,QF.l2L_`li-qbli-qbjo5;\mJd.d
+qu6Wrq>UEpp&>!ln,E@fmJd.dkPkM^jo5;\n,E@foD\djj8T)Z\c2X6rr=)>B</lK!!(^P!!)3^
+!!)Ed!!)Kf!!)Kf!!'k8!!';(!:0XdVpD.<!!(FH!!)Kf!!)?b!!)Qh!!)ip!!)3^!!(:D!!<0*
+2rFW:Bn<tt!!)cn!!)]l!!)3^!!)Kf!!)Qh!!)Qh!!'S0!!<1o_<h1(q#D#]rr<&\rr<&jrr<&f
+rr<&nrr<&lrr<&Lrr<&,rr<-#eb/;/!5JO6!5\[8!:Tpf!;$3j!:g'h!;6?l!:g'h!:Bdd!87AP
+!71ZF!7CfH!rqH\qu?!^!dgp&rr<&:rr<&Zrr<&frr<&trr<&prr<&drr<&brr<&frr<&jrr<&T
+rr<&Lrr<&Drr<&0rr<&2rr<&.rr<&.rr<&0rr<&2rr<&2rr<&2rr<&2rr<&0rr<&0rr<&2rr<&6
+rr<&0rr<&&rr<%qrr<%Qrr<1i!"8i(df0B>[E8FK!4i+0!6+s<!9O4\!:g'h!;HKn!;HKn!:0Xb
+!:Bdd!:Bdd!:Bdd!:g'h!:g'h!;$3j!;HKn!;$3j!:g'h!:Bdd!:Bdd!:Bdd!;$3j!;$3j!:g'h
+!:Bdd!9sL`!;HKn!:g'h!8meV!7h)L!8%5N!WVc&rrRVXbPqPBX8`/"ci3tFe,KCJhu<ZVkPkM^
+kPkM^p\t3nli-qbn,E@fn,E@fnc&RhmJd.dn,E@fn,E@fnc&Rhnc&Rhq>UEpp&>!lmJd.dj8T)Z
+j8T)ZfDbgNfDbgN\c2X0\,QF3s!M%Ng%E)Z"eiWi!#)^=!!("<!!(:D!!(XN!!(jT!!)!X!!)Ed
+!!)]l!!)Wj!!)?b!!)Ed!!)Wj!!)Qh!!)or!!)Qh!!)3^!!)9`!!)Qh!!)Wj!!)Wj!!)Ed!!)9`
+!!(.@!!&_m!!<0fDsmW,iW$Oi!!'S0!!)Ed!!)]l!!)or!!)Kf!!)Ed!!)Kf!!)Wj!!)cn!!)]l
+!!)Ed!!)Ed!!)Wj!!)]l!!)Wj!!)Kf!!)Ed!!)9`!!)9`!!)3^!!)3^!!)'Z!!(dR!!(.@!!'Y2
+!!&kq!!(^P!!<1;OiRJ*`TQ1[+g(bE!4Vt.!8%5N!8meV!9O4\!9a@^!:0Xb!;$3j!;ZWp!;$3j
+!9a@^!:Bdd!:g'h!;HKn!;HKn!:0Xb!9a@^!:g'h!;HKn!9sL`!:Bdd!9a@^!7CfH!4Vt.!q-4M
+d/O/=HaWkR!8IMR!9sL`!:0Xb!:0Xb!:g'h!:g'h!;$3j!;6?l!:g'h!:g'h!:g'h!:g'h!:g'h
+!:Bdd!:Bdd!:0Xb!9a@^!9sL`!8IMR!8%5N!7h)L!3uP(!3uP("kN_fs.dWorrW)tci3tF`W#o<
+h>[HTl2L_`j8T)Zl2L_`p\t3ns8N'!p&>!ln,E@fmJd.dn,E@fli-qbkPkM^bPqPB[Jp45gAi,k
+bPhH\X0)C%!7UrJ!:Tpf!:Tpf!;6?l!;6?l!6>*>!3?,"li.$ge#E?I!7UrJ!:Tpf!;HKn!;$3j
+!:0Xb!9O4\!71ZF!riWihu<alJ\h?d!<<'!!:Bdd!:g'h!;$3j!:Bdd!:Tpf!5JO6!ro7;li."d
+);"lg!:Tpf!9sL`!;$3j!9sL`!;HKn!7UrJ!4Vt.!rpmHli-s_s1A:2!8%5N!:Bdd!;$3j!;$3j
+!9sL`!:Tpf!:Bdd!8IMR!58C4!qRR&qu>m[!pBNurr<&8rr<&trr<&nrr<&lrr<&jrr<&drr<&h
+rr<&hrr<&frr<&\rr<&\rr<&Zrr<&Rrr<&Vrr<&Vrr<&Xrr<&Xrr<&Zrr<&Zrr<&Zrr<&Zrr<&Z
+rr<&Zrr<&`rr<&\rr<&Brr<&$rr<&$rr<*"p!s'GKsU"D&\7oA!6>*>!71ZF!87AP!9O4\!9a@^
+!9sL`!:g'h!;$3j!;$3j!;$3j!:g'h!:g'h!:g'h!;$3j!:g'h!:g'h!:Bdd!:Bdd!;$3j!;HKn
+!;HKn!;$3j!:g'h!:g'h!;6?l!:0Xb!:g'h!7CfH!2]\q!rm8([Jp7&s8N-tELHh,!1j,i!6>*>
+!8[YT!<<'!!;ZWp!;HKn!:Bdd!:Bdd!;$3j!;6?l!;lcr!;lcr!;$3j!:Tpf!9sL`!;6?l!8meV
+!7CfH!6P6@!3?,"!1Eie"m6O`s3'H.rrn[q]`8M.rr<&4rr<&Drr<&Xrr<&`rr<&brr<&hrr<&h
+rr<&jrr<&lrr<&jrr<&hrr<&frr<&frr<&jrr<&jrr<&drr<&^rr<&Xrr<&Frr<&.rr<%Srr<,F
++Zo,l!oNa]rr<&@rr<&frr<&nrr<&trr<&jrr<&drr<&drr<&drr<&jrr<&hrr<&drr<&`rr<&^
+rr<&`rr<&jrr<&nrr<&lrr<&brr<&Xrr<&Rrr<&Brr<&0rr<%krr<%_rr<5A!$2*%YIjf<T=NVW
+.uXE-!3uP(!6bBB!8meV!:Bdd!9a@^!:Tpf!;HKn!;HKn!:Bdd!:g'h!;lcr!<)ot!;HKn!;$3j
+!:g'h!:Bdd!9sL`!8meV!7UrJ!42\*!/^^U!jM_Cd/O/5HaWkR!9*qX!:Tpf!:Bdd!:Bdd!:Tpf
+!:Tpf!:g'h!;$3j!:g'h!;$3j!;$3j!;$3j!;$3j!:g'h!:Bdd!9sL`!8%5N!6tND!6bBB!3cD&
+!13]c"jm;fs.?jTrrUmB^&J'4Z2Xe(ci3tFfDbgNj8T)Zp&>!lqu6Wrp&>!lp&>!loD\djl2L_`
+j8T)Z]Dhj2Qi@$hoeB,>p\Xph!bmq%rr<&Nrr<&brr<&jrr<&jrr<&jrr<&Jrr<%krrDBb!ia;2
+rr<&Hrr<&frr<&lrr<&nrr<&hrr<&Xrr<&0rr<-#%6`VK!bmXprr<&drr<&frr<&jrr<&lrr<&b
+rr<&`rr<&,rr<-#V7Z*o"8`'3ci3tFjo5;\nc&RhiVrlXl2L_`nc&Rhec,ULWW)r"s4R53rrOE@
+XoAA$g]%6RoD\djnc&RhkPkM^mJd.doD\djiVrlXao;>@YQ"S(s)FP-s5j7^ea'dG!!(4B!!(RL
+!!(RL!!(^P!!(4B!!(^P!!(@F!!(RL!!(XN!!(^P!!(RL!!(:D!!(RL!!(XN!!(^P!!(^P!!(^P
+!!(XN!!(XN!!(RL!!(XN!!(dR!!(FH!!(XN!!')"!!'k8!!<2VrS7DV^!lR5?)di(!2]\q!6tND
+!9a@^!;$3j!;$3j!9O4\!8[YT!9=(Z!:0Xb!:g'h!;HKn!;HKn!;HKn!;$3j!:g'h!;$3j!:g'h
+!:g'h!:Bdd!:g'h!:g'h!;$3j!;HKn!;$3j!;$3j!;$3j!;$3j!:Bdd!;$3j!9O4\!4i+0!5\[8
+WW*-IU\b$Eci3tFZ2Xe(_uB]:`W#o<`W#o<_>aK8`W#o<ao;>@ao;>@ao;>@a8Z,>`W#o<`W#o<
+YQ"S&V>gMqZ2Xe/k5Z1q<J1>3V>ghIoD^gfrr=.[rr<&.rr<&&rr<&.rr<&:rr<&4rr<&2rr<&6
+rr<&8rr<&6rr<&0rr<&.rr<&,rr<&*rr<&8rr<&>rr<>t!#,Ag?2pJ/li.%Jq47Nc!/pjW!3,tu
+!5&72!4Vt.!3Q8$!2]\q!2]\q!2ohs!3?,"!3uP(!3uP(!42\*!3?,"!3?,"!3Q8$!3?,"!29Dm
+!3?,"!58C4!7UrJ$MsfHs!(PDKsUgLY5\L^s8N7(L&V-#_uB]:X8`/"YQ"S&\c2X0^]+96\c2X0
+]Dhj2\c2X0_uB]:`W#o<^]+96^]+96^&J'4\,QF.WW)qu\,QF8lMq1i.8g,/\,ZEQrr?.#KDtoO
+S,WHgVuH_sWW)quXoAA$YQ"S&YQ"S&Z2Xe(Z2Xe(Z2Xe(Z2Xe(YQ"S&XoAA$WW)quXoAA$Z2Xe(
+WW)qu_>aKBkl;7o)bp?TU&X5urrPc9`W#o<V>gMqXoAA$\c2X0_uB]:^&J'4\c2X0\,QF.Zi:"*
+\c2X5r;\5F\^1$M!eHnhrr<%mrr<&$rr<%srr<%qrr<&(rr<%grr<%ErrDBb!kH^$rr<%Yrr<&&
+rr<&*rr<&(rr<%qrr<%crr<%Urr<,T+%+rc!caEVrr<%krr<&"rr<&&rr<%qrr<&"rr<%mrr<%W
+rr<-#Z,,f,"47)lRK!6eV>gMqSc8ZiS,WHgVuH_sU&P)mNW/tYM>mPWs5X"?rrVflZ2Xe(RK!6e
+XoAA$YQ"S&V>gMqU&P)mVuH_sV>gMqSc8ZiM>mPUH2djGs0oo*rrPQ#OoGC]WW)quTDnlkS,WHg
+U&P)mU&P)mVuH_sVuH_sVuH_sVuH_sX8`/"YQ"S&WW)quU]1;oU&P)mU]1;oU]1;oU]1;oU]1;o
+V>gMqWW)quZi:"*U&P)mS,WHgYQ"S(s5!)(rs6g:s,"#\*C\$K!!'A*!!'G,!!(4B!!(^P!!)?b
+!!)]l!!)or!!)]l!!)]l!!)Wj!!)?b!!)?b!!)Wj!!)Ed!!)cn!!)cn!!)cn!!)cn!!)Wj!!)Qh
+!!)Qh!!)Wj!!)cn!!)cn!!)Wj!!)Ed!!)?b!!)Ed!!)Wj!!)cn!!)cn!!)3^!!(pV!!')"!!<2*
+a.rY7nc/V!Zdo(]L%-0TeGpQ1!!C"9!!'S0!!'G,!!'A*!!'Y2!"R*N#MfJ6q`eTjT==jdqiq*\
+rVumGak?]PU&S8:s"@76%lMrB-eS_Rf`<b`$T[St9E.Lts)3tuT=P!NmG.^ArVultnc/Uhp&G$l
+n,NCfn,NCfp&G$ln,ND2j8K#2p&ES4s3^*2e*6n[jo<$Cs0^&M[E\`lh>c=&s6p!f!;ViY.,44j
+RBuorH0[1di?(M5$SBa2/)((XhZGb!(J4WiAcHV0s-'SbgZuTR!;lfr!;6Bl!:Tsf!:Bgd!:0[b
+!9*tX)qjuccgUnYmJkN$s2X=&^"`Rpe,R&5s39m0j8],ZpU^A)rVum8S$W&`A^^f5d/Y?7!$BGc
+-1s9(s+dNPl2C&M!;$6j!:Tsf!;$6j!:g*h!;ZZp!:0[b!;kaT!;6Bl"7?'eoDegjp&G$loDegj
+p](6np"99Ep&G$lp&G$rmJ[(Rqu??hrr_Nas7QEl!;GRS!;HNn!:Tsf!;HNn!;6Bl!:Bgd!;lfr
+!;ZZp!<(dS!;ZZp!:Bgd!:Bgd!:Bgd!:Bgd!:g*h!:g*h!:Tsf!:fpchu?9[h>a\/s0^P[Z.8l^
+g]+P3s0:2UWR_$JdJp,ps/49EWS.<DaoAKps/joQXk3TPec2Jps/"3EU!`n8dJoibs.e-EVq:sr
+oCW%_mJm1rg%56IbPu41jVL5%!"5k-!!&eo!!'G,!!(XN!!(jT!!)9`!!)or!!)ip!!)or!!)Kf
+!!)Wj!!)Wj!!)]l!!)Wj!!)Qh!!)Qh!!)Wj!!)cn!!)Wj!!)Wj!!)Wj!!)Wj!!)Qh!!)Ed!!)Ed
+!!)Qh!!)cn!!)cn!!)Wj!!)Ed!!)?b!!)?b!!)Wj!!)cn!!)Wj!!(jT!!'e6!!;`l23In=qu?Zr
+mJm1dli6tbli6teli$kTJcC<$JcC<$JcC<$JcGZJkl4oJkLGomiHL4UEJsj6MuR:>s'pia;02b9
+EW8[Es$pf'7q_i`A,eDjs#Xrp3G&4H?iMcds!qCT.:<*&@K.]bs!;1T,@1<o=oTL@ru4c6&OHF'
+1\h"gmf3gQrr<&Brr<&2rr<&(rr<&(rr<&2rr<&:rr<&Drr<&Nrr<&Vrr<&Zrr<&brr<&jrr<&^
+rr<&hrr<&drr<&nrr<&frr<&nrr<&jrr<&hrr<'!rr<&prr<&drr<&lrr<&hrr<&drr<&drr<&b
+rr<&brr<&`rr<&`rr<&`rr<&drr<&hrr<&jrr<&jrr<&hrr<&drr<&hrr<&hrr<&hrr<&@rr<&"
+rr<-#h>Mp)JcC<$JcC<$JcC<$JcGZJhu<]Rs8N)ds8Ob2q>\@gs2!CgXi(1.XoFBSs*p=4BnQ.a
+GO7h1h^q^W*C8'`28oP?\H!5H!!/en!!&5_!!%lU!!%6C!!%$=!!%*?!!%<E!!%rW!!&)[!!&;a
+!!&Yk!!'"u!!'5&!!'A*!!'Y2!!'k8!!'k8!!'k8!!'k8!!(:D!!("<!!((>!!(.@!!(:D!!((>
+!!(@F!!(.@!!(:D!!(@F!!(XN!!(jT!!(jT!!(pV!!(pV!!(dR!!(jT!!(jT!!(jT!!(jT!!(pV
+!!(pV!!(pV!!)'Z!!)9`!!)Ed!!)cn!!)cn!!)Qh!!)Qh!!)Qh!!)9`!!(XN!!';(!!<1WWIb)#
+s+13$s+13$s+13$s7u\]rrD<`s")Xds1R1eXiLI8]DmS[s)jJ(?\AAOD>uV'r?kD.'0YL\1$JZ[
+irB\;!!C:A!!'k8!!'M.!!'/$!!&eo!!&Mg!!&Si!!&eo!!'"u!!'/$!!'5&!!'/$!!'5&!!'_4
+!!'e6!!'q:!!((>!!(RL!!(LJ!!(RL!!(dR!!)-\!!)Ed!!)Wj!!)ut!!)Ed!!)Wj!!)]l!!(dR
+!!&qs!!<0V=+UC&s+13$s+13$s+13$s7ZJZrrE#trrDrrrrDlprrD`lrrDZjrrDZjrrDThrrDHd
+rrD<`rrD*ZrrD$XrrCsVrrCgRs$"^!s2ja0`U3]AkPr*Qs0LJ[Xk3TLec2Pts-(M'J%,GrWW-1h
+s%A.I4+$uVBE&E6rr>4^!%\'L)?0[As8N'!s8N'!s8N'!s8N'!li-qbrVlitp\t3nl2L_`iVrlX
+kPkM^^&J'8jT$+spOW?qs+13$s+13$s+13$s7QEMs"jJogVnZ%c$,#T?Yuo<=/e2QV(Fj&-T@5.
+/!V&(SJa#C%3Lo?)k-gBRfF%i!"57r#FYSl!1!Qa!0R9]!0.!Y!13]c!1j,i!3cD&!58C4!6>*>
+!6tND!6bBB!71ZF!7UrJ!87AP!8[YT!9*qX!9a@^!9sL`!:0Xb!:Tpf!;$3j!;HKn!;HKn!;6?l
+!:Bdd!:Bdd!;$3j!;ZWp!<<'!!<<'!!<<'!!<<'!!<<'!!<<'!!<<'!!<<'!!<<'!!<<'!!<<'!
+!<<'!!<<'!!<<'!!<<'!!<<'!!<<'!!:Bdd!9sL`!;6?l!:Tpf!8[YT!6>*>!6>*>!rq$BJcC<$
+JcC<$JcC<$JcC<$oDcu5!<)rt!;$6j45]l6g\(Tqn,L5Ys09oMVoet,^&O"qs*^aDDjC?6O8iL<
+s#jZf03/#k8cJlOrr=M@!#Or$$0;-fdJj1Hao;>@_>aK8]Dhj2\c2X0]Dhj2^&J'4_>aK8_uB]:
+_>aK8]Dhj2\c2X0\,QF.[Jp4,\,QF.\c2X0^&J'4^&J'4_>aK8^]+96^&J'4^&J'4`W#o<a8Z,>
+`W#o<ao;>@dJj1Hh>[HTg&D$Pg&D$Pg]%6RiVrlXl2L_`mJd.dn,E@fmJd.dfDbgN`W#o<YQ"S(
+s0L1*s+13$s+13$s+13$s+14>s+:7Nq>^HpoDegjl2Uc=g&(fgli4BMs.@L7PK!QUZ2]*Gs(@Pq
+<JCHAGQ0U;s".OV*Dc\A3WB(,rr<r:!"8i,!!)]l!!)Kf!!)Kf!!)9`!!(RL!!(@F!!(LJ!!)-\
+!!)?b!!)Ed!!)Qh!!)3^!!)'Z!!'q:!!';(!!<2&a+=8As+13$s+13$s+13$s6]j<s*sX:X0jZN
+d2P=?,uNtI8`^[So,g]s*D>W97IMBmkoE:Y*Co?78*M$am2npi*D,iA8b!`enJaja)aj'56gks]
+koE:U+%P?78)ka_k93F_+[toA7I_<am284Y'gMR/62qT_rsqKs%mU()5Q;6YrsLpg#<Vqh49#IE
+rrXQ+rr=_P!%n3N/,oT"rr=GH!%%XF)?0[_rr<T0!#tq<-3!rSs8N'!l2L_`n,E@fnc&Rhl2L_`
+fDbgN`W#o<[Jp4.s,XR=s+13$s+13$s+13$s+148s4%&NW=:;7rr<%srr<&,rr<&*rr<&2rr<&8
+rr<&2rr<&<rr<&6rr<&2rr<&2rr<&2rr<&2rr<&6rr<&:rr<&8rr<&4rr<&2rr<&8rr<&8rr<&8
+rr<&6rr<&,rr<&0rr<&4rr<&:rr<&<rr<&:rr<&0rr<&0rr<&8rr<&>rr<&:rr<&<rr<&@rr<&@
+rr<&Drr<&Drr<&Hrr<&Hrr<&Hrr<&Lrr<&Prr<&Rrr<&Rrr<&Prr<&Trr<&Trr<&Prr<&Trr<&X
+rr<&Vrr<&`rr<&brr<&drr<&drr<&frr<&\rr<&:rr<&.rr<-#Z-.^uJcC<$JcC<$JcC<$JcFp5
+e,KF@s8N-.1U[5_!58C4!8[YT!9sL`!;lcr!;$3j!;ZWp!;$3j!:g'h!:Bdd!:Bdd!:Bdd!:g'h
+!;$3j!:g'h!:0Xb!:0Xb!:Bdd!:g'h!:g'h!:Bdd!:0Xb!:0Xb!;ZWp!;ZWp!;6?l!:g'h!:0Xb
+!:Bdd!:Tpf!:g'h!;$3j!:g'h!:g'h!:g'h!;$3j!:g'h!:Bdd!:0Xb!;$3j!;6?l!;6?l!;$3j
+!:g'h!;$3j!;$3j!:Bdd!9sL`!:Bdd!:0Xb!:Tpf!:Tpf!;6?l!:0Xb!9=(Z!87AP!4Vt.!5ng:
+!rom_JcC<$JcC<$JcC<$JcC<$jT!L)!_m0srr<&8rr<&brr<&frr<&hrr<&jrr<&hrr<&frr<&d
+rr<&frr<&hrr<&jrr<&jrr<&`rr<&hrr<&hrr<&drr<&brr<&brr<&`rr<&brr<&drr<&jrr<&n
+rr<&nrr<&jrr<&hrr<&drr<&brr<&drr<&hrr<&hrr<&drr<&hrr<&jrr<&jrr<&drr<&drr<&p
+rr<&hrr<&jrr<&nrr<&hrr<&frr<&hrr<&^rr<&hrr<&hrr<&jrr<&hrr<&prr<&frr<&brr<&F
+rr<%srr<5U!"Jteo7?pms+13$s+13$s+13$s5F"#rrSIpZi:"*Zi:"*g]%6Rjo5;\li-qbli-qb
+mJd.dnc&Rhnc&Rhp&>!loD\djmJd.dmJd.doD\djoD\djnc&RhmJd.dli-qbli-qbli-qbmJd.d
+nc&RhoD\djoD\djoD\djoD\djnc&Rhli-qbli-qbnc&Rhnc&RhmJd.dmJd.dp\t3np\t3nmJd.d
+mJd.dnc&Rhq>UEpn,E@fkPkM^nc&Rhnc&RhmJd.doD\djp\t3nn,E@fq>UEpoD\djjo5;\h>[HT
+]Dhj2WW)r"s#!f-s+13$s+13$s+13$s+14)s2Y-CiUuR<0<tNW!8%5N!9a@^!:0Xb!:Tpf!:Bdd
+!:Tpf!;6?l!:g'h!9sL`!:g'h!;HKn!;HKn!;$3j!;$3j!;$3j!:g'h!:g'h!:g'h!:g'h!:Bdd
+!:Bdd!:Bdd!:Bdd!:Bdd!:Bdd!:Bdd!:g'h!:g'h!:Bdd!:Bdd!;HKn!;HKn!:g'h!:Bdd!:g'h
+!:g'h!:Tpf!:Tpf!:Tpf!:g'h!:g'h!;6?l!:Tpf!:g'h!:Tpf!9a@^!9*qX!58C4!4i+0!rnt+
+JcC<$JcC<$JcC<$JcC<$f`/ef!cOLMrr<&(rr<&<rr<&Rrr<&frr<&jrr<&frr<&jrr<&nrr<&j
+rr<&jrr<&nrr<&jrr<&jrr<&jrr<&jrr<&jrr<&hrr<&hrr<&hrr<&drr<&drr<&hrr<&hrr<&h
+rr<&drr<&hrr<&drr<&drr<&hrr<&nrr<&nrr<&hrr<&hrr<&frr<&lrr<&^rr<&Zrr<&jrr<&n
+rr<&lrr<&frr<&drr<&\rr<&Jrr<&4rr<&4rr<3%&P<#eJcC<$JcC<$JcC<$JcC<$eGm8_"l8kO
+.oWAG!!'G,!!(^P!!)]l!!)Qh!!)Ed!!)Wj!!)Ed!!)Qh!!)Ed!!)Ed!!)Ed!!)?b!!)Ed!!)Ed
+!!)Qh!!)Wj!!)Wj!!)cn!!)cn!!)Wj!!)Wj!!)Wj!!)Qh!!)Ed!!)Ed!!)Qh!!)Wj!!)ip!!)ip
+!!)Wj!!)Qh!!)ip!!)Ed!!)Ed!!)]l!!)Qh!!)Qh!!)ip!!)ip!!)3^!!((>!!'"u!!UsS'E>,N
+JcC<$JcC<$JcC<$JcC<$ci:NT"h37\"#ZeP!!'/$!!(4B!!(jT!!)?b!!)Ed!!)?b!!)?b!!)Ed
+!!)?b!!)?b!!)?b!!)Ed!!)Qh!!)Wj!!)cn!!)cn!!)cn!!)cn!!)Wj!!)Wj!!)Qh!!)Ed!!)Ed
+!!)Wj!!)cn!!)ip!!)cn!!)Ed!!)Ed!!)Kf!!)]l!!)]l!!)Kf!!)?b!!)-\!!(FH!!'M.!!'/$
+!!(@F!!<1GRt:Tjs+13$s+13$s+13$s2k;Hrrps;mk[n=rr<%orr<&Brr<&Zrr<&brr<&drr<&h
+rr<&hrr<&hrr<&drr<&drr<&hrr<&jrr<&jrr<&jrr<&hrr<&hrr<&hrr<&jrr<&jrr<&brr<&d
+rr<&nrr<&prr<&nrr<&drr<&\rr<&\rr<&\rr<'!rr<&lrr<&`rr<&Zrr<&(rr<%krr<5O!#P[)
+YCZ_)s+13$s+13$s+13$s24l<rrD*Zrrlhnkl;1+rr<&,rr<&:rr<&Frr<&Nrr<&Trr<&Zrr<&`
+rr<&brr<&hrr<&hrr<&drr<&drr<&brr<&drr<&jrr<&jrr<&drr<&drr<&nrr<&nrr<&brr<&V
+rr<&Lrr<&Drr<&Frr<&<rr<&8rr<&0rr<&Hrr<6&03A1if7EsQs+13$s+13$s+13$s1SH-rs7$8
+s'L-#!"6(3!!'"u!!'M.!!(4B!!(RL!!)-\!!)Ed!!)Ed!!)Ed!!)?b!!)!X!!)?b!!)Ed!!)Wj
+!!)Wj!!)Kf!!)Qh!!)Ed!!(dR!!(@F!!'S0!!'"u!!'A*!!'k8!!i6W:]IK+s8.BIJcC<$JcC<$
+JcC<$JcE1YRf<cQqu;qps$_5-!%6J"!!(:D!!(dR!!(LJ!!(RL!!(LJ!!(LJ!!(FH!!(^P!!(dR
+!!(dR!!(dR!!(XN!!(4B!!'q:!"7`c$i_S[s*LUB_rH=JJcC<$JcC<$JcC<$JcDeNMuP*<h>^uA
+s!LnJ"ZcS_,Q@`_rr<N.!"o52)?0[irtRj"7rA:"]7L!5s+13$s+13$s+13$s.')~> Z
+; 
+%%IncludeResource: font Helvetica-Narrow-BoldOblique
+7500 VM?
+/Helvetica-Narrow-BoldOblique FontHasEuro not
+{
+/Euro.Helvetica-Narrow-BoldOblique
+/Helvetica-Narrow-BoldOblique UseObliqueEuro {
+ [456 0 49 -19 570 710 ] 
+<BCF85C0DD5F70A0378F70401F774EA01F803EA01F8EAF70401F89DF901157CB157BE398B
+08FB0C8B31315BFB320862065B2C05CC0688760589828A828A820869065A2C05D50686FB
+3ACD3EF7028B08B88BB892B6A908A1F71405686C5B75578B08498B80D48FC508F71006BD
+EA05FB3A0693BB05F74A06BCEA05FB6306A7E5B3B9C08B08BE8BA66F99740898768F828D
+8308090E>
+} {
+ [556 0 12 -19 563 710 ] 
+<97F8C00DDBF7240378F70401F774EA01F803EA01F8EAF70401F8BBF9011571B141BE278B
+08FB278B303173FB32085906642C05DB0676078B828C828B82086206632C05E506A8FB3A
+EC3EF71B8B08C18BC192B9A908F71407676C54754C8B083B8B6ED483C508F72C06B3EA05
+FB5E06BB07F77106B3EA05FB91069AE5B2B9CC8B08C98BB26FA17408A07691828F830809
+0E>
+} ifelse
+AddEuroGlyph
+/Euro /Helvetica-Narrow-BoldOblique /Helvetica-Narrow-BoldOblique-Copy BuildNewFont
+} if
+F /F1 0 /256 T /Helvetica-Narrow-BoldOblique mF 
+/F1S21 F1 [33 0 0 -33 0 0 ] mFS
+F1S21 Ji 
+2263 115 M (    )[8 8 8  0]xS 
+F0S2A Ji 
+2295 115 M ( )S 
+/F0S19 F0 [25 0 0 -25 0 0 ] mFS
+F0S19 Ji 
+2275 107 M (\(295400)[8 14 14 14 14 14  0]xS 
+2367 107 M (-)S 
+2374 107 M (W\))[26  0]xS 
+
+%%IncludeResource: font Times-Roman
+7500 VM?
+/Times-Roman FontHasEuro not
+{
+/Euro.Times-Roman
+ [500 0 24 -14 493 676 ] 
+<A3F8880DC0EB03F854F743950C0C037DA501F7A0BB01F805BB01F91EA501F869F8911584
+F73A0576068478827E7F8B087F8B70AC438B082A8BFB0D6471FB700863067C5B05BE068A
+7E8B878B7D08750764067D5B05C206A0FB7BF71858E88B088F0AC0EB03F84BF789950C0C
+037DA501F7A0BB01F805BB01F91EA501CA8BACAC998B08988B95809076088F0AC0EB03F8
+54F743950C0C037DA501F7A0BB01F805BB01F91EA501A00692F73705750675FB09417667
+8B083A8B43C182F75E08F7740699BB05FB84069C078B978C978B9708F7950699BB05FBA1
+069AF755D5B3D18B08AB8BDD71A2FB0708090E>
+AddEuroGlyph
+/Euro /Times-Roman /Times-Roman-Copy BuildNewFont
+} if
+F /F2 0 /256 T /Times-Roman mF 
+/F2S19 F2 [25 0 0 -25 0 0 ] mFS
+F2S19 Ji 
+2408 107 M ( )S 
+
+%%IncludeResource: font Helvetica-Narrow-Bold
+7500 VM?
+/Helvetica-Narrow-Bold FontHasEuro not
+{
+/Euro.Helvetica-Narrow-Bold
+/Helvetica-Narrow-Bold UseObliqueEuro {
+ [456 0 10 -19 462 710 ] 
+<95F85C0DCCF70B0378F70401F774EA01F803EA01F8EAF70401F858F9011575B14FBE398B
+08FB0D8B413177FB320862066B2C05CC0676078B828C828B82086A066A2C05D506A2FB3A
+DB3EF7038B08B78BB792B1A908F714076D6C5E75588B08498B73D485C508F71006ACEA05
+FB3906BB07F74906ACEA05FB640697E5ABB9C18B08BE8BAA6F9E74089C7690828E830809
+0E>
+} {
+ [556 0 12 -19 563 710 ] 
+<97F8C00DDBF7240378F70401F774EA01F803EA01F8EAF70401F8BBF9011571B141BE278B
+08FB278B303173FB32085906642C05DB0676078B828C828B82086206632C05E506A8FB3A
+EC3EF71B8B08C18BC192B9A908F71407676C54754C8B083B8B6ED483C508F72C06B3EA05
+FB5E06BB07F77106B3EA05FB91069AE5B2B9CC8B08C98BB26FA17408A07691828F830809
+0E>
+} ifelse
+AddEuroGlyph
+/Euro /Helvetica-Narrow-Bold /Helvetica-Narrow-Bold-Copy BuildNewFont
+} if
+F /F3 0 /256 T /Helvetica-Narrow-Bold mF 
+/F3S21 F3 [33 0 0 -33 0 0 ] mFS
+F3S21 Ji 
+99 153 M (Important Notes For Cardmembers / )[8 24 17 17 11 9 15 17 9 7 20 17 9 15 15 8 17 16 11 7 20 15 11 17 24 15 24 17 15 11 15 8
+7  0]xS 
+F1S21 Ji 
+575 153 M (Maklumat Penting Bagi Ahli Kad)[23 15 15 8 17 24 15 9 8 18 15 17 9 7 17 17 7 20 15 17 8 7 20 17 7 8 8 20 14  0]xS 
+
+%%IncludeResource: font Helvetica-Narrow
+7500 VM?
+/Helvetica-Narrow FontHasEuro not
+{
+/Euro.Helvetica-Narrow
+/Helvetica-Narrow UseObliqueEuro {
+ [456 0 20 -19 444 703 ] 
+<9FF85C0DC7D80378DA01F779D301F808D301F904DA01F83CF9081571B453AD438B088F0A
+CAD70378DA01F779D301F808D301F904DA01FB118B462B7EFB37088F0AC7D80378DA01F7
+79D301F808D301F904DA016106774305C60644076306774305CB069DFB36D035F7088B08
+D18BC1B7919208EE077D714E5E4E8B084D8B57CE86F108F73F069FD305FB5806D207F76C
+069FD3058F0ACAD70378DA01F779D301F808D301F904DA01FB7E0691E2AFE8DF8B08D18B
+B5629F5A08090E>
+} {
+ [556 0 24 -19 541 703 ] 
+<A3F8C00DD4E90378DA01F779D301F808D301F904DA01F899F908156CB447AD338B08FB2D
+8B372B7BFB37085806724305D30644075B06724305DA06A0FB36E035F7218B08E08BCDB7
+939208EE077A71405E418B083F8B4CCE84F108F76506A3D305FB8306D207F79C06A3D305
+FBB10692E2B7E8F28B08E08BBE62A45A08090E>
+} ifelse
+AddEuroGlyph
+/Euro /Helvetica-Narrow /Helvetica-Narrow-Copy BuildNewFont
+} if
+F /F4 0 /256 T /Helvetica-Narrow mF 
+/F4S21 F4 [33 0 0 -33 0 0 ] mFS
+F4S21 Ji 
+994 153 M ( )S 
+F3S21 Ji 
+1221 153 M ( )S 
+Pscript_WinNT_Incr begin
+%%BeginResource: file Pscript_Win_GdiObject 5.0 0
+/SavedCTM null d/CTMsave{/SavedCTM SavedCTM currentmatrix d}b/CTMrestore
+{SavedCTM setmatrix}b/mp null d/ADO_mxRot null d/GDIHMatrix null d
+/GDIHPatternDict 22 dict d GDIHPatternDict `/PatternType 1 d/PaintType 2 d/Reps
+L2?{1}{5}? d/XStep 8 Reps mul d/YStep XStep d/BBox[0 0 XStep YStep]d/TilingType
+1 d/PaintProc{` 1 Lw[]0 sd PaintData , exec E}b/FGnd null d/BGnd null d
+/HS_Horizontal{horiz}b/HS_Vertical{vert}b/HS_FDiagonal{fdiag}b/HS_BDiagonal
+{biag}b/HS_Cross{horiz vert}b/HS_DiagCross{fdiag biag}b/MaxXYStep XStep YStep
+gt{XStep}{YStep}? d/horiz{Reps{0 4 M XStep 0 - 0 8 +}repeat 0 -8 Reps mul + K}b
+/vert{Reps{4 0 M 0 YStep - 8 0 +}repeat 0 -8 Reps mul + K}b/biag{Reps{0 0 M
+MaxXYStep @ - 0 YStep neg M MaxXYStep @ - 0 8 +}repeat 0 -8 Reps mul + 0 YStep
+M 8 8 - K}b/fdiag{Reps{0 0 M MaxXYStep @ neg - 0 YStep M MaxXYStep @ neg - 0 8
++}repeat 0 -8 Reps mul + MaxXYStep @ M 8 -8 - K}b E/makehatch{4 -2 $/yOrg ~ d
+/xOrg ~ d GDIHPatternDict/PaintData 3 -1 $ put CTMsave GDIHMatrix setmatrix
+GDIHPatternDict matrix xOrg yOrg + mp CTMrestore ~ U ~ 2 ^ put}b/h0{/h0
+/HS_Horizontal makehatch}b/h1{/h1/HS_Vertical makehatch}b/h2{/h2/HS_FDiagonal
+makehatch}b/h3{/h3/HS_BDiagonal makehatch}b/h4{/h4/HS_Cross makehatch}b/h5{/h5
+/HS_DiagCross makehatch}b/GDIBWPatternMx null d/pfprep{save 8 1 $
+/PatternOfTheDay 8 1 $ GDIBWPatternDict `/yOrg ~ d/xOrg ~ d/PaintData ~ d/yExt
+~ d/Width ~ d/BGnd ~ d/FGnd ~ d/Height yExt RepsV mul d/mx[Width 0 0 Height 0
+0]d E build_pattern ~ !}b/pfbf{/fEOFill ~ d pfprep hbf fEOFill{O}{L}? restore}b
+/GraphInit{GDIHMatrix null eq{/SavedCTM matrix d : ADO_mxRot concat 0 0 snap +
+: 0.48 @ GDIHPatternDict ` YStep mul ~ XStep mul ~ nonzero_dsnap YStep V ~
+XStep V ~ E +S/GDIHMatrix matrix currentmatrix readonly d ; : 0.24 -0.24 +S
+GDIBWPatternDict ` Width Height E nonzero_dsnap +S/GDIBWPatternMx matrix
+currentmatrix readonly d ; ;}if}b
+%%EndResource
+%%BeginResource: file Pscript_Win_GdiObject_L2 5.0 0
+/GDIBWPatternDict 25 dict @ `/PatternType 1 d/PaintType 1 d/RepsV 1 d/RepsH 1 d
+/BBox[0 0 RepsH 1]d/TilingType 1 d/XStep 1 d/YStep 1 d/Height 8 RepsV mul d
+/Width 8 d/mx[Width 0 0 Height neg 0 Height]d/FGnd null d/BGnd null d
+/SetBGndFGnd{BGnd null ne{BGnd aload ! scol BBox aload ! 2 ^ sub ~ 3 ^ sub ~
+rf}if FGnd null ne{FGnd aload ! scol}if}b/PaintProc{` SetBGndFGnd RepsH{Width
+Height F mx PaintData imagemask Width 0 +}repeat E}b E d/mp/makepattern , d
+/build_pattern{CTMsave GDIBWPatternMx setmatrix/nupangle where{! nupangle -90
+eq{nupangle R}if}if GDIBWPatternDict @ ` Width Height ne{Width Height gt{Width
+Height V 1}{1 Height Width V}? +S}if xOrg yOrg E matrix + mp CTMrestore}b/hbf
+{setpattern}b/hf{:/fEOFill ~ d ~ ! setpattern fEOFill{O}{L}? ;}b/pbf{: !
+/fEOFill ~ d GDIBWPatternDict `/yOrg ~ d/xOrg ~ d/PaintData ~ d/OutputBPP ~ d
+/Height ~ d/Width ~ d/PaintType 1 d/PatternType 1 d/TilingType 1 d/BBox[0 0
+Width Height]d/XStep Width d/YStep Height d/mx xOrg yOrg matrix + d 20 dict @ `
+/ImageType 1 d/Width Width d/Height Height d/ImageMatrix[1 0 0 1 0 0]d
+/BitsPerComponent 8 d OutputBPP 24 eq{/Decode[0 1 0 1 0 1]d}{OutputBPP 8 eq{
+/Decode[0 1]d}{/Decode[0 1 0 1 0 1 0 1]d}?}?/DataSource{PaintData}d E/ImageDict
+~ d/PaintProc{` ImageDict image E}b & mx makepattern setpattern E fEOFill{O}{L}
+? ;}b/mask_pbf{:/fEOFill ~ d 20 dict `/yOrg ~ d/xOrg ~ d/PaintData ~ d/Height ~
+d/Width ~ d/PatternType 1 d/PaintType 2 d/TilingType 1 d/BBox[0 0 Width Height]
+d/XStep Width d/YStep Height d/mx xOrg yOrg matrix + d/PaintProc{` Width Height
+T 1 1 dtransform abs ~ abs ~ 0 0 3 -1 $ 0 0 6 array astore{PaintData}imagemask
+E}b & mx makepattern setpattern E fEOFill{O}{L}? ;}b
+%%EndResource
+end reinitialize
+: N 77 163 M 77 507 I 1198 507 I 1198 163 I 1177 163 I 1177 469 I 99 469 I 99 163 I C 
+eoclip : N 77 163 1121 344 rp C 
+1 1 1 1 scol  L ; ; : N 99 163 1078 38 rp C 
+1 1 1 1 scol  L ; 99 193 M (Convenient Payment Methods)[20 17 17 15 15 17 8 15 17 9 25 18 15 15 24 15 17 9 25 23 15 9 17 17 17  0]xS 
+525 193 M (:)S 
+F4S21 Ji 
+534 193 M ( \(a\) P)[25 9 15 9 25  0]xS 
+635 193 M (ay through OCBC Internet Banking at )[15 14 25 8 15 9 15 15 15 16 25 21 20 18 20 25 8 15 8 15 9 15 15 8 25 18 15 15 14 6 16 15
+25 15 9  0]xS 
+: N 99 201 1078 38 rp C 
+1 1 1 1 scol  L ; 99 231 M (https://www.ocbc.com.my/Internet)[15 8 8 15 14 7 8 8 20 19 20 8 15 14 15 13 8 14 15 22 8 23 13 8 8 15 8 15 9 15 15  0]xS 
+510 231 M (-)S 
+519 231 M (banking/)[15 15 15 14 6 15 15  0]xS 
+622 231 M (.)S 
+: N 99 234 531 2 rp C 
+ L ; 630 231 M ( )S 
+642 231 M (\()S 
+651 231 M (b\))[15  0]xS 
+675 231 M ( )S 
+686 231 M (Deposit Cash or)[20 15 15 15 14 6 8 12 20 14 14 15 12 15  0]xS 
+890 231 M ( Cheque through Cash )[12 20 15 15 15 15 15 12 8 15 9 15 15 15 15 12 20 15 14 15  0]xS 
+: N 99 239 1078 39 rp C 
+1 1 1 1 scol  L ; 99 269 M (Deposit Machine or Cheque Deposit Machine at any OCBC branch in Malaysia. )
+[20 15 15 15 14 6 8 9 23 15 14 15 6 15 15 9 15 9 9 20 15 15 16 15 15 9 20 15 15 15 14 6
+8 9 23 15 14 15 6 15 15 10 15 8 9 15 15 14 9 21 20 18 20 9 15 10 15 15 14 15 9 6 15 9
+23 15 7 15 14 14 6 15 8  0]xS 
+1088 269 M (\(c\))[9 14  0]xS 
+1120 269 M ( )S 
+1129 269 M (Pay )[18 15 15  0]xS 
+: N 99 278 1078 38 rp C 
+1 1 1 1 scol  L ; 99 308 M (through OCBC Phone Banking services.)[8 15 9 15 15 15 15 9 21 20 18 20 9 18 15 15 15 15 9 18 15 15 14 6 15 15 9 14 15 9 14 6
+14 15 14  0]xS 
+591 308 M ( \()[9  0]xS 
+609 308 M (d\) )[15 9  0]xS 
+642 308 M (Direct Debit Instruction to directly debit your )[20 6 9 15 14 7 9 20 15 15 6 8 8 8 15 14 8 9 15 14 8 6 15 15 8 8 15 9 15 6 9 15
+14 8 6 13 9 15 15 15 6 8 9 14 15 15 9  0]xS 
+: N 99 316 1078 38 rp C 
+1 1 1 1 scol  L ; 99 346 M (deposit account.)[15 15 15 15 14 6 8 9 15 14 14 15 15 15 8  0]xS 
+300 346 M ( )S 
+309 346 M (\()S 
+318 346 M (e\) )[15 9  0]xS 
+351 346 M (Pay through OCBC Auto Teller Machines \(ATMs)[18 15 14 8 8 15 9 15 15 15 15 9 21 20 18 20 9 18 15 8 15 9 17 15 6 6 15 9 9 23 15 14
+15 6 15 15 14 9 9 18 17 22  0]xS 
+943 346 M (\).)[9  0]xS 
+960 346 M ( \(f\))[9 8 8  0]xS 
+994 346 M ( )S 
+1003 346 M (Use InterBank )[20 14 14 9 8 15 8 15 8 18 15 15 15  0]xS 
+: N 99 354 1078 38 rp C 
+1 1 1 1 scol  L ; 99 384 M (Funds Transfer from your Current or Savings account at participating MEPS IBG banks. )
+[17 15 15 15 14 9 17 9 15 15 14 8 15 9 9 8 9 15 23 9 14 15 15 9 9 20 15 9 9 15 15 8
+9 15 9 9 18 15 14 6 15 15 14 9 15 14 14 15 15 15 8 9 15 8 9 15 15 9 8 6 14 6 15 15
+8 6 15 15 9 23 18 18 18 9 8 18 21 9 16 15 15 14 14 8  0]xS 
+: N 99 392 1078 39 rp C 
+1 1 1 1 scol  L ; 99 422 M (\(g\) )[9 15 9  0]xS 
+142 422 M (Mail your cheque directly to OCBC Bank \(M\) Berhad, P.O.Box 11087, 50990 Kuala )
+[23 15 6 6 10 14 15 15 9 10 14 15 15 16 15 15 10 15 6 10 15 14 8 6 14 10 8 15 10 21 20 18
+20 10 18 15 15 14 10 9 23 9 10 18 15 9 16 15 15 8 10 18 8 21 8 18 15 14 10 15 15 15 15 15
+8 10 16 15 15 15 15 11 18 15 15 7 16  0]xS 
+: N 99 431 1078 38 rp C 
+1 1 1 1 scol  L ; 99 461 M (Lumpur. Please do not mail cash. )[15 15 23 15 15 9 8 8 18 6 15 15 14 15 8 15 15 8 15 15 8 8 23 15 6 6 8 14 15 14 15 7
+ 0]xS 
+
+%%IncludeResource: font Helvetica-Narrow-Oblique
+7500 VM?
+/Helvetica-Narrow-Oblique FontHasEuro not
+{
+/Euro.Helvetica-Narrow-Oblique
+/Helvetica-Narrow-Oblique UseObliqueEuro {
+ [456 0 60 -19 553 703 ] 
+<C7F85C0D8BF8810378DA01F779D301F808D301F904DA01F881F9081579B459AD438B08FB
+128B362B61FB370861066A4305C6067F440564066A4305CB0680FB36C235F7088B08D08B
+C9B79392089CEE057971455E4F8B084C8B63CE97F108F74006ABD305FB580697D205F76D
+06ABD305FB7E06A0E2C0E8DF8B08D18BAE62965A08090E>
+} {
+ [556 0 24 -19 541 703 ] 
+<A3F8C00DD4E90378DA01F779D301F808D301F904DA01F899F908156CB447AD338B08FB2D
+8B372B7BFB37085806724305D30644075B06724305DA06A0FB36E035F7218B08E08BCDB7
+939208EE077A71405E418B083F8B4CCE84F108F76506A3D305FB8306D207F79C06A3D305
+FBB10692E2B7E8F28B08E08BBE62A45A08090E>
+} ifelse
+AddEuroGlyph
+/Euro /Helvetica-Narrow-Oblique /Helvetica-Narrow-Oblique-Copy BuildNewFont
+} if
+F /F5 0 /256 T /Helvetica-Narrow-Oblique mF 
+/F5S21 F5 [33 0 0 -33 0 0 ] mFS
+F5S21 Ji 
+513 461 M ( )S 
+: N 1200 163 M 1200 507 I 1221 507 I 1221 163 I C 
+2358 163 M 2358 507 I 2379 507 I 2379 163 I C 
+eoclip : N 1200 163 1179 344 rp C 
+1 1 1 1 scol  L ; ; : N 1221 163 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 193 M (Kaedah Pembayaran Yang Mudah)[20 15 15 17 15 17 14 18 15 24 17 15 15 15 11 15 17 14 18 15 17 17 14 23 17 17 15  0]xS 
+1680 193 M (:)S 
+F3S21 Ji 
+1689 193 M ( )S 
+F4S21 Ji 
+1703 193 M (\()S 
+F5S21 Ji 
+1712 193 M (a\) )[15 9  0]xS 
+1750 193 M (Bayar melalui)[18 15 14 15 9 14 23 15 6 15 6 15  0]xS 
+F4S21 Ji 
+1921 193 M ( )S 
+F5S21 Ji 
+1935 193 M (Perkhidmatan Perbankan Internet )[18 15 9 14 15 6 15 23 15 8 15 15 14 19 15 9 15 15 15 14 16 15 14 8 15 8 15 9 15 15 8  0]xS 
+: N 1221 201 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 231 M (OCBC di )[21 20 18 20 17 15 6  0]xS 
+1355 231 M (https://www.ocbc.com.my/Internet)[15 8 8 15 14 8 8 8 19 20 20 8 14 14 15 14 8 14 15 22 8 23 13 8 8 15 8 15 9 15 15  0]xS 
+1767 231 M (-)S 
+1776 231 M (banking/)[15 15 15 14 6 15 15  0]xS 
+: N 1355 234 524 2 rp C 
+ L ; 1879 231 M (.)S 
+1887 231 M ( \(b\))[17 9 15  0]xS 
+1937 231 M ( )S 
+1954 231 M (Deposit Wang Tunai atau Cek )[20 15 15 15 14 6 8 17 26 15 15 15 17 17 15 15 15 6 18 15 8 15 15 17 20 15 14  0]xS 
+: N 1221 239 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 269 M (melalui Mesin Deposit Tunai atau Mesin Deposit Cek di mana)[23 15 6 15 6 15 6 13 23 15 14 6 15 13 20 15 15 15 14 6 8 13 17 15 15 15 6 13 15 8 15 15
+13 23 15 14 6 15 13 20 15 15 15 14 6 8 13 20 15 14 13 15 6 13 23 15 15  0]xS 
+2015 269 M (-)S 
+2024 269 M (mana cawan)[23 15 15 15 13 14 15 20 15  0]xS 
+2184 269 M (gan OCBC di )[16 15 15 14 21 20 18 20 13 15 6  0]xS 
+: N 1221 278 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 308 M (Malaysia.)[23 15 6 15 14 14 6 15  0]xS 
+1337 308 M ( \()[9  0]xS 
+1355 308 M (c)S 
+1369 308 M (\) )[9  0]xS 
+1387 308 M (Bayar melalui Perkhidmatan Perbankan Telefon OCBC.)[18 15 14 15 9 9 23 15 6 15 6 15 6 9 18 15 9 14 15 6 15 23 15 8 15 15 9 18 15 9 15 15
+15 14 15 15 9 17 15 6 15 8 15 15 9 21 20 18 20  0]xS 
+2066 308 M ( \(d)[9 9  0]xS 
+2099 308 M (\) )[9  0]xS 
+2117 308 M (Arahan Tetap Debit )[18 9 15 16 15 15 9 17 15 8 15 15 9 20 15 15 6 8  0]xS 
+: N 1221 316 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 346 M (Langsung untuk mendebit terus daripada akaun deposit anda.)[15 15 15 15 14 15 15 15 10 15 15 8 15 14 10 23 15 15 15 15 15 6 8 10 8 15 9 15 14 10 15 15
+9 6 15 15 15 15 10 15 14 15 16 15 10 15 15 15 15 14 6 8 10 15 15 15 15  0]xS 
+1986 346 M ( \()[10  0]xS 
+2005 346 M (e)S 
+2020 346 M (\) )[9  0]xS 
+2039 346 M (Bayar melalui Mesin ATM )[18 15 14 15 9 10 23 15 6 15 6 15 6 10 24 15 14 6 15 10 18 17 22  0]xS 
+: N 1221 354 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 384 M (OCBC)[21 20 18  0]xS 
+1300 384 M (. )[8  0]xS 
+1317 384 M (\(f\) )[9 8 9  0]xS 
+1352 384 M (Pemindahan Dana Antara Bank melalui akaun Semasa / Simpanan)[18 15 23 6 15 15 15 15 15 15 9 20 16 15 15 9 18 15 8 15 9 16 9 18 15 15 14 9 23 15 6 16
+6 15 6 9 15 14 15 15 16 9 18 15 23 15 14 15 9 8 9 18 6 23 15 16 15 15  0]xS 
+2178 384 M ( anda di bank)[9 16 15 16 15 9 15 6 9 15 15 15  0]xS 
+2347 384 M (-)S 
+: N 1221 392 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 422 M (bank yang mengambil bahagian dalam rangkaian MEPS IBG.)[15 15 15 14 11 14 15 15 15 11 23 15 15 15 15 23 15 6 6 11 15 15 15 15 15 6 16 15 11 15 15 6
+15 23 11 9 15 15 15 14 15 6 15 15 11 23 18 18 18 11 8 18 21  0]xS 
+1986 422 M ( \()[11  0]xS 
+2006 422 M (g)S 
+2021 422 M (\))S 
+2030 422 M ( )S 
+2041 422 M (Kirim cek anda ke OCBC )[18 6 9 6 23 11 14 15 14 11 15 15 15 15 11 14 15 11 21 20 18 19  0]xS 
+: N 1221 431 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 461 M (Bank \(M\) Berhad, Karung Berkunci 11087, 50990 Kuala Lumpur. Hindari dari mengirim wang )
+[18 15 15 14 9 9 23 9 9 18 15 9 15 15 15 8 9 18 15 9 15 15 15 9 18 15 9 14 15 15 14 6
+9 15 15 15 15 15 8 9 15 15 15 16 15 9 18 15 15 6 15 9 15 15 23 15 15 9 8 9 20 6 15 15
+15 9 6 9 15 15 9 6 9 23 15 15 16 6 9 6 23 9 20 15 15 15  0]xS 
+: N 1221 469 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 499 M (tunai.)[8 15 15 15 6  0]xS 
+1288 499 M ( )S 
+: N 75 161 2 2 rp C 
+ L ; : N 75 161 2 2 rp C 
+ L ; : N 77 161 2 2 rp C 
+ L ; : N 79 161 1118 2 rp C 
+ L ; : N 1197 161 2 2 rp C 
+ L ; : N 1198 161 2 2 rp C 
+ L ; : N 1200 161 1178 2 rp C 
+ L ; : N 2378 161 2 2 rp C 
+ L ; : N 2379 161 2 2 rp C 
+ L ; : N 2379 161 2 2 rp C 
+ L ; : N 75 163 2 344 rp C 
+ L ; : N 1198 163 2 344 rp C 
+ L ; : N 2379 163 2 344 rp C 
+ L ; : N 77 509 M 77 701 I 1198 701 I 1198 509 I 1177 509 I 1177 662 I 99 662 I 99 509 I C 
+eoclip : N 77 509 1121 192 rp C 
+1 1 1 1 scol  L ; ; : N 99 509 1078 39 rp C 
+1 1 1 1 scol  L ; F3S21 Ji 
+99 539 M (How To Verify Your Statement )[20 17 21 11 17 17 11 18 15 10 8 9 15 11 18 17 17 10 11 18 9 15 9 15 24 15 17 9  0]xS 
+F4S21 Ji 
+514 539 M (-)S 
+523 539 M ( Please examine your statement and )[11 18 6 15 15 14 15 11 15 14 15 23 6 15 15 11 14 15 15 9 11 14 8 15 8 15 23 15 15 8 11 15
+15 15  0]xS 
+994 539 M (inform Bank of )[6 15 8 15 9 23 11 18 15 15 14 11 15 8  0]xS 
+: N 99 548 1078 38 rp C 
+1 1 1 1 scol  L ; 99 578 M (any errors within 14 days from the statement date. In the absence of such notification, )
+[15 15 14 11 15 9 9 15 9 14 11 20 6 8 15 6 15 11 15 15 11 15 15 14 13 11 8 9 15 22 11 8
+15 15 10 14 8 15 8 15 23 15 15 7 11 15 15 8 15 8 10 8 15 11 8 15 15 11 15 15 14 15 15 14
+14 11 15 8 10 14 15 14 15 11 15 15 8 6 8 5 13 15 8 6 15 15 9  0]xS 
+: N 99 586 1078 38 rp C 
+1 1 1 1 scol  L ; 99 616 M (the statement of Credit Card account shall be deemed conclusive evidence of your )
+[8 15 15 14 14 8 15 8 15 23 15 15 8 14 15 8 14 20 9 15 15 6 8 14 20 15 9 15 14 15 14 14
+15 15 15 8 14 14 15 15 6 6 14 15 15 14 15 15 15 23 16 15 14 14 15 15 14 6 15 14 6 14 15 14
+15 14 6 15 15 15 14 15 14 15 9 14 14 15 15 10  0]xS 
+: N 99 624 1078 38 rp C 
+1 1 1 1 scol  L ; 99 654 M (confirmation and acceptance of the transaction therein. )[14 15 15 8 6 9 23 15 8 6 15 15 8 15 15 15 8 15 14 14 15 15 8 15 15 14 15 8 15 7 8 8
+15 15 8 8 9 15 15 14 15 13 8 6 15 15 8 8 15 15 9 15 6 15 8  0]xS 
+F1S21 Ji 
+773 654 M ( )S 
+: N 1200 509 M 1200 701 I 1221 701 I 1221 509 I C 
+2358 509 M 2358 701 I 2379 701 I 2379 509 I C 
+eoclip : N 1200 509 1179 192 rp C 
+1 1 1 1 scol  L ; ; : N 1221 509 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 539 M (Bagaimana untuk)[20 15 17 15 8 24 15 17 15 11 17 17 9 17  0]xS 
+1452 539 M ( Mengesahkan Penyata Anda)[11 23 15 17 17 15 15 15 17 15 15 17 11 18 15 17 15 15 9 15 11 20 16 17  0]xS 
+F4S21 Ji 
+1838 539 M ( )S 
+1849 539 M (-)S 
+1858 539 M ( Sila)[11 18 6 6  0]xS 
+F5S21 Ji 
+1914 539 M ( periksa penyata anda dan beritahu )[11 15 15 9 6 14 14 15 11 15 15 15 14 15 8 15 11 15 15 15 15 11 15 14 15 11 15 15 9 6 8 15
+15 16  0]xS 
+: N 1221 548 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 578 M (Bank sekiranya terdapat sebarang kesilapan dalam tempoh 14 hari dari Tarikh Penyata, )
+[18 15 15 14 14 14 15 14 6 9 15 15 14 15 14 8 15 9 15 15 15 15 8 14 14 15 15 16 9 15 15 15
+14 14 15 14 6 6 15 16 15 15 14 15 15 7 15 23 14 8 15 23 15 15 15 14 15 16 14 15 15 9 6 14
+16 15 9 6 14 17 15 9 6 14 16 14 18 15 15 14 15 8 15 8  0]xS 
+: N 1221 586 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 616 M (sekiranya anda gagal memberitahu Bank, maka Penyata Akaun Kad Kredit hendaklah )
+[14 15 14 6 9 15 15 14 15 17 15 15 15 15 17 15 16 15 15 6 17 23 15 23 15 15 9 6 8 15 16 15
+17 18 15 15 14 8 17 23 15 14 15 17 18 15 15 14 15 8 15 17 18 14 15 16 15 17 18 15 15 18 18 9
+15 15 6 8 18 15 15 15 15 15 14 6 15 16  0]xS 
+: N 1221 624 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 654 M (dianggap sebagai bukti mu)[15 6 15 15 15 15 15 16 12 14 15 15 15 15 15 7 12 15 15 14 8 6 12 23  0]xS 
+1561 654 M (ktamad bahawa anda mengesah dan menerima transaksi yang )[14 8 15 23 15 15 12 15 15 15 15 20 16 12 15 15 15 16 12 23 15 15 15 15 14 15 16 12 15 15 15 12
+23 16 15 15 9 6 23 15 12 8 9 15 15 15 15 14 14 6 12 14 15 15 15  0]xS 
+: N 1221 662 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 692 M (dinyatakan di dalam Penyata tersebut.)[15 6 15 14 15 8 15 14 15 15 8 15 6 8 15 15 6 15 23 8 18 15 15 14 15 8 15 8 8 15 9 14
+15 15 15 8  0]xS 
+F3S21 Ji 
+1687 692 M ( )S 
+: N 75 507 2 2 rp C 
+ L ; : N 77 507 1121 2 rp C 
+ L ; : N 1198 507 2 2 rp C 
+ L ; : N 1200 507 1179 2 rp C 
+ L ; : N 2379 507 2 2 rp C 
+ L ; : N 75 509 2 192 rp C 
+ L ; : N 1198 509 2 192 rp C 
+ L ; : N 2379 509 2 192 rp C 
+ L ; : N 77 703 M 77 818 I 1198 818 I 1198 703 I 1177 703 I 1177 779 I 99 779 I 99 703 I C 
+eoclip : N 77 703 1121 115 rp C 
+1 1 1 1 scol  L ; ; : N 99 703 1078 38 rp C 
+1 1 1 1 scol  L ; 99 733 M (Payment Allocation Statement)[18 15 15 24 15 17 9 8 20 8 8 17 15 15 9 8 17 17 8 18 9 15 9 15 24 15 17  0]xS 
+F1S21 Ji 
+493 733 M ( )S 
+501 733 M (-)S 
+510 733 M ( )S 
+F4S21 Ji 
+518 733 M (Payment received from cardmembers will be allocated )[18 15 14 23 15 15 8 8 9 15 14 15 6 14 15 15 8 8 9 15 23 8 14 15 9 15 23 15 23 15 15 9
+14 8 20 6 6 6 8 15 15 8 15 6 6 15 14 15 8 15 16  0]xS 
+: N 99 741 1078 38 rp C 
+1 1 1 1 scol  L ; 99 771 M (to settle balances \(items appearing in the statement\) attracting the highest i)
+[8 15 8 14 15 7 8 6 15 8 15 15 6 15 15 14 15 14 8 9 6 8 15 23 13 8 15 15 15 15 15 9
+6 15 15 8 6 15 8 8 15 15 8 14 8 15 8 15 23 15 15 8 9 8 15 7 8 9 15 14 8 6 15 15
+7 8 15 15 8 15 6 15 15 15 14 8 8  0]xS 
+1010 771 M (nterest first. )[15 8 15 9 15 14 7 8 8 5 9 14 8 8  0]xS 
+F5S21 Ji 
+1161 771 M ( )S 
+: N 1200 703 M 1200 818 I 2379 818 I 2379 703 I 2358 703 I 2358 817 I 1221 817 I 1221 703 I C 
+eoclip : N 1200 703 1179 115 rp C 
+1 1 1 1 scol  L ; ; : N 1221 703 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 733 M (Penyata Peruntukan Pembayaran)[18 15 17 15 15 9 15 15 19 15 11 17 17 9 17 15 15 17 15 18 15 24 17 15 15 15 11 15  0]xS 
+F5S21 Ji 
+1669 733 M ( )S 
+1684 733 M (-)S 
+1693 733 M (.Pembayaran yang diterima daripada ahli kad akan )[8 18 15 23 15 15 14 15 9 15 16 15 14 15 15 15 15 16 6 8 15 9 6 23 15 15 15 15 9 7 15 15
+15 16 15 15 15 6 6 16 14 15 15 15 15 14 15 16  0]xS 
+: N 1221 741 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 771 M (diperuntukkan untuk menyelesaikan baki \(butiran yang terdapat dalam penyata\) yang )
+[15 6 15 15 9 15 15 8 15 14 14 15 15 19 15 15 8 15 14 19 23 15 15 14 15 6 15 14 15 6 14 15
+15 20 15 15 14 6 19 9 15 15 8 6 9 15 16 19 14 15 15 15 19 8 15 9 15 16 15 15 8 19 15 15
+6 15 23 19 16 15 15 15 15 8 15 9 19 14 15 15 15  0]xS 
+: N 1221 779 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 809 M (menarik kadar faedah yang tertinggi)[23 15 15 15 9 6 14 8 14 15 15 15 9 8 8 15 15 15 15 15 8 14 15 15 15 8 8 15 9 8 6 15
+15 15  0]xS 
+1657 809 M ( terdahulu.)[8 8 15 9 15 15 15 15 6 15  0]xS 
+F3S21 Ji 
+1786 809 M ( )S 
+: N 75 701 2 2 rp C 
+ L ; : N 77 701 1121 2 rp C 
+ L ; : N 1198 701 2 2 rp C 
+ L ; : N 1200 701 1179 2 rp C 
+ L ; : N 2379 701 2 2 rp C 
+ L ; : N 75 703 2 115 rp C 
+ L ; : N 1198 703 2 115 rp C 
+ L ; : N 2379 703 2 115 rp C 
+ L ; : N 77 820 M 77 1164 I 99 1164 I 99 820 I C 
+1177 820 M 1177 1164 I 1198 1164 I 1198 820 I C 
+eoclip : N 77 820 1121 344 rp C 
+1 1 1 1 scol  L ; ; : N 99 820 1078 38 rp C 
+1 1 1 1 scol  L ; 99 850 M (Finance Charges )[17 8 17 15 17 15 15 8 19 17 15 11 17 15 15  0]xS 
+328 850 M <96>S 
+343 850 M ( \(a\) Retail P)[8 9 15 9 8 20 15 9 15 7 8 8  0]xS 
+492 850 M (urchases)[16 11 15 17 15 15 15  0]xS 
+F4S21 Ji 
+611 850 M ( )S 
+F3S21 Ji 
+619 850 M (including Balance Transfer & Call)[8 17 15 8 16 17 8 16 17 8 20 14 8 15 17 15 15 8 17 11 15 17 15 9 15 10 8 20 8 20 14 8
+ 0]xS 
+1056 850 M (-)S 
+1065 850 M (for)[9 16  0]xS 
+1101 850 M (-)S 
+1110 850 M (Cash )[20 15 15 17  0]xS 
+: N 99 858 1078 38 rp C 
+1 1 1 1 scol  L ; F4S21 Ji 
+99 888 M <96>S 
+114 888 M ( \(i\) Tier 1: 15% p.a. in interest charge for cardmembers who make prompt payment for )
+[9 9 6 9 9 17 6 15 9 9 15 8 9 15 16 23 9 15 8 15 8 9 6 15 9 6 15 8 15 10 15 14
+8 9 14 15 15 9 15 15 9 8 15 9 9 14 15 9 15 23 15 23 15 15 9 14 9 20 15 15 9 23 15 14
+15 9 15 9 15 23 15 8 9 15 15 14 23 16 15 8 9 8 15 9  0]xS 
+: N 99 896 1078 38 rp C 
+1 1 1 1 scol  L ; 99 926 M (12 consecutive months. \(ii\) Tier 2: 17% p.a. in interest charge for cardmembers who )
+[15 15 12 14 15 15 14 15 14 15 8 6 14 15 12 23 15 15 8 15 14 8 12 9 6 6 9 12 17 6 15 9
+13 15 8 12 15 16 24 12 15 8 15 8 12 6 15 12 7 15 8 15 9 15 14 8 12 14 15 15 9 15 15 12
+8 15 10 12 14 15 9 15 23 15 23 15 15 9 15 12 20 15 16  0]xS 
+: N 99 934 1078 39 rp C 
+1 1 1 1 scol  L ; 99 964 M (make prompt payment for either 10 )[23 15 14 15 8 15 9 15 23 15 8 8 15 15 14 23 15 15 8 8 8 15 9 8 15 6 8 15 15 9 8 15
+15  0]xS 
+534 964 M (or 11 months within the past 12 consecutive months. )[16 9 8 15 15 8 23 15 15 8 15 14 8 20 6 8 15 6 15 8 8 15 15 8 16 15 14 8 8 15 15 8
+14 15 15 14 15 14 15 8 6 14 15 8 23 15 15 8 15 14 8  0]xS 
+: N 99 973 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1003 M (\(iii\) Tier 3: 18% p.a. in interest charge for cardmembers who do not meet the above )
+[9 6 6 6 9 12 17 6 15 9 12 15 8 13 15 16 23 13 15 8 15 8 12 6 15 12 6 15 8 15 9 15
+14 8 12 14 15 15 9 16 15 12 8 15 9 12 14 15 9 15 23 15 23 16 15 9 14 12 20 15 15 12 16 15
+12 15 15 8 12 23 16 15 8 12 8 15 15 12 16 15 15 14 16  0]xS 
+: N 99 1011 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1041 M (criteria. To enjoy lower finance charges for retail transactions, you should make at least )
+[14 9 6 8 15 9 6 15 8 9 17 15 9 15 15 6 15 14 9 6 15 20 15 10 9 8 6 15 15 15 14 15
+9 14 15 15 9 16 15 14 9 8 15 9 9 9 15 8 15 6 7 9 8 9 15 15 14 15 14 8 6 15 15 14
+8 9 14 15 15 9 14 15 15 15 6 15 9 23 15 14 15 10 15 8 10 6 15 15 14 8  0]xS 
+: N 99 1049 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1079 M (10 prompt payments in the las)[15 15 11 15 9 15 23 15 8 11 15 15 14 23 15 15 8 14 11 6 15 10 8 15 15 11 6 15  0]xS 
+481 1079 M (t 12 months)[8 11 15 15 11 23 15 15 8 14  0]xS 
+630 1079 M (.)S 
+F5S21 Ji 
+638 1079 M ( \()[11  0]xS 
+F3S21 Ji 
+657 1079 M (b\) Cash Advance)[17 9 11 20 15 15 17 10 20 17 15 15 17 15  0]xS 
+F4S21 Ji 
+885 1079 M ( /)[11  0]xS 
+F3S21 Ji 
+904 1079 M ( Casino Chips)[10 20 15 15 8 17 16 11 20 16 8 17  0]xS 
+F4S21 Ji 
+1092 1079 M ( )S 
+1103 1079 M (-)S 
+1112 1079 M ( 18% )[10 15 16 24  0]xS 
+: N 99 1087 1078 39 rp C 
+1 1 1 1 scol  L ; 99 1117 M (p.a. of the Cash Advance / Casino Chips amount calculated on a daily basis from the )
+[15 8 15 8 11 15 8 11 8 15 15 11 20 15 14 15 11 18 15 14 15 15 14 15 11 8 11 20 15 14 6 15
+15 11 20 15 6 15 14 11 15 23 15 15 15 8 11 14 15 6 14 15 6 15 8 15 15 11 15 15 11 15 11 15
+15 6 6 14 11 15 15 14 6 14 11 8 9 16 23 11 8 15 15  0]xS 
+: N 99 1126 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1156 M (date of transaction. )[15 15 8 15 8 15 8 8 8 9 15 15 14 15 13 8 6 15 15 8  0]xS 
+F3S21 Ji 
+340 1156 M ( )S 
+: N 1200 820 M 1200 1164 I 2379 1164 I 2379 820 I 2358 820 I 2358 1126 I 1221 1126 I 1221 820 I C 
+eoclip : N 1200 820 1179 344 rp C 
+1 1 1 1 scol  L ; ; : N 1221 820 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 850 M (Caj Kewangan )[20 15 8 11 20 15 21 15 17 17 15 16  0]xS 
+1422 850 M <96>S 
+1437 850 M ( )S 
+1448 850 M (\()S 
+1457 850 M (a\) Urus Niaga Runcit termasuk Pemindaan Baki & Call)[15 9 11 19 11 17 15 10 20 8 15 17 15 10 20 17 17 15 8 8 11 9 15 11 24 15 15 17 15 11 18 15
+24 8 17 17 15 15 17 10 20 15 15 8 11 19 11 20 15 7  0]xS 
+2182 850 M (-)S 
+2191 850 M (for)[9 17  0]xS 
+2228 850 M (-)S 
+2236 850 M (Cash)[20 15 15  0]xS 
+F5S21 Ji 
+2303 850 M ( )S 
+2314 850 M (-)S 
+2323 850 M ( \(i\) )[11 9 6 8  0]xS 
+: N 1221 858 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 888 M (Tingkat 1: 15% s)[17 6 15 15 14 15 8 11 15 8 11 15 16 22 11  0]xS 
+1434 888 M (etahun bagi ahli kad dengan pembayaran tepat selama 12 bulan berturut)
+[15 8 15 15 15 15 11 15 15 15 6 11 16 15 6 6 11 14 15 15 11 15 15 15 15 16 15 11 15 15 23 15
+15 14 15 9 15 15 11 8 15 15 15 8 11 14 15 6 15 23 15 11 15 15 11 15 16 6 15 16 11 15 15 9
+8 15 9 15  0]xS 
+2348 888 M (-)S 
+: N 1221 896 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 926 M (turut. \(ii\) Tingkat 2: 17% setahun bagi ahli kad dengan pembayaran tepat bagi 10 atau 11 )
+[8 15 9 15 8 8 11 9 6 6 9 11 17 6 15 15 14 15 8 11 15 8 11 15 16 23 11 15 15 8 15 15
+15 16 11 15 15 15 7 11 15 15 6 7 11 14 15 15 11 15 16 15 15 15 16 11 15 15 23 15 15 14 15 9
+16 15 11 8 15 15 15 8 11 16 15 15 6 11 16 15 11 15 8 15 15 11 16 16  0]xS 
+: N 1221 934 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 964 M (bulan dalam 12 bulan yang lepas. \(iii\) Tingkat 3: 18% setahun bagi ahli kad yang tidak )
+[15 15 6 15 15 14 15 15 6 15 23 14 16 15 14 15 15 6 15 15 14 14 15 16 15 14 6 15 15 15 14 8
+14 9 6 6 6 9 14 17 6 15 15 14 15 8 14 15 8 14 15 16 23 14 14 15 8 15 15 15 15 14 15 16
+15 6 14 15 15 6 6 14 14 15 15 14 15 15 15 15 14 8 6 15 15 14  0]xS 
+: N 1221 973 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1003 M (memenuhi k)[23 15 23 15 15 15 15 6 9  0]xS 
+1371 1003 M (riteria di atas. Untuk menikmati caj kewangan yang lebih rendah bagi urus niaga )
+[9 6 8 15 9 6 15 9 15 6 9 15 8 15 14 8 9 20 15 8 15 14 9 23 15 15 6 14 23 15 8 6
+9 14 15 6 9 14 14 20 15 15 15 15 15 9 14 15 15 15 9 6 15 15 6 15 9 10 15 15 15 15 15 10
+15 15 15 6 9 16 9 15 14 9 15 6 15 15 16  0]xS 
+: N 1221 1011 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1041 M (runcit, anda perlu membuat sekurang)[9 15 15 14 6 8 8 15 15 15 15 15 15 15 15 9 6 15 15 23 15 23 15 15 15 8 15 14 15 14 15 9
+15 15  0]xS 
+1702 1041 M (-)S 
+1711 1041 M (kurangnya 10 pembayaran tepat dalam kitaran 12 )[14 15 9 15 15 15 15 14 15 15 15 15 15 15 15 23 15 15 14 15 9 16 15 15 8 15 15 15 8 15 15 15
+6 15 23 15 14 6 8 15 9 15 15 15 15 15  0]xS 
+: N 1221 1049 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1079 M (bulan.)[15 15 6 15 15  0]xS 
+F1S21 Ji 
+1295 1079 M ( \(b\))[8 9 17  0]xS 
+F5S21 Ji 
+1338 1079 M ( )S 
+F1S21 Ji 
+1346 1079 M (Pendahuluan Wang Tunai / Cip Kasino)[18 15 17 17 15 17 17 8 17 15 17 8 26 15 17 17 8 17 17 17 14 8 8 8 8 20 8 17 8 20 15 15
+7 17  0]xS 
+F5S21 Ji 
+1851 1079 M ( )S 
+1859 1079 M (-)S 
+1868 1079 M ( 18% setahun atas amaun Pendahuluan )[8 15 16 23 8 14 15 8 15 15 15 15 8 15 8 15 14 8 15 23 15 16 15 8 18 16 15 15 15 15 15 6
+15 16 16  0]xS 
+: N 1221 1087 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 1117 M (Wang Tuna)[26 15 15 15 8 17 15 15  0]xS 
+1362 1117 M (i / Cip Kasino dikira secara harian dari tarikh urus niaga.)[6 8 8 8 20 6 15 8 18 15 14 6 15 15 8 15 6 14 6 9 15 7 14 15 14 15 9 15 8 15 15 9
+6 15 15 8 15 15 9 6 8 8 15 9 6 14 15 8 15 9 15 14 8 15 6 15 15 15  0]xS 
+F3S21 Ji 
+2040 1117 M ( )S 
+: N 75 818 2 2 rp C 
+ L ; : N 77 818 1121 2 rp C 
+ L ; : N 1198 818 2 2 rp C 
+ L ; : N 1200 818 1179 2 rp C 
+ L ; : N 2379 818 2 2 rp C 
+ L ; : N 75 820 2 344 rp C 
+ L ; : N 1198 820 2 344 rp C 
+ L ; : N 2379 820 2 344 rp C 
+ L ; : N 77 1166 M 77 1242 I 99 1242 I 99 1166 I C 
+1177 1166 M 1177 1242 I 1198 1242 I 1198 1166 I C 
+eoclip : N 77 1166 1121 76 rp C 
+1 1 1 1 scol  L ; ; : N 99 1166 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1196 M (Balance Transfer Interest Charge)[20 15 8 15 17 15 15 11 17 11 15 17 15 9 15 11 11 7 17 9 15 11 15 15 9 11 20 17 15 11 17  0]xS 
+F5S21 Ji 
+540 1196 M ( )S 
+551 1196 M <96>S 
+566 1196 M ( )S 
+F4S21 Ji 
+577 1196 M (6% p.a. flat or lower due to promotional interest )[15 23 11 15 8 15 8 11 8 6 15 8 11 15 9 11 6 15 20 15 9 11 15 15 15 11 8 15 11 15 9 15
+23 15 8 6 15 16 15 6 11 6 15 9 15 9 15 14 8  0]xS 
+: N 99 1204 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1234 M (rate)[9 15 8  0]xS 
+F5S21 Ji 
+146 1234 M ( )S 
+F3S21 Ji 
+154 1234 M ( )S 
+: N 1200 1166 M 1200 1242 I 1221 1242 I 1221 1166 I C 
+2358 1166 M 2358 1242 I 2379 1242 I 2379 1166 I C 
+eoclip : N 1200 1166 1179 76 rp C 
+1 1 1 1 scol  L ; ; : N 1221 1166 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 1196 M (Caj Faedah Pemindahan Baki)[20 15 8 13 17 15 15 17 15 17 13 18 15 24 8 17 17 15 17 15 17 13 20 15 15  0]xS 
+F5S21 Ji 
+1620 1196 M ( )S 
+1633 1196 M <96>S 
+1648 1196 M ( Kadar faedah rata 6% setahun atau lebih rendah bagi )[13 18 15 16 15 9 13 8 15 15 15 16 15 13 9 15 8 16 13 16 23 13 14 15 8 15 16 15 15 13 15 8
+15 16 13 6 15 15 6 16 13 9 16 15 15 15 15 13 16 15 15 7  0]xS 
+: N 1221 1204 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1234 M (kadar faedah)[14 15 15 15 9 8 8 15 15 15 15  0]xS 
+1380 1234 M ( promosi)[8 15 9 15 23 15 14  0]xS 
+F3S21 Ji 
+1485 1234 M ( )S 
+: N 75 1164 2 2 rp C 
+ L ; : N 77 1164 1121 2 rp C 
+ L ; : N 1198 1164 2 2 rp C 
+ L ; : N 1200 1164 1179 2 rp C 
+ L ; : N 2379 1164 2 2 rp C 
+ L ; : N 75 1166 2 76 rp C 
+ L ; : N 1198 1166 2 76 rp C 
+ L ; : N 2379 1166 2 76 rp C 
+ L ; : N 77 1244 M 77 1359 I 99 1359 I 99 1244 I C 
+1177 1244 M 1177 1359 I 1198 1359 I 1198 1244 I C 
+eoclip : N 77 1244 1121 115 rp C 
+1 1 1 1 scol  L ; ; : N 99 1244 1078 39 rp C 
+1 1 1 1 scol  L ; 99 1274 M (C)S 
+119 1274 M (all)[15 8  0]xS 
+150 1274 M (-)S 
+159 1274 M (for)[9 17  0]xS 
+196 1274 M (-)S 
+204 1274 M (Cash \(CFC\) )[20 15 15 17 14 9 20 17 20 9  0]xS 
+374 1274 M <96>S 
+389 1274 M ( )S 
+F4S21 Ji 
+403 1274 M (\(a\) Interest Rate )[9 15 9 14 8 15 8 15 9 15 14 8 14 20 15 8 15  0]xS 
+628 1274 M (-)S 
+F3S21 Ji 
+638 1274 M ( )S 
+F4S21 Ji 
+652 1274 M (9% p.a. flat or lower due to promotional )[16 24 14 15 8 15 8 14 8 6 15 8 14 15 9 15 6 15 20 15 9 14 16 15 15 14 8 16 14 15 9 15
+23 15 9 6 15 15 15 7  0]xS 
+: N 99 1283 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1313 M (interest rate \(b\) Cash Advance Fee )[6 15 8 15 9 15 14 8 9 9 15 8 15 9 9 15 9 9 20 15 14 15 9 18 15 14 15 15 14 15 9 17
+15 15  0]xS 
+540 1313 M <96>S 
+555 1313 M ( 3% or lower due to promotional interest rate \(one)[9 16 23 9 15 9 9 6 15 20 15 9 9 15 16 15 9 8 15 9 15 9 15 23 15 8 6 15 15 15 6 9
+6 15 8 15 9 15 14 8 9 9 15 8 15 9 10 15 15  0]xS 
+1167 1313 M (-)S 
+: N 99 1321 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1351 M (time fee\))[8 6 23 15 8 8 15 15  0]xS 
+F5S21 Ji 
+206 1351 M ( )S 
+F3S21 Ji 
+214 1351 M ( )S 
+: N 1200 1244 M 1200 1359 I 1221 1359 I 1221 1244 I C 
+2358 1244 M 2358 1359 I 2379 1359 I 2379 1244 I C 
+eoclip : N 1200 1244 1179 115 rp C 
+1 1 1 1 scol  L ; ; : N 1221 1244 1137 39 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 1274 M (Call)[20 15 8  0]xS 
+1272 1274 M (-)S 
+1281 1274 M (for)[9 17  0]xS 
+1318 1274 M (-)S 
+1326 1274 M (Cash \(CFC\))[20 15 15 17 11 9 20 17 20  0]xS 
+F5S21 Ji 
+1478 1274 M ( )S 
+1489 1274 M <96>S 
+1504 1274 M ( \(a\) Kadar Faedah )[11 9 15 9 11 18 15 15 15 9 11 17 15 15 15 15 15  0]xS 
+1745 1274 M <96>S 
+1760 1274 M ( Rata 9% setahun atau lebih rendah b)[11 20 15 8 15 11 16 22 11 14 15 8 15 15 15 15 11 15 8 15 15 11 6 15 16 6 15 11 9 15 15 15
+16 15 11  0]xS 
+2242 1274 M (agi kadar )[15 15 6 11 14 15 15 15 9  0]xS 
+: N 1221 1283 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1313 M (faedah promosi \(b\) Yuran Pendahuluan Tunai )[8 15 15 15 15 15 13 15 9 15 23 15 14 6 13 9 16 9 13 18 15 9 16 15 13 18 15 16 15 15 15 15
+6 16 15 15 13 17 15 15 15 7  0]xS 
+1816 1313 M (-)S 
+1825 1313 M ( 3% atau lebih rendah bagi kadar faedah )[13 16 23 14 15 8 15 15 13 6 15 15 7 15 13 9 15 16 15 15 15 13 15 16 15 6 13 14 15 16 15 9
+13 8 15 15 15 15 16  0]xS 
+: N 1221 1321 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1351 M (promosi \(yuran satu kali\)  )[15 9 15 23 15 14 6 8 9 14 15 9 15 15 8 14 15 8 15 8 14 15 6 6 9 7  0]xS 
+F3S21 Ji 
+1536 1351 M ( )S 
+: N 75 1242 2 2 rp C 
+ L ; : N 77 1242 1121 2 rp C 
+ L ; : N 1198 1242 2 2 rp C 
+ L ; : N 1200 1242 1179 2 rp C 
+ L ; : N 2379 1242 2 2 rp C 
+ L ; : N 75 1244 2 115 rp C 
+ L ; : N 1198 1244 2 115 rp C 
+ L ; : N 2379 1244 2 115 rp C 
+ L ; : N 77 1361 M 77 1744 I 99 1744 I 99 1361 I C 
+1177 1361 M 1177 1744 I 1198 1744 I 1198 1361 I C 
+eoclip : N 77 1361 1121 383 rp C 
+1 1 1 1 scol  L ; ; : N 99 1361 1078 39 rp C 
+1 1 1 1 scol  L ; 99 1391 M (Interest Free Period for Retail Purchases )[8 17 9 15 11 15 15 9 9 17 11 15 15 9 18 15 11 8 17 17 9 9 16 11 9 20 15 9 15 8 8 9
+18 17 11 14 17 15 15 15 15  0]xS 
+F4S21 Ji 
+644 1391 M (-)S 
+653 1391 M ( )S 
+662 1391 M (20 days from the statement date provided )[15 15 9 16 15 14 14 9 8 9 15 23 9 8 15 15 9 14 8 15 8 15 23 15 15 8 9 15 15 8 15 9
+15 9 15 14 6 15 15 16  0]xS 
+: N 99 1400 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1430 M (that there is no outstanding balance in the card)[8 15 15 8 12 8 15 15 9 15 12 6 14 12 15 15 12 15 15 7 14 8 15 15 15 6 15 15 12 15 15 6
+15 15 14 15 12 6 15 12 8 15 15 12 14 15 9  0]xS 
+700 1430 M (member\222s account. If the cardmember )[23 15 23 15 15 9 6 14 12 15 14 14 15 15 15 8 7 12 8 7 12 8 15 15 12 14 15 9 15 23 14 23
+15 15 10  0]xS 
+: N 99 1438 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1468 M (opts to make partial or minimum payment, finance charges on retail transactions will be )
+[15 15 8 14 9 8 15 9 23 15 14 15 9 15 15 9 8 6 15 7 9 15 9 9 23 7 15 6 23 15 23 9
+15 15 14 23 15 15 8 8 9 8 6 15 15 15 14 15 9 14 15 15 10 15 15 14 9 15 16 9 9 15 8 15
+6 7 9 8 9 15 15 14 15 14 8 6 15 15 14 9 20 6 6 6 9 16 16  0]xS 
+: N 99 1476 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1506 M (imposed from the day the transaction is posted to the card account. The following )
+[6 23 15 15 14 15 15 15 8 9 15 23 15 8 15 15 15 15 15 14 15 8 15 15 15 8 9 15 15 14 15 14
+8 6 15 15 15 6 13 15 15 15 14 8 15 15 15 8 15 15 8 15 15 15 14 15 9 15 15 15 13 14 15 15
+15 8 8 15 17 15 15 15 8 15 6 6 14 20 6 15 16  0]xS 
+: N 99 1514 1078 39 rp C 
+1 1 1 1 scol  L ; 99 1544 M (formula will apply for the computation of interest)[8 15 9 23 15 6 15 8 20 6 6 6 8 15 16 15 6 14 8 8 15 9 8 8 15 15 8 14 15 23 15 15
+8 15 8 6 15 16 8 15 8 8 6 15 8 15 9 15 14  0]xS 
+683 1544 M (: )[8  0]xS 
+F3S21 Ji 
+699 1544 M (A = \(B\) x \(C/D\) x \(E\) and F = Sum [A])[20 8 16 8 9 20 9 9 15 8 9 20 8 20 9 8 15 9 9 18 9 8 15 17 17 8 17 8 17 8 18 18
+24 8 9 20  0]xS 
+F4S21 Ji 
+1177 1544 M ( )S 
+: N 99 1553 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1583 M (where A = the interest charge for a particular balance \223B\224 computed over the period of )
+[20 15 15 9 15 10 18 10 17 10 8 15 15 10 6 15 8 15 10 15 14 8 10 14 15 15 9 15 15 10 8 15
+9 11 15 10 15 16 9 8 6 14 15 6 15 9 10 15 15 7 15 15 14 15 11 8 19 9 10 14 15 23 15 15
+8 15 15 10 15 14 15 10 10 8 15 15 10 16 15 9 7 15 15 10 15 9  0]xS 
+: N 99 1591 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1621 M (\223C\224 days. B = the Balance that is imposed with interest. C = the respective interest )
+[8 21 8 14 15 15 14 14 8 13 18 13 16 13 8 15 15 14 18 15 6 15 15 14 16 13 8 15 15 8 13 6
+14 13 6 23 15 15 14 15 15 13 20 6 8 15 13 7 15 8 15 9 15 14 8 8 13 20 13 16 13 8 15 15
+13 9 15 14 15 15 14 8 6 14 15 13 6 15 9 15 9 15 14 8  0]xS 
+: N 99 1629 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1659 M (bearing period in days on which the Balance )[15 15 15 9 6 15 15 8 15 15 9 7 15 15 8 6 15 8 15 15 14 14 8 15 15 8 20 15 6 14 15 8
+8 15 15 8 18 15 6 15 15 14 15  0]xS 
+644 1659 M (\223B\224 is imposed with interest. D = the number )[8 19 8 8 6 14 8 6 23 15 15 14 15 15 8 20 6 8 15 8 6 15 8 15 9 15 14 7 8 8 19 8
+16 8 8 15 15 8 15 14 23 15 15 10  0]xS 
+: N 99 1667 1078 39 rp C 
+1 1 1 1 scol  L ; 99 1697 M (of days used as the base for the annual rate. E = the nominal interest annual rate stated. )
+[15 8 8 15 15 14 14 8 15 14 15 15 8 15 14 8 8 15 15 8 15 15 14 15 8 8 15 9 8 8 15 15
+8 15 15 15 15 15 6 8 9 15 8 15 8 8 18 8 16 8 8 15 15 8 15 15 23 6 15 15 6 9 6 15
+8 15 9 15 14 8 8 15 15 15 15 15 6 8 9 15 8 15 8 14 9 15 8 15 15 8  0]xS 
+: N 99 1706 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1736 M (F = the total interest imposed for the month.)[17 8 16 7 8 15 15 8 8 15 8 15 6 8 6 15 8 15 9 15 13 8 8 6 23 15 15 14 15 15 7 8
+15 9 8 8 15 15 8 23 15 15 8 15  0]xS 
+F5S21 Ji 
+629 1736 M ( )S 
+F4S21 Ji 
+637 1736 M ( )S 
+: N 1200 1361 M 1200 1744 I 2379 1744 I 2379 1361 I 2358 1361 I 2358 1706 I 1221 1706 I 1221 1361 I C 
+eoclip : N 1200 1361 1179 383 rp C 
+1 1 1 1 scol  L ; ; : N 1221 1361 1137 39 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 1391 M (Tempoh Bebas Faedah untuk Urus Niaga Runcit)[17 15 24 17 17 17 13 20 15 17 15 15 13 17 15 15 17 15 17 13 17 17 8 17 15 13 20 11 17 15 13 19
+8 15 17 15 13 20 17 17 14 8  0]xS 
+F5S21 Ji 
+1880 1391 M ( )S 
+1893 1391 M (-)S 
+1902 1391 M ( 20 hari dari tarikh penyata)[13 15 15 13 15 15 9 6 13 15 15 10 6 13 8 15 9 6 14 15 13 15 15 15 14 15 9  0]xS 
+2253 1391 M ( dengan )[13 15 15 15 15 15 16  0]xS 
+: N 1221 1400 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1430 M (syarat tidak terdapat baki belum jelas dalam akaun ahli kad. Jika ahli kad memilih untuk )
+[14 14 15 9 15 8 13 8 6 15 15 14 13 8 15 9 15 15 15 15 8 13 15 15 14 6 13 15 15 6 15 23
+13 6 15 6 15 14 13 15 15 7 15 23 13 15 14 15 15 15 13 15 15 7 6 13 14 15 15 8 13 14 6 14
+15 13 15 15 6 6 13 14 15 15 13 23 15 24 6 6 6 15 13 15 15 8 15 14  0]xS 
+: N 1221 1438 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1468 M (membuat pembayaran sebahagian atau minima, caj kewangan bagi urus niaga runcit akan )
+[23 15 23 15 15 15 8 11 15 15 23 15 15 14 15 9 15 15 11 14 15 15 16 15 15 15 6 16 15 11 15 8
+15 15 11 23 6 15 6 23 15 8 11 14 15 6 11 14 15 20 15 15 15 16 15 11 15 15 15 6 12 15 9 15
+14 11 15 6 15 16 15 11 9 16 15 14 6 8 11 15 14 15 15  0]xS 
+: N 1221 1476 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1506 M (dikenakan dari tarikh urus niaga dicatatkan pada akaun kad. )[15 6 14 15 15 15 14 15 15 15 15 15 9 6 15 8 15 9 6 14 15 15 15 9 15 14 15 15 6 15 15 15
+15 15 6 14 15 8 15 8 14 15 15 15 15 15 15 15 15 15 14 15 15 15 15 14 15 15 8  0]xS 
+2022 1506 M (Formula pengira)[17 15 9 23 15 6 15 15 15 15 15 15 6 9  0]xS 
+2228 1506 M (an faedah )[16 15 15 8 15 15 15 15 15  0]xS 
+: N 1221 1514 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 1544 M (adalah seperti berikut: )[15 15 15 6 15 15 9 14 15 16 15 9 8 6 9 15 15 9 6 14 15 8 8  0]xS 
+F1S21 Ji 
+1502 1544 M (A = \(B\) x \(C/D\) x \(E\) dan F = Jumlah [A])[20 9 16 9 9 20 9 9 16 9 9 20 8 20 9 9 15 9 9 18 9 9 17 15 17 9 17 9 17 9 15 17
+24 8 15 17 9 9 20  0]xS 
+F5S21 Ji 
+2025 1544 M ( di mana A = kadar faedah )[9 15 6 9 23 16 15 15 9 19 9 16 9 14 15 16 15 9 9 8 15 15 15 15 16  0]xS 
+: N 1221 1553 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1583 M (bagi baki \223B\224 dikira atas tempoh hari \223C\224. B = baki yang dikenakan faedah. C = tempoh )
+[15 15 15 6 13 15 15 14 6 13 10 18 9 13 15 6 14 6 9 16 13 15 8 15 14 13 8 15 23 15 15 15
+13 15 16 9 6 13 9 20 9 8 13 18 13 16 14 15 15 14 6 13 14 15 15 15 14 15 6 14 15 15 15 14
+15 15 13 8 15 15 16 15 15 8 13 20 14 16 13 8 15 23 15 15 15  0]xS 
+: N 1221 1591 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1621 M (pengenaan faedah masing)[15 15 15 15 15 15 16 15 15 12 8 15 15 15 15 15 12 23 15 14 6 15  0]xS 
+1552 1621 M (-)S 
+1561 1621 M (masing mengikut hari di mana Baki "B" dikenaka)[23 15 14 6 15 15 12 23 15 16 15 6 14 15 8 12 15 15 9 6 12 15 6 12 23 15 15 15 12 18 15 14
+6 12 10 18 10 12 15 6 14 15 15 15 14  0]xS 
+2179 1621 M (n faedah. D = )[15 12 8 15 15 15 15 15 8 12 20 12 16  0]xS 
+: N 1221 1629 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1659 M (jumlah hari digunakan sebagai asas kadar tahunan. E = kadar tahunan caj faedah ternyata. )
+[6 15 23 6 15 15 8 15 15 9 6 8 15 7 15 15 15 15 14 15 15 8 14 15 16 15 15 15 6 8 15 14
+15 14 8 14 15 15 15 9 8 8 15 16 15 15 15 15 8 8 18 8 16 8 14 15 15 15 9 8 8 15 16 15
+15 15 15 8 14 15 6 8 8 15 16 15 15 15 8 9 15 9 15 14 15 8 15 8  0]xS 
+2341 1659 M (F )[16  0]xS 
+: N 1221 1667 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 1697 M (= jumlah faedah yang dikenakan bagi bulan tersebut.)[16 8 6 15 23 6 15 15 8 8 15 15 15 15 15 8 14 15 15 15 8 15 6 14 15 15 15 14 15 15 8 15
+15 15 6 8 15 15 6 15 15 8 8 15 9 14 15 15 15 8  0]xS 
+F3S21 Ji 
+1863 1697 M ( )S 
+: N 75 1359 2 2 rp C 
+ L ; : N 77 1359 1121 2 rp C 
+ L ; : N 1198 1359 2 2 rp C 
+ L ; : N 1200 1359 1179 2 rp C 
+ L ; : N 2379 1359 2 2 rp C 
+ L ; : N 75 1361 2 383 rp C 
+ L ; : N 1198 1361 2 383 rp C 
+ L ; : N 2379 1361 2 383 rp C 
+ L ; : N 77 1746 M 77 1823 I 1198 1823 I 1198 1746 I 1177 1746 I 1177 1822 I 99 1822 I 99 1746 I C 
+eoclip : N 77 1746 1121 77 rp C 
+1 1 1 1 scol  L ; ; : N 99 1746 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1776 M (Cash Advance / Casino Chips)[20 15 15 17 11 20 17 15 15 17 15 15 11 8 11 20 15 15 8 17 17 11 20 16 8 17  0]xS 
+500 1776 M ( Fees )[11 17 15 15 15  0]xS 
+584 1776 M (-)S 
+593 1776 M ( )S 
+F4S21 Ji 
+604 1776 M (5% of the amount advanced or a minimum of )[15 24 11 15 8 11 8 15 15 11 15 23 15 15 15 8 11 15 15 14 15 15 14 16 15 11 15 9 11 16 11 23
+6 15 6 23 16 23 11 15 8  0]xS 
+: N 99 1784 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1814 M (RM20, whichever is hi)[20 23 15 15 8 8 20 15 6 14 15 15 14 15 9 8 5 14 8 15  0]xS 
+367 1814 M (gher. This is imposed for each cash advance transaction.)[15 15 15 9 8 8 17 15 6 13 8 6 14 8 6 23 15 15 14 15 15 7 8 15 9 8 15 15 14 15 8 14
+15 14 14 8 15 15 14 15 15 14 15 8 8 9 15 15 14 15 14 8 6 15 15  0]xS 
+1058 1814 M ( )S 
+1066 1814 M ( )S 
+: N 1200 1746 M 1200 1823 I 2379 1823 I 2379 1746 I 2358 1746 I 2358 1822 I 1221 1822 I 1221 1746 I C 
+eoclip : N 1200 1746 1179 77 rp C 
+1 1 1 1 scol  L ; ; : N 1221 1746 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 1776 M (Yuran Pendahuluan Tunai / Cip Kasino)[18 17 11 15 17 11 18 15 17 17 15 17 17 7 17 15 17 11 17 16 17 15 8 11 8 11 19 8 17 11 20 15
+15 8 16  0]xS 
+F5S21 Ji 
+1742 1776 M ( )S 
+1753 1776 M (-)S 
+1762 1776 M ( 5% daripada amaun pendahuluan atau minima )[11 16 22 11 16 15 9 6 15 15 16 15 11 15 23 15 15 15 12 15 15 15 15 16 15 15 6 15 16 15 11 15
+8 16 15 11 23 6 15 6 23 15  0]xS 
+: N 1221 1784 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1814 M (RM20, yang mana lebih tinggi. Yuran ini dikenakan bagi setiap urus niaga pendahuluan tunai.)
+[20 23 15 15 8 8 14 15 15 15 8 23 15 15 15 8 6 15 15 6 15 8 8 6 15 15 15 6 8 8 18 15
+9 15 15 8 6 15 6 8 15 6 14 15 15 15 14 15 15 8 15 15 15 6 8 14 15 8 6 15 15 8 15 9
+15 14 8 15 6 15 15 15 8 15 15 15 15 15 15 15 7 15 15 15 8 8 15 15 15 6  0]xS 
+F3S21 Ji 
+2353 1814 M ( )S 
+: N 75 1744 2 2 rp C 
+ L ; : N 77 1744 1121 2 rp C 
+ L ; : N 1198 1744 2 2 rp C 
+ L ; : N 1200 1744 1179 2 rp C 
+ L ; : N 2379 1744 2 2 rp C 
+ L ; : N 75 1746 2 77 rp C 
+ L ; : N 1198 1746 2 77 rp C 
+ L ; : N 2379 1746 2 77 rp C 
+ L ; : N 77 1825 M 77 1901 I 99 1901 I 99 1825 I C 
+1177 1825 M 1177 1901 I 1198 1901 I 1198 1825 I C 
+eoclip : N 77 1825 1121 76 rp C 
+1 1 1 1 scol  L ; ; : N 99 1825 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1855 M (Minimum Monthly Repaymen)[23 8 17 8 24 17 24 8 23 16 17 9 17 8 15 8 20 15 17 15 15 24 15  0]xS 
+479 1855 M (t )[9  0]xS 
+F4S21 Ji 
+496 1855 M (-)S 
+505 1855 M ( )S 
+513 1855 M (5% of the outstanding balance or a minimum of RM50, )[15 23 8 15 8 8 8 15 15 8 15 15 8 14 8 15 15 15 6 15 15 9 15 15 6 15 15 14 15 9 15 9
+8 15 8 23 6 15 6 23 15 23 8 15 8 8 21 23 15 15 8  0]xS 
+: N 99 1863 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1893 M (whichever is higher. )[20 15 6 14 15 15 14 15 9 8 6 14 8 15 6 15 15 15 9 8  0]xS 
+F3S21 Ji 
+349 1893 M ( )S 
+: N 1200 1825 M 1200 1901 I 1221 1901 I 1221 1825 I C 
+2358 1825 M 2358 1901 I 2379 1901 I 2379 1825 I C 
+eoclip : N 1200 1825 1179 76 rp C 
+1 1 1 1 scol  L ; ; : N 1221 1825 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 1855 M (Bayaran Minima Bulanan)[20 15 15 15 11 15 17 11 23 8 17 8 24 15 11 20 16 8 15 17 15  0]xS 
+F5S21 Ji 
+1554 1855 M ( )S 
+1565 1855 M (-)S 
+1574 1855 M ( 5%)[11 16  0]xS 
+1623 1855 M ( dari baki tertunggak atau minima RM50, yang mana lebih )[12 15 15 9 6 11 16 15 14 6 11 8 15 9 8 15 15 15 15 15 14 11 15 8 15 15 11 23 6 15 6 23
+16 11 20 23 15 15 8 11 14 15 15 15 11 24 15 15 15 11 6 15 15 7 15  0]xS 
+: N 1221 1863 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 1893 M (tinggi.)[8 6 15 15 15 6  0]xS 
+F3S21 Ji 
+1294 1893 M ( )S 
+: N 75 1823 2 2 rp C 
+ L ; : N 77 1823 1121 2 rp C 
+ L ; : N 1198 1823 2 2 rp C 
+ L ; : N 1200 1823 1179 2 rp C 
+ L ; : N 2379 1823 2 2 rp C 
+ L ; : N 75 1825 2 76 rp C 
+ L ; : N 1198 1825 2 76 rp C 
+ L ; : N 2379 1825 2 76 rp C 
+ L ; : N 77 1903 M 77 1980 I 99 1980 I 99 1903 I C 
+1177 1903 M 1177 1980 I 1198 1980 I 1198 1903 I C 
+eoclip : N 77 1903 1121 77 rp C 
+1 1 1 1 scol  L ; ; : N 99 1903 1078 38 rp C 
+1 1 1 1 scol  L ; 99 1933 M (Late Payment Charge)[17 15 9 15 13 18 15 15 25 15 17 9 13 20 17 15 11 17  0]xS 
+F4S21 Ji 
+390 1933 M ( )S 
+403 1933 M (-)S 
+412 1933 M ( 1% of the outstanding balance due or RM10, whichever is )[13 16 24 13 15 8 13 8 15 15 13 15 15 8 14 8 15 15 15 6 15 16 13 15 15 6 16 15 14 15 13 15
+15 16 13 15 9 13 20 23 15 15 8 13 20 15 6 14 15 15 15 15 9 13 6 15  0]xS 
+: N 99 1941 1078 39 rp C 
+1 1 1 1 scol  L ; 99 1971 M (higher, )[15 6 15 15 15 9 8  0]xS 
+190 1971 M (up to a maximum of RM100.)[15 15 8 8 15 8 15 8 23 15 14 6 23 15 22 8 15 8 8 19 23 15 15 15  0]xS 
+F3S21 Ji 
+534 1971 M ( )S 
+: N 1200 1903 M 1200 1980 I 1221 1980 I 1221 1903 I C 
+2358 1903 M 2358 1980 I 2379 1980 I 2379 1903 I C 
+eoclip : N 1200 1903 1179 77 rp C 
+1 1 1 1 scol  L ; ; : N 1221 1903 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 1933 M (Yuran Pembayaran Lewat)[18 17 11 15 17 12 18 15 24 17 15 15 15 11 15 17 12 17 15 21 15  0]xS 
+F5S21 Ji 
+1562 1933 M ( )S 
+1574 1933 M (-)S 
+1583 1933 M ( 1% dari baki tertunggak atau RM10, yang mana lebih tinggi, )[12 16 22 12 15 15 10 6 12 15 15 14 6 12 8 15 9 8 15 15 15 15 15 14 12 15 8 15 15 12 20 23
+15 15 8 12 14 15 15 15 12 23 15 15 15 12 6 15 15 6 15 12 8 6 15 15 15 6 8  0]xS 
+: N 1221 1941 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 1971 M (sehingga maksima RM100)[14 15 15 6 15 15 15 15 8 23 15 14 14 6 23 15 8 20 23 15 15  0]xS 
+1545 1971 M (.)S 
+F3S21 Ji 
+1553 1971 M ( )S 
+: N 75 1901 2 2 rp C 
+ L ; : N 77 1901 1121 2 rp C 
+ L ; : N 1198 1901 2 2 rp C 
+ L ; : N 1200 1901 1179 2 rp C 
+ L ; : N 2379 1901 2 2 rp C 
+ L ; : N 75 1903 2 77 rp C 
+ L ; : N 1198 1903 2 77 rp C 
+ L ; : N 2379 1903 2 77 rp C 
+ L ; : N 77 1982 M 77 2135 I 99 2135 I 99 1982 I C 
+1177 1982 M 1177 2135 I 1198 2135 I 1198 1982 I C 
+eoclip : N 77 1982 1121 153 rp C 
+1 1 1 1 scol  L ; ; : N 99 1982 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2012 M (Conversion for Overseas Transactions )[20 17 17 15 15 11 15 8 16 17 12 9 17 11 12 21 15 15 11 15 15 15 15 12 17 11 15 17 15 15 15 9
+8 17 17 15  0]xS 
+F4S21 Ji 
+628 2012 M <96>S 
+643 2012 M ( )S 
+655 2012 M (Overseas Transactions are subject to the )[21 14 15 9 14 15 15 14 12 17 9 15 15 14 15 14 8 6 15 15 14 12 15 9 15 12 14 15 15 6 15 14
+8 12 8 15 12 8 15 16  0]xS 
+: N 99 2020 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2050 M (currency conversion rate )[14 15 9 9 15 15 14 14 12 14 15 15 14 15 9 14 6 15 15 12 9 15 8 15  0]xS 
+419 2050 M (determined by Vi)[15 15 8 15 9 23 6 15 15 15 12 15 14 12 18  0]xS 
+632 2050 M (sa International and MasterCard Worldwide )[14 15 12 8 15 8 15 9 15 15 8 6 15 15 15 6 13 15 15 15 12 23 15 14 8 15 9 20 15 9 15 12
+26 15 9 6 16 20 6 15 16  0]xS 
+: N 99 2058 1078 39 rp C 
+1 1 1 1 scol  L ; 99 2088 M (plus a standard administration cost of 1.25% and any transaction fee charged by Visa )
+[15 6 15 14 11 15 11 14 8 15 15 15 15 9 15 11 15 15 23 6 15 6 14 8 9 15 8 6 15 15 11 14
+15 14 8 11 15 8 11 15 8 15 15 23 11 16 15 15 11 15 15 14 11 8 9 15 15 14 15 14 8 6 15 15
+11 8 15 15 11 14 15 15 9 15 15 15 12 15 14 11 18 6 14 16  0]xS 
+: N 99 2097 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2127 M (International and MasterCard Worldwide. )[8 15 8 15 9 15 15 8 6 15 15 15 6 8 15 15 15 8 23 15 14 8 15 9 20 15 9 15 8 26 15 9
+6 15 20 6 15 15 8  0]xS 
+604 2127 M ( )S 
+: N 1200 1982 M 1200 2135 I 1221 2135 I 1221 1982 I C 
+2358 1982 M 2358 2135 I 2379 2135 I 2379 1982 I C 
+eoclip : N 1200 1982 1179 153 rp C 
+1 1 1 1 scol  L ; ; : N 1221 1982 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 2012 M (Penukaran untuk Urus Niaga Luar Negera)[18 15 17 17 15 15 11 15 17 15 17 17 9 17 15 14 20 11 17 15 15 19 8 15 17 15 15 16 17 15 11 15
+20 15 17 14 11  0]xS 
+F5S21 Ji 
+1798 2012 M ( )S 
+1813 2012 M <96>S 
+1828 2012 M ( Urus niaga luar negara adalah tertakluk )[15 20 9 15 14 15 15 6 15 15 15 15 6 15 15 9 15 15 15 15 15 9 15 15 15 15 16 6 15 16 15 8
+15 9 8 15 14 6 15 13  0]xS 
+: N 1221 2020 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2050 M (kepada )[14 15 15 15 15 15  0]xS 
+1323 2050 M (kadar tukaran matawang yang ditentukan oleh Visa International dan MasterCard )
+[14 15 15 15 9 13 8 15 14 15 9 16 15 13 23 15 8 15 20 15 15 15 13 14 15 15 15 14 15 6 8 15
+15 8 15 14 15 15 13 15 6 15 16 13 18 6 14 15 13 8 15 8 15 9 15 15 8 6 15 15 15 7 13 15
+15 15 13 24 15 14 8 15 9 20 15 9 15  0]xS 
+: N 1221 2058 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 2088 M (Worldwide termasuk yuran pentadbiran sebanyak 1.25% dan mana)[26 15 9 6 15 20 6 15 15 11 8 15 9 23 15 14 15 14 11 14 15 9 15 15 11 15 15 15 8 15 15 15
+6 9 15 15 11 14 15 16 15 15 14 15 14 11 15 8 15 16 23 11 15 15 15 11 23 15 15  0]xS 
+2058 2088 M (-)S 
+2067 2088 M (mana yuran urus niaga )[23 15 15 15 11 14 15 9 15 15 11 16 9 15 14 11 15 6 15 15 16  0]xS 
+: N 1221 2097 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2127 M (yang dikenakan oleh Visa International dan MasterCard Worldwide. )
+[14 15 15 15 8 15 6 14 15 15 15 14 15 15 8 15 6 15 15 8 18 6 14 15 8 8 15 8 15 9 15 15
+8 6 15 15 15 6 8 15 15 15 8 23 15 14 8 15 9 20 15 9 15 8 26 15 9 6 15 20 6 15 15 8
+ 0]xS 
+F3S21 Ji 
+2045 2127 M ( )S 
+: N 75 1980 2 2 rp C 
+ L ; : N 77 1980 1121 2 rp C 
+ L ; : N 1198 1980 2 2 rp C 
+ L ; : N 1200 1980 1179 2 rp C 
+ L ; : N 2379 1980 2 2 rp C 
+ L ; : N 75 1982 2 153 rp C 
+ L ; : N 1198 1982 2 153 rp C 
+ L ; : N 2379 1982 2 153 rp C 
+ L ; : N 77 2137 M 77 2214 I 1198 2214 I 1198 2137 I 1177 2137 I 1177 2213 I 99 2213 I 99 2137 I C 
+eoclip : N 77 2137 1121 77 rp C 
+1 1 1 1 scol  L ; ; : N 99 2137 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2167 M (Monthly Statement Retrieval )[23 17 17 9 17 8 15 8 18 9 15 9 15 24 15 17 9 8 20 15 9 11 8 15 15 15 8  0]xS 
+476 2167 M (Fee)[17 15  0]xS 
+F4S21 Ji 
+523 2167 M ( )S 
+531 2167 M <96>S 
+546 2167 M ( \(i\) Current to 2 months )[8 9 6 9 8 20 15 9 9 15 15 8 8 8 15 8 15 8 23 15 15 8 15 14  0]xS 
+837 2167 M <96>S 
+852 2167 M ( Free of Charge. \(ii\) Above )[8 17 9 15 15 8 15 8 8 20 15 15 9 15 15 8 8 9 6 6 9 8 19 15 15 14 16  0]xS 
+: N 99 2175 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2205 M (3 months )[15 8 23 15 15 8 15 14  0]xS 
+220 2205 M <96>S 
+235 2205 M ( RM5 per statement.)[8 19 23 15 8 15 15 9 8 13 8 15 8 15 23 15 15 8  0]xS 
+F5S21 Ji 
+483 2205 M ( )S 
+: N 1200 2137 M 1200 2214 I 2379 2214 I 2379 2137 I 2358 2137 I 2358 2213 I 1221 2213 I 1221 2137 I C 
+eoclip : N 1200 2137 1179 77 rp C 
+1 1 1 1 scol  L ; ; : N 1221 2137 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 2167 M (Yuran Pengeluaran Penyata Bulanan )[18 17 11 15 17 8 18 15 17 17 15 8 17 15 11 15 17 8 18 15 17 15 15 9 15 8 20 17 8 15 17 15
+17  0]xS 
+F5S21 Ji 
+1709 2167 M <96>S 
+1724 2167 M ( \(i\) Terkini hingga 2 bulan )[8 9 6 9 8 17 15 9 14 6 15 6 8 15 6 15 15 15 15 8 16 8 15 15 6 15 16  0]xS 
+2042 2167 M <96>S 
+2057 2167 M ( Percuma. \(ii\) 3 bulan ke )[8 18 16 9 14 15 23 15 8 8 9 6 6 9 9 15 8 15 15 6 15 15 8 14 16  0]xS 
+: N 1221 2175 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2205 M (atas )[15 8 15 14  0]xS 
+1281 2205 M <96>S 
+1296 2205 M ( RM5 bagi setiap penyata.)[8 20 23 14 8 15 15 15 6 8 14 15 8 6 15 15 8 15 15 15 14 15 8 15  0]xS 
+F3S21 Ji 
+1614 2205 M ( )S 
+: N 75 2135 2 2 rp C 
+ L ; : N 77 2135 1121 2 rp C 
+ L ; : N 1198 2135 2 2 rp C 
+ L ; : N 1200 2135 1179 2 rp C 
+ L ; : N 2379 2135 2 2 rp C 
+ L ; : N 75 2137 2 77 rp C 
+ L ; : N 1198 2137 2 77 rp C 
+ L ; : N 2379 2137 2 77 rp C 
+ L ; : N 77 2216 M 77 2254 I 99 2254 I 99 2216 I C 
+1177 2216 M 1177 2254 I 1198 2254 I 1198 2216 I C 
+eoclip : N 77 2216 1121 38 rp C 
+1 1 1 1 scol  L ; ; : N 99 2216 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2246 M (Sales Draft Retrieval Fee)[18 15 8 15 15 8 20 11 15 9 9 8 20 15 9 11 8 15 15 15 7 8 17 15  0]xS 
+F4S21 Ji 
+420 2246 M ( )S 
+428 2246 M (-)S 
+437 2246 M ( RM20 per origina)[8 19 23 15 15 8 15 15 9 8 15 9 6 15 6 15  0]xS 
+653 2246 M (l copy. RM15 per duplicate copy. )[6 8 14 15 15 14 8 8 20 23 15 15 8 15 15 9 8 15 15 15 6 6 14 15 8 15 7 14 15 15 14 8
+ 0]xS 
+F3S21 Ji 
+1059 2246 M ( )S 
+: N 1200 2216 M 1200 2254 I 1221 2254 I 1221 2216 I C 
+2358 2216 M 2358 2254 I 2379 2254 I 2379 2216 I C 
+eoclip : N 1200 2216 1179 38 rp C 
+1 1 1 1 scol  L ; ; : N 1221 2216 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 2246 M (Yuran Resit Urus Niaga)[18 17 11 15 17 8 20 15 15 8 8 8 20 11 17 14 8 20 8 15 17  0]xS 
+F5S21 Ji 
+1525 2246 M ( )S 
+1533 2246 M (-)S 
+1542 2246 M ( RM20 setiap salinan asal. RM15 bagi setiap salinan pendua.)[8 20 23 15 15 7 14 15 8 6 15 15 8 14 15 6 6 15 15 15 8 15 14 15 6 8 7 20 23 15 15 8
+15 15 15 6 8 14 15 8 6 15 15 8 14 15 6 6 15 15 15 8 15 15 15 15 15 15  0]xS 
+F3S21 Ji 
+2283 2246 M ( )S 
+: N 75 2214 2 2 rp C 
+ L ; : N 77 2214 1121 2 rp C 
+ L ; : N 1198 2214 2 2 rp C 
+ L ; : N 1200 2214 1179 2 rp C 
+ L ; : N 2379 2214 2 2 rp C 
+ L ; : N 75 2216 2 38 rp C 
+ L ; : N 1198 2216 2 38 rp C 
+ L ; : N 2379 2216 2 38 rp C 
+ L ; : N 77 2256 M 77 2294 I 99 2294 I 99 2256 I C 
+1177 2256 M 1177 2294 I 1198 2294 I 1198 2256 I C 
+eoclip : N 77 2256 1121 38 rp C 
+1 1 1 1 scol  L ; ; : N 99 2256 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2286 M (Cheque Returned)[20 17 15 17 17 15 8 20 15 9 16 11 17 15  0]xS 
+F4S21 Ji 
+327 2286 M ( )S 
+F3S21 Ji 
+335 2286 M (Fee /)[17 15 15 8  0]xS 
+F4S21 Ji 
+397 2286 M ( )S 
+F3S21 Ji 
+405 2286 M (Over Limit Fee)[21 15 15 11 8 16 8 24 8 9 8 17 15  0]xS 
+F4S21 Ji 
+595 2286 M ( )S 
+603 2286 M (-)S 
+611 2286 M ( No charge.)[8 20 15 8 14 15 15 9 15 15  0]xS 
+F5S21 Ji 
+753 2286 M ( )S 
+F3S21 Ji 
+761 2286 M ( )S 
+: N 1200 2256 M 1200 2294 I 1221 2294 I 1221 2256 I C 
+2358 2256 M 2358 2294 I 2379 2294 I 2379 2256 I C 
+eoclip : N 1200 2256 1179 38 rp C 
+1 1 1 1 scol  L ; ; : N 1221 2256 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 2286 M (Yuran Pemulangan Cek)[18 17 11 15 17 8 18 15 24 17 8 15 17 17 15 16 8 20 15  0]xS 
+F5S21 Ji 
+1527 2286 M ( /)[7  0]xS 
+F1S21 Ji 
+1542 2286 M ( Yuran Had Lebih)[8 18 17 11 15 16 8 20 15 16 8 17 15 17 7  0]xS 
+F5S21 Ji 
+1767 2286 M ( )S 
+1775 2286 M (-)S 
+1784 2286 M ( Tiada caj.  )[7 17 6 15 15 15 8 14 15 6 8 7  0]xS 
+F3S21 Ji 
+1925 2286 M ( )S 
+: N 75 2254 2 2 rp C 
+ L ; : N 77 2254 1121 2 rp C 
+ L ; : N 1198 2254 2 2 rp C 
+ L ; : N 1200 2254 1179 2 rp C 
+ L ; : N 2379 2254 2 2 rp C 
+ L ; : N 75 2256 2 38 rp C 
+ L ; : N 1198 2256 2 38 rp C 
+ L ; : N 2379 2256 2 38 rp C 
+ L ; : N 77 2296 M 77 2335 I 99 2335 I 99 2296 I C 
+1177 2296 M 1177 2335 I 1198 2335 I 1198 2296 I C 
+eoclip : N 77 2296 1121 39 rp C 
+1 1 1 1 scol  L ; ; : N 99 2296 1078 39 rp C 
+1 1 1 1 scol  L ; 99 2326 M (Card Replacement Fee)[20 15 11 17 8 20 14 17 8 15 15 15 24 15 17 9 8 17 15  0]xS 
+F4S21 Ji 
+394 2326 M ( )S 
+402 2326 M (-)S 
+411 2326 M ( RM50 \(Co)[8 19 23 15 15 8 9 20  0]xS 
+543 2326 M (urier charge is applicable for overseas delivery\). )[15 9 6 15 9 8 14 15 15 9 15 15 8 6 14 8 15 15 15 6 6 14 15 15 6 15 8 8 15 9 8 15
+14 15 9 14 15 15 14 8 15 15 6 6 14 15 9 14 8 8  0]xS 
+F3S21 Ji 
+1131 2326 M ( )S 
+: N 1200 2296 M 1200 2335 I 1221 2335 I 1221 2296 I C 
+2358 2296 M 2358 2335 I 2379 2335 I 2379 2296 I C 
+eoclip : N 1200 2296 1179 39 rp C 
+1 1 1 1 scol  L ; ; : N 1221 2296 1137 39 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 2326 M (Yuran Penggantian Kad)[18 17 11 15 17 8 18 15 17 17 17 14 17 9 8 15 17 7 20 15  0]xS 
+F5S21 Ji 
+1530 2326 M ( )S 
+1538 2326 M (-)S 
+1547 2326 M ( RM50 \(Caj kiriman dikenakan untuk penghantaran luar negara\).)
+[7 20 23 15 15 8 9 20 15 6 7 14 6 9 6 23 15 15 8 15 6 14 15 15 15 14 15 15 8 15 15 8
+15 14 8 15 15 15 15 15 15 15 8 15 9 15 15 8 6 15 15 9 8 16 15 15 15 9 15 9  0]xS 
+F3S21 Ji 
+2325 2326 M ( )S 
+: N 75 2294 2 2 rp C 
+ L ; : N 77 2294 1121 2 rp C 
+ L ; : N 1198 2294 2 2 rp C 
+ L ; : N 1200 2294 1179 2 rp C 
+ L ; : N 2379 2294 2 2 rp C 
+ L ; : N 75 2296 2 39 rp C 
+ L ; : N 1198 2296 2 39 rp C 
+ L ; : N 2379 2296 2 39 rp C 
+ L ; : N 77 2337 M 77 2643 I 1198 2643 I 1198 2337 I 1177 2337 I 1177 2604 I 99 2604 I 99 2337 I C 
+eoclip : N 77 2337 1121 306 rp C 
+1 1 1 1 scol  L ; ; : N 99 2337 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2367 M (Liability for Unauthorised Transactions )[17 8 15 17 7 8 8 9 15 12 9 16 11 12 20 17 14 17 9 17 17 10 8 15 15 17 12 16 11 15 17 15
+15 15 9 8 17 17 15  0]xS 
+F4S21 Ji 
+633 2367 M <96>S 
+648 2367 M ( If your card is lost / stolen, please report )[11 8 8 11 14 15 15 9 12 14 15 9 15 12 6 14 12 6 15 13 8 12 7 12 14 8 15 6 15 15 8 12
+15 6 15 15 14 15 12 8 15 15 15 9 9  0]xS 
+: N 99 2375 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2405 M (immediately to OCBC Bank. )[6 23 23 15 15 6 15 8 15 6 14 11 8 15 11 21 20 18 20 11 18 15 15 14 8  0]xS 
+461 2405 M (You w)[18 15 15 11  0]xS 
+540 2405 M (ill be liable to pay all charges incurred on your lost )[6 6 6 11 15 15 11 6 6 15 15 6 15 11 8 15 11 15 15 14 11 15 6 6 11 14 15 15 9 15 15 14
+11 6 15 14 15 9 9 15 15 11 15 15 11 14 15 16 9 11 6 15 14 8  0]xS 
+: N 99 2413 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2443 M (/stolen card if you fail to lodge a report.)[8 14 8 15 6 15 15 17 14 15 9 15 17 6 8 17 14 15 15 16 8 15 6 6 17 8 15 17 6 15 15 15
+15 17 15 17 9 15 15 15 9 8  0]xS 
+644 2443 M ( Your maximum )[17 18 15 15 9 17 23 15 14 6 23 15 23  0]xS 
+871 2443 M (liability for unauthorised )[6 6 15 15 6 6 6 8 14 17 8 15 9 17 15 15 15 15 8 15 15 9 6 14 15 16  0]xS 
+: N 99 2451 1078 39 rp C 
+1 1 1 1 scol  L ; 99 2481 M (transaction will be limited to RM250 provided you have not \(i\) acted fraudulently; or \(ii\) )
+[8 9 15 15 14 15 14 8 6 15 15 10 20 6 6 6 10 15 15 10 6 6 23 6 8 15 15 10 8 15 10 20
+23 15 16 15 10 15 9 15 14 6 16 15 15 10 14 15 15 11 15 15 14 15 10 15 15 8 10 10 6 9 10 15
+14 8 15 15 10 8 9 15 15 16 15 6 15 15 8 6 14 8 10 15 9 10 9 6 7 10  0]xS 
+: N 99 2490 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2520 M (failed to inform OCBC Bank)[8 15 6 6 15 15 8 8 15 8 6 15 8 15 9 23 8 21 20 18 20 8 18 15 15  0]xS 
+436 2520 M ( as reasonably practicable after you have discovered that the )
+[8 15 14 8 9 15 15 14 15 15 15 15 6 14 8 15 9 15 14 8 6 14 15 15 6 15 8 15 8 8 15 9
+8 14 15 15 8 15 15 14 15 8 15 6 14 14 15 14 15 9 15 15 8 8 16 15 8 8 8 15 15  0]xS 
+: N 99 2528 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2558 M (Card is lost or stolen. Otherwise, your liability for loss may exceed the maximum amount )
+[20 15 9 15 8 6 14 8 6 15 14 8 8 15 9 8 14 8 15 6 15 15 8 9 21 8 15 15 9 20 6 14
+15 8 8 14 15 15 9 8 6 6 15 15 6 7 6 8 14 8 8 15 9 8 6 15 14 14 8 23 15 14 8 15
+14 14 15 15 15 8 8 15 15 8 23 15 14 6 23 15 23 8 16 23 15 15 15 9  0]xS 
+: N 99 2566 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2596 M (of RM250. )[15 8 8 20 23 15 15 15 8  0]xS 
+F5S21 Ji 
+234 2596 M ( )S 
+: N 1200 2337 M 1200 2643 I 1221 2643 I 1221 2337 I C 
+2358 2337 M 2358 2643 I 2379 2643 I 2379 2337 I C 
+eoclip : N 1200 2337 1179 306 rp C 
+1 1 1 1 scol  L ; ; : N 1221 2337 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 2367 M (Liabiliti untuk Urus Niaga yang Tidak Dibenarkan)[17 8 15 17 7 8 8 9 7 13 17 17 9 17 14 13 20 10 17 15 13 20 8 15 17 14 13 15 15 17 17 13
+16 8 17 15 15 13 19 8 17 15 17 15 11 15 15  0]xS 
+F5S21 Ji 
+1889 2367 M ( )S 
+1902 2367 M <96>S 
+1916 2367 M ( Jika Kad anda hilang / dicuri, sila )[13 14 6 14 15 13 18 15 15 13 15 15 15 15 13 15 6 6 15 15 15 13 8 12 15 6 14 15 9 6 8 13
+14 6 6 15  0]xS 
+: N 1221 2375 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2405 M (laporka)[6 15 15 15 9 14  0]xS 
+1310 2405 M (n dengan secepat mungkin kepada OCBC Bank. Anda akan bertanggungjawab untuk )
+[15 9 15 15 15 16 15 15 9 14 15 14 15 15 15 8 9 23 15 15 15 14 6 15 9 14 15 15 15 15 15 9
+21 20 18 20 9 18 15 15 14 8 9 18 15 15 15 9 15 14 15 15 9 15 15 9 8 15 15 15 16 15 15 15
+6 16 20 15 15 9 15 15 8 15 14  0]xS 
+: N 1221 2413 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 2443 M (membayar segala Caj atas Kad yang hilang / dicuri sekiranya anda gagal membuat laporan. )
+[23 15 23 15 15 14 15 9 9 14 15 15 15 6 16 9 20 15 6 9 15 8 15 14 9 18 16 15 9 14 15 15
+16 9 15 6 6 16 15 15 9 8 9 16 6 14 15 9 6 9 14 15 14 6 9 15 15 14 15 10 15 15 15 16
+9 15 15 15 16 6 9 23 15 23 15 15 16 8 9 6 15 15 15 9 15 15 9  0]xS 
+: N 1221 2452 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2482 M (Liabiliti maksimum anda untuk urus niaga yang tidak dibenarkan disebabkan kehilangan atau )
+[15 6 15 15 6 6 6 8 6 9 23 15 14 14 6 23 15 23 9 15 15 15 15 9 15 15 8 15 14 9 15 9
+15 14 9 15 6 15 15 15 9 14 15 15 15 9 8 6 15 15 14 9 15 6 15 15 15 15 9 14 15 15 9 15
+6 14 15 15 15 15 14 15 15 9 14 15 15 6 6 15 15 15 15 15 9 15 8 15 16  0]xS 
+: N 1221 2490 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2520 M (ke)[14  0]xS 
+1250 2520 M (curian Kad adalah RM250 dengan syarat anda tidak \(i\) melakukan penipuan; atau \(ii\) gagal )
+[14 15 9 6 15 15 8 18 15 15 8 15 15 15 7 15 15 8 20 23 15 15 15 8 15 15 16 15 15 15 8 14
+14 15 9 15 8 8 15 15 15 15 8 8 6 15 15 14 8 9 6 9 8 23 15 6 15 14 15 14 15 15 8 15
+15 16 6 15 15 15 15 8 8 15 8 15 16 8 9 6 6 9 8 15 15 15 15 7  0]xS 
+: N 1221 2528 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2558 M (memaklumkan OCBC Bank secepat yang munasabah selepas anda mendapat tahu bahawa )
+[23 15 23 15 14 6 15 23 14 15 15 9 21 20 18 20 9 18 15 15 14 9 14 15 14 15 15 15 8 9 14 15
+15 16 9 23 15 15 15 14 15 15 16 15 9 14 15 6 15 16 15 14 9 15 15 15 16 9 23 15 15 15 16 15
+15 8 9 8 15 16 15 9 15 15 15 15 20 16  0]xS 
+: N 1221 2566 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2596 M (Kad hilang atau dicuri. Jika tidak, liabiliti anda untuk kerugian mungkin melebihi jumla)
+[18 15 15 15 15 6 6 16 15 15 15 15 8 15 15 15 16 6 14 15 9 6 8 15 14 6 14 15 15 8 6 15
+15 14 8 15 6 6 15 15 6 6 6 8 6 15 15 15 15 15 15 16 15 8 15 14 15 14 15 9 15 15 6 15
+15 15 23 15 16 15 14 6 15 15 23 15 6 15 15 7 15 6 15 6 15 23 6  0]xS 
+2341 2596 M (h )[16  0]xS 
+: N 1221 2604 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 2634 M (maksimum RM250.)[23 15 14 14 6 23 15 23 7 20 23 15 15 15  0]xS 
+F3S21 Ji 
+1457 2634 M ( )S 
+: N 75 2335 2 2 rp C 
+ L ; : N 77 2335 1121 2 rp C 
+ L ; : N 1198 2335 2 2 rp C 
+ L ; : N 1200 2335 1179 2 rp C 
+ L ; : N 2379 2335 2 2 rp C 
+ L ; : N 75 2337 2 306 rp C 
+ L ; : N 1198 2337 2 306 rp C 
+ L ; : N 2379 2337 2 306 rp C 
+ L ; : N 77 2645 M 77 2874 I 1198 2874 I 1198 2645 I 1177 2645 I 1177 2846 I 99 2846 I 99 2645 I C 
+eoclip : N 77 2645 1121 229 rp C 
+1 1 1 1 scol  L ; ; : N 99 2645 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2675 M (Notice On Paying Only Minimum Monthly Repayment)[20 17 9 8 15 15 12 21 17 12 18 15 15 8 17 17 12 21 16 8 15 12 23 8 16 8 24 17 24 12 23 17
+17 8 17 8 15 12 20 15 17 15 15 24 15 17  0]xS 
+F4S21 Ji 
+815 2675 M ( )S 
+827 2675 M (-)S 
+836 2675 M ( The table below illustrates )[12 17 15 15 12 8 15 15 6 15 12 15 15 6 15 20 12 6 6 6 15 14 8 9 15 8 15 14  0]xS 
+: N 99 2683 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2713 M (how long it would take to pay off an outstanding balance and amount of interest incurred )
+[15 15 20 8 6 15 15 16 8 6 8 8 20 15 15 6 15 8 8 15 14 16 8 8 15 8 15 15 14 8 15 8
+8 8 15 16 8 15 15 8 14 8 15 15 15 6 15 16 8 15 15 6 15 15 14 16 8 15 15 16 8 15 23 15
+15 15 8 9 15 8 8 6 15 8 15 9 15 14 8 8 6 15 15 15 9 9 15 16  0]xS 
+: N 99 2721 1078 39 rp C 
+1 1 1 1 scol  L ; 99 2751 M (if you continue to pay only the minimum payment amount. The computatio)
+[6 8 9 14 15 15 9 14 15 15 8 6 15 15 16 9 8 15 9 15 15 14 10 15 15 6 14 9 8 15 15 9
+23 6 16 6 23 15 23 9 15 15 14 23 15 15 8 9 15 23 15 16 15 8 8 9 17 15 15 9 14 15 23 15
+15 8 15 8 6  0]xS 
+1014 2751 M (ns are based )[15 14 9 15 9 16 9 16 15 14 15 16  0]xS 
+: N 99 2760 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2790 M (on 5% minimum payment or RM50, whichever is higher, at a financial charge of 18% p.a. )
+[15 15 8 16 23 8 23 6 15 6 23 15 23 8 15 15 14 23 15 15 8 8 15 9 8 20 23 15 15 8 7 20
+15 6 14 15 15 14 15 9 8 6 14 8 15 6 15 15 15 9 8 8 15 8 8 15 7 8 6 15 15 15 14 6
+15 6 8 14 15 15 9 15 15 8 15 8 8 15 15 23 8 15 8 15 9  0]xS 
+: N 99 2798 1078 38 rp C 
+1 1 1 1 scol  L ; 99 2828 M (provided no new retail transactions. This calculation is based on 30 days a month. )
+[15 9 15 14 6 15 15 15 8 15 15 8 15 15 20 8 9 15 8 15 6 6 8 8 9 15 15 14 15 14 8 6
+15 15 14 8 7 17 15 6 14 7 14 15 6 14 15 6 15 8 6 15 15 8 6 14 8 15 15 14 15 15 8 15
+15 8 15 15 8 15 15 14 13 8 15 8 23 15 15 8 15 7  0]xS 
+F1S21 Ji 
+1098 2828 M ( )S 
+: N 99 2836 1078 10 rp C 
+1 1 1 1 scol  L ; /F1S08 F1 [8 0 0 -8 0 0 ] mFS
+F1S08 Ji 
+99 2842 M ( )S 
+: N 1200 2645 M 1200 2874 I 1221 2874 I 1221 2645 I C 
+2358 2645 M 2358 2874 I 2379 2874 I 2379 2645 I C 
+eoclip : N 1200 2645 1179 229 rp C 
+1 1 1 1 scol  L ; ; : N 1221 2645 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 2675 M (Notis Sekiranya Pelanggan Membuat Bayaran Minimum Bulanan Sahaja)
+[20 17 9 8 15 15 18 15 15 8 11 15 17 15 15 15 18 15 8 15 16 17 17 15 16 15 23 15 24 17 17 15
+9 15 20 15 15 15 11 15 16 15 23 7 17 8 24 17 24 15 19 17 8 15 17 15 16 15 18 15 17 15 8  0]xS 
+F4S21 Ji 
+2203 2675 M ( )S 
+2218 2675 M (-)S 
+F5S21 Ji 
+2227 2675 M ( Jadua)[14 14 15 15 15  0]xS 
+2315 2675 M (l di )[6 15 15 6  0]xS 
+: N 1221 2683 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2713 M (bawah menggambarkan masa yang diambil untuk menjelaskan baki belum jelas dan jumlah )
+[15 15 20 15 15 10 23 15 15 15 15 15 23 16 15 9 14 15 15 10 23 15 14 15 10 14 15 15 15 10 15 6
+15 23 15 7 6 10 15 15 8 15 14 10 23 15 15 6 15 6 15 14 14 15 15 10 15 15 14 6 10 16 15 6
+15 23 10 6 15 6 15 14 10 16 15 15 10 6 15 23 6 15 16  0]xS 
+: N 1221 2721 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 2751 M (faedah yang ditanggung jika anda hanya membuat bayaran minimum secara berterusan. )
+[8 15 15 15 15 15 14 14 15 15 15 14 15 6 8 15 15 15 15 16 15 15 14 6 6 14 15 14 15 15 15 15
+14 15 15 15 14 15 14 23 15 23 15 15 15 8 14 15 15 14 15 9 16 15 14 23 6 15 6 23 15 23 14 14
+15 14 15 9 15 14 15 15 9 8 15 9 15 14 15 15 8  0]xS 
+: N 1221 2760 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2790 M (Pengiraan adalah berasaskan bayaran minimum 5% atau RM50, yang mana lebih tinggi, )
+[18 15 15 15 6 9 15 16 15 13 15 16 15 6 15 15 14 15 15 9 15 14 15 14 14 15 15 13 15 15 14 15
+10 15 15 13 23 6 15 6 23 15 23 14 16 23 13 15 8 15 16 13 20 23 15 15 8 13 14 15 15 15 13 23
+15 16 15 13 6 16 15 6 15 13 8 6 15 15 15 6 9  0]xS 
+: N 1221 2798 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2828 M (pad)[15 15  0]xS 
+1266 2828 M (a caj faedah 18% setahun selagi tiada transaksi baru. Pengiraan ini berdasarkan tempoh )
+[15 9 14 15 6 9 8 15 15 15 15 15 9 16 16 23 9 14 15 8 15 15 15 15 9 14 15 6 15 15 6 9
+8 6 15 16 15 9 8 9 15 15 14 15 14 14 6 9 15 15 9 15 8 9 18 15 15 15 6 9 16 15 15 9
+6 15 6 9 15 16 9 15 15 14 15 9 14 16 15 9 8 15 23 15 15 15  0]xS 
+: N 1221 2836 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 2866 M (30 hari sebulan)[15 15 8 15 15 9 6 8 14 15 15 15 6 15  0]xS 
+F4S21 Ji 
+1407 2866 M (.)S 
+F3S21 Ji 
+1415 2866 M ( )S 
+: N 75 2643 2 2 rp C 
+ L ; : N 77 2643 1121 2 rp C 
+ L ; : N 1198 2643 2 2 rp C 
+ L ; : N 1200 2643 1179 2 rp C 
+ L ; : N 2379 2643 2 2 rp C 
+ L ; : N 75 2645 2 229 rp C 
+ L ; : N 1198 2645 2 229 rp C 
+ L ; : N 2379 2645 2 229 rp C 
+ L ; : N 77 2876 M 77 3085 I 2379 3085 I 2379 2876 I 2352 2876 I 2352 3084 I 99 3084 I 99 2876 I C 
+eoclip : N 77 2876 2302 209 rp C 
+1 1 1 1 scol  L ; ; : N 101 2879 M 101 2923 I 991 2923 I 991 2879 I C 
+123 2881 M 123 2920 I 970 2920 I 970 2881 I C 
+eoclip : N 101 2879 890 44 rp C 
+1 1 1 1 scol  L ; ; : N 123 2881 847 39 rp C 
+1 1 1 1 scol  L ; 123 2911 M (Outstanding Balance \(RM\) / Baki Belum Jelas \(RM\))[21 17 9 15 9 15 17 17 8 17 17 7 20 15 8 15 17 15 15 8 9 20 23 8 8 7 8 20 15 15 8 7
+20 15 8 17 24 8 15 15 8 15 15 8 9 19 23  0]xS 
+781 2911 M ( )S 
+: N 993 2879 M 993 2923 I 1464 2923 I 1464 2879 I C 
+1015 2881 M 1015 2920 I 1443 2920 I 1443 2881 I C 
+eoclip : N 993 2879 471 44 rp C 
+0.902 0.902 0.902 1 scol  L ; ; : N 1015 2881 428 39 rp C 
+0.902 0.902 0.902 1 scol  L ; 1195 2911 M (3,000)[15 8 15 15  0]xS 
+1263 2911 M ( )S 
+: N 1466 2879 M 1466 2923 I 1936 2923 I 1936 2879 I C 
+1487 2881 M 1487 2920 I 1915 2920 I 1915 2881 I C 
+eoclip : N 1466 2879 470 44 rp C 
+0.902 0.902 0.902 1 scol  L ; ; : N 1487 2881 428 39 rp C 
+0.902 0.902 0.902 1 scol  L ; 1667 2911 M (5,000)[15 8 15 15  0]xS 
+1735 2911 M ( )S 
+: N 1938 2879 M 1938 2923 I 2350 2923 I 2350 2879 I C 
+1960 2881 M 1960 2920 I 2329 2920 I 2329 2881 I C 
+eoclip : N 1938 2879 412 44 rp C 
+0.902 0.902 0.902 1 scol  L ; ; : N 1960 2881 369 39 rp C 
+0.902 0.902 0.902 1 scol  L ; 2103 2911 M (10,000)[15 15 8 15 15  0]xS 
+2186 2911 M ( )S 
+: N 99 2876 2 2 rp C 
+ L ; : N 99 2876 2 2 rp C 
+ L ; : N 101 2876 890 2 rp C 
+ L ; : N 991 2876 2 2 rp C 
+ L ; : N 993 2876 471 2 rp C 
+ L ; : N 1464 2876 2 2 rp C 
+ L ; : N 1466 2876 470 2 rp C 
+ L ; : N 1936 2876 2 2 rp C 
+ L ; : N 1938 2876 412 2 rp C 
+ L ; : N 2350 2876 2 2 rp C 
+ L ; : N 2350 2876 2 2 rp C 
+ L ; : N 99 2878 2 45 rp C 
+ L ; : N 991 2878 2 45 rp C 
+ L ; : N 1464 2878 2 45 rp C 
+ L ; : N 1936 2878 2 45 rp C 
+ L ; : N 2350 2878 2 45 rp C 
+ L ; : N 101 2925 M 101 3002 I 991 3002 I 991 2925 I C 
+123 2944 M 123 2982 I 970 2982 I 970 2944 I C 
+eoclip : N 101 2925 890 77 rp C 
+1 1 1 1 scol  L ; ; : N 123 2944 847 38 rp C 
+1 1 1 1 scol  L ; F4S21 Ji 
+123 2974 M (Repayment / Pembayaran Balik)[20 15 15 15 14 23 15 15 8 8 8 8 18 15 23 15 15 14 15 9 15 15 8 18 15 6 6  0]xS 
+508 2974 M ( )S 
+: N 993 2925 M 993 3002 I 1015 3002 I 1015 2925 I C 
+1236 2925 M 1236 3002 I 1257 3002 I 1257 2925 I C 
+eoclip : N 993 2925 264 77 rp C 
+0.902 0.902 0.902 1 scol  L ; ; : N 1015 2925 221 38 rp C 
+0.902 0.902 0.902 1 scol  L ; 1043 2955 M (Pay only min. )[18 15 14 8 15 15 6 14 8 23 6 15 8  0]xS 
+: N 1015 2963 221 39 rp C 
+0.902 0.902 0.902 1 scol  L ; 1032 2993 M (amount RM150)[15 23 15 15 15 8 8 20 23 15 15  0]xS 
+1219 2993 M ( )S 
+: N 1259 2925 M 1259 3002 I 1464 3002 I 1464 2925 I C 
+1280 2944 M 1280 2982 I 1442 2982 I 1442 2944 I C 
+eoclip : N 1259 2925 205 77 rp C 
+0.902 0.902 0.902 1 scol  L ; ; : N 1280 2944 162 38 rp C 
+0.902 0.902 0.902 1 scol  L ; 1289 2974 M (Pay RM250)[18 15 14 8 20 23 15 15  0]xS 
+1432 2974 M ( )S 
+: N 1466 2925 M 1466 3002 I 1487 3002 I 1487 2925 I C 
+1708 2925 M 1708 3002 I 1729 3002 I 1729 2925 I C 
+eoclip : N 1466 2925 263 77 rp C 
+0.902 0.902 0.902 1 scol  L ; ; : N 1487 2925 221 38 rp C 
+0.902 0.902 0.902 1 scol  L ; 1515 2955 M (Pay only min. )[18 15 14 8 15 15 6 14 8 23 6 15 8  0]xS 
+: N 1487 2963 221 39 rp C 
+0.902 0.902 0.902 1 scol  L ; 1504 2993 M (am)[15  0]xS 
+1542 2993 M (ount RM250)[15 15 15 8 8 20 23 15 15  0]xS 
+1691 2993 M ( )S 
+: N 1731 2925 M 1731 3002 I 1936 3002 I 1936 2925 I C 
+1753 2944 M 1753 2982 I 1915 2982 I 1915 2944 I C 
+eoclip : N 1731 2925 205 77 rp C 
+0.902 0.902 0.902 1 scol  L ; ; : N 1753 2944 162 38 rp C 
+0.902 0.902 0.902 1 scol  L ; 1758 2974 M (Pay  RM350)[18 15 14 8 8 20 23 15 15  0]xS 
+1909 2974 M ( )S 
+: N 1938 2925 M 1938 3002 I 1960 3002 I 1960 2925 I C 
+2152 2925 M 2152 3002 I 2172 3002 I 2172 2925 I C 
+eoclip : N 1938 2925 234 77 rp C 
+0.902 0.902 0.902 1 scol  L ; ; : N 1960 2925 192 38 rp C 
+0.902 0.902 0.902 1 scol  L ; 1973 2955 M (Pay only min. )[18 15 14 8 15 15 6 14 8 23 6 15 8  0]xS 
+: N 1960 2963 192 39 rp C 
+0.902 0.902 0.902 1 scol  L ; 1962 2993 M (amount RM500)[15 23 15 15 15 8 8 20 23 15 15  0]xS 
+2149 2993 M ( )S 
+: N 2174 2925 M 2174 3002 I 2196 3002 I 2196 2925 I C 
+2329 2925 M 2329 3002 I 2350 3002 I 2350 2925 I C 
+eoclip : N 2174 2925 176 77 rp C 
+0.902 0.902 0.902 1 scol  L ; ; : N 2196 2925 133 38 rp C 
+0.902 0.902 0.902 1 scol  L ; 2238 2955 M (Pay )[18 15 14  0]xS 
+: N 2196 2963 133 39 rp C 
+0.902 0.902 0.902 1 scol  L ; 2218 2993 M (RM600)[20 23 15 15  0]xS 
+2306 2993 M ( )S 
+: N 99 2923 2 2 rp C 
+ L ; : N 101 2923 890 2 rp C 
+ L ; : N 991 2923 2 2 rp C 
+ L ; : N 993 2923 264 2 rp C 
+ L ; : N 1257 2923 2 2 rp C 
+ L ; : N 1259 2923 205 2 rp C 
+ L ; : N 1464 2923 2 2 rp C 
+ L ; : N 1466 2923 263 2 rp C 
+ L ; : N 1729 2923 2 2 rp C 
+ L ; : N 1731 2923 205 2 rp C 
+ L ; : N 1936 2923 2 2 rp C 
+ L ; : N 1938 2923 234 2 rp C 
+ L ; : N 2172 2923 2 2 rp C 
+ L ; : N 2174 2923 176 2 rp C 
+ L ; : N 2350 2923 2 2 rp C 
+ L ; : N 99 2925 2 77 rp C 
+ L ; : N 991 2925 2 77 rp C 
+ L ; : N 1257 2925 2 77 rp C 
+ L ; : N 1464 2925 2 77 rp C 
+ L ; : N 1729 2925 2 77 rp C 
+ L ; : N 1936 2925 2 77 rp C 
+ L ; : N 2172 2925 2 77 rp C 
+ L ; : N 2350 2925 2 77 rp C 
+ L ; : N 101 3004 M 101 3042 I 123 3042 I 123 3004 I C 
+970 3004 M 970 3042 I 991 3042 I 991 3004 I C 
+eoclip : N 101 3004 890 38 rp C 
+1 1 1 1 scol  L ; ; : N 123 3004 847 38 rp C 
+1 1 1 1 scol  L ; 123 3034 M (Repayment Period \(months\) / Tempoh Pembayaran Balik \(bulan\))[20 15 15 15 14 23 15 15 8 8 18 15 9 6 15 15 8 9 23 15 15 8 15 14 9 8 8 7 17 15 23 15
+15 15 8 18 15 23 15 15 14 15 9 15 15 8 18 15 6 6 14 8 9 15 15 6 15 15  0]xS 
+909 3034 M ( )S 
+: N 993 3004 M 993 3042 I 1015 3042 I 1015 3004 I C 
+1236 3004 M 1236 3042 I 1257 3042 I 1257 3004 I C 
+eoclip : N 993 3004 264 38 rp C 
+1 1 1 1 scol  L ; ; : N 1015 3004 221 38 rp C 
+1 1 1 1 scol  L ; 1110 3034 M (55)[15  0]xS 
+1140 3034 M ( )S 
+: N 1259 3004 M 1259 3042 I 1280 3042 I 1280 3004 I C 
+1442 3004 M 1442 3042 I 1464 3042 I 1464 3004 I C 
+eoclip : N 1259 3004 205 38 rp C 
+1 1 1 1 scol  L ; ; : N 1280 3004 162 38 rp C 
+1 1 1 1 scol  L ; 1346 3034 M (14)[15  0]xS 
+1376 3034 M ( )S 
+: N 1466 3004 M 1466 3042 I 1487 3042 I 1487 3004 I C 
+1708 3004 M 1708 3042 I 1729 3042 I 1729 3004 I C 
+eoclip : N 1466 3004 263 38 rp C 
+1 1 1 1 scol  L ; ; : N 1487 3004 221 38 rp C 
+1 1 1 1 scol  L ; 1582 3034 M (70)[15  0]xS 
+1612 3034 M ( )S 
+: N 1731 3004 M 1731 3042 I 1753 3042 I 1753 3004 I C 
+1915 3004 M 1915 3042 I 1936 3042 I 1936 3004 I C 
+eoclip : N 1731 3004 205 38 rp C 
+1 1 1 1 scol  L ; ; : N 1753 3004 162 38 rp C 
+1 1 1 1 scol  L ; 1819 3034 M (17)[15  0]xS 
+1849 3034 M ( )S 
+: N 1938 3004 M 1938 3042 I 1960 3042 I 1960 3004 I C 
+2152 3004 M 2152 3042 I 2172 3042 I 2172 3004 I C 
+eoclip : N 1938 3004 234 38 rp C 
+1 1 1 1 scol  L ; ; : N 1960 3004 192 38 rp C 
+1 1 1 1 scol  L ; 2040 3034 M (89)[15  0]xS 
+2070 3034 M ( )S 
+: N 2174 3004 M 2174 3042 I 2196 3042 I 2196 3004 I C 
+2329 3004 M 2329 3042 I 2350 3042 I 2350 3004 I C 
+eoclip : N 2174 3004 176 38 rp C 
+1 1 1 1 scol  L ; ; : N 2196 3004 133 38 rp C 
+1 1 1 1 scol  L ; 2247 3034 M (20)[15  0]xS 
+2277 3034 M ( )S 
+: N 99 3002 2 2 rp C 
+ L ; : N 101 3002 890 2 rp C 
+ L ; : N 991 3002 2 2 rp C 
+ L ; : N 993 3002 264 2 rp C 
+ L ; : N 1257 3002 2 2 rp C 
+ L ; : N 1259 3002 205 2 rp C 
+ L ; : N 1464 3002 2 2 rp C 
+ L ; : N 1466 3002 263 2 rp C 
+ L ; : N 1729 3002 2 2 rp C 
+ L ; : N 1731 3002 205 2 rp C 
+ L ; : N 1936 3002 2 2 rp C 
+ L ; : N 1938 3002 234 2 rp C 
+ L ; : N 2172 3002 2 2 rp C 
+ L ; : N 2174 3002 176 2 rp C 
+ L ; : N 2350 3002 2 2 rp C 
+ L ; : N 99 3004 2 38 rp C 
+ L ; : N 991 3004 2 38 rp C 
+ L ; : N 1257 3004 2 38 rp C 
+ L ; : N 1464 3004 2 38 rp C 
+ L ; : N 1729 3004 2 38 rp C 
+ L ; : N 1936 3004 2 38 rp C 
+ L ; : N 2172 3004 2 38 rp C 
+ L ; : N 2350 3004 2 38 rp C 
+ L ; : N 101 3044 M 101 3082 I 123 3082 I 123 3044 I C 
+970 3044 M 970 3082 I 991 3082 I 991 3044 I C 
+eoclip : N 101 3044 890 38 rp C 
+1 1 1 1 scol  L ; ; : N 123 3044 847 38 rp C 
+1 1 1 1 scol  L ; 123 3074 M (Total Interest Incurred \(RM\)/ Jumlah Faedah Yang Dikenakan \(RM\))
+[17 15 8 15 6 8 8 15 8 15 9 15 14 7 8 8 15 14 15 9 9 15 15 8 9 20 23 8 8 8 14 15
+23 6 15 15 7 17 15 15 15 15 15 8 18 15 15 15 8 20 6 14 15 15 15 14 15 15 8 9 20 23  0]xS 
+939 3074 M ( )S 
+: N 993 3044 M 993 3082 I 1015 3082 I 1015 3044 I C 
+1236 3044 M 1236 3082 I 1257 3082 I 1257 3044 I C 
+eoclip : N 993 3044 264 38 rp C 
+1 1 1 1 scol  L ; ; : N 1015 3044 221 38 rp C 
+1 1 1 1 scol  L ; 1091 3074 M (1,055)[15 8 15 15  0]xS 
+1159 3074 M ( )S 
+: N 1259 3044 M 1259 3082 I 1280 3082 I 1280 3044 I C 
+1442 3044 M 1442 3082 I 1464 3082 I 1464 3044 I C 
+eoclip : N 1259 3044 205 38 rp C 
+1 1 1 1 scol  L ; ; : N 1280 3044 162 38 rp C 
+1 1 1 1 scol  L ; 1338 3074 M (333)[15 15  0]xS 
+1383 3074 M ( )S 
+: N 1466 3044 M 1466 3082 I 1487 3082 I 1487 3044 I C 
+1708 3044 M 1708 3082 I 1729 3082 I 1729 3044 I C 
+eoclip : N 1466 3044 263 38 rp C 
+1 1 1 1 scol  L ; ; : N 1487 3044 221 38 rp C 
+1 1 1 1 scol  L ; 1563 3074 M (1,912)[15 8 15 15  0]xS 
+1631 3074 M ( )S 
+: N 1731 3044 M 1731 3082 I 1753 3082 I 1753 3044 I C 
+1915 3044 M 1915 3082 I 1936 3082 I 1936 3044 I C 
+eoclip : N 1731 3044 205 38 rp C 
+1 1 1 1 scol  L ; ; : N 1753 3044 162 38 rp C 
+1 1 1 1 scol  L ; 1811 3074 M (670)[15 15  0]xS 
+1856 3074 M ( )S 
+: N 1938 3044 M 1938 3082 I 1960 3082 I 1960 3044 I C 
+2152 3044 M 2152 3082 I 2172 3082 I 2172 3044 I C 
+eoclip : N 1938 3044 234 38 rp C 
+1 1 1 1 scol  L ; ; : N 1960 3044 192 38 rp C 
+1 1 1 1 scol  L ; 2021 3074 M (4,055)[15 8 15 15  0]xS 
+2089 3074 M ( )S 
+: N 2174 3044 M 2174 3082 I 2196 3082 I 2196 3044 I C 
+2329 3044 M 2329 3082 I 2350 3082 I 2350 3044 I C 
+eoclip : N 2174 3044 176 38 rp C 
+1 1 1 1 scol  L ; ; : N 2196 3044 133 38 rp C 
+1 1 1 1 scol  L ; 2228 3074 M (1,594)[15 8 15 15  0]xS 
+2296 3074 M ( )S 
+: N 99 3042 2 2 rp C 
+ L ; : N 101 3042 890 2 rp C 
+ L ; : N 991 3042 2 2 rp C 
+ L ; : N 993 3042 264 2 rp C 
+ L ; : N 1257 3042 2 2 rp C 
+ L ; : N 1259 3042 205 2 rp C 
+ L ; : N 1464 3042 2 2 rp C 
+ L ; : N 1466 3042 263 2 rp C 
+ L ; : N 1729 3042 2 2 rp C 
+ L ; : N 1731 3042 205 2 rp C 
+ L ; : N 1936 3042 2 2 rp C 
+ L ; : N 1938 3042 234 2 rp C 
+ L ; : N 2172 3042 2 2 rp C 
+ L ; : N 2174 3042 176 2 rp C 
+ L ; : N 2350 3042 2 2 rp C 
+ L ; : N 99 3044 2 38 rp C 
+ L ; : N 99 3082 2 2 rp C 
+ L ; : N 99 3082 2 2 rp C 
+ L ; : N 101 3082 890 2 rp C 
+ L ; : N 991 3044 2 38 rp C 
+ L ; : N 991 3082 2 2 rp C 
+ L ; : N 993 3082 264 2 rp C 
+ L ; : N 1257 3044 2 38 rp C 
+ L ; : N 1257 3082 2 2 rp C 
+ L ; : N 1259 3082 205 2 rp C 
+ L ; : N 1464 3044 2 38 rp C 
+ L ; : N 1464 3082 2 2 rp C 
+ L ; : N 1466 3082 263 2 rp C 
+ L ; : N 1729 3044 2 38 rp C 
+ L ; : N 1729 3082 2 2 rp C 
+ L ; : N 1731 3082 205 2 rp C 
+ L ; : N 1936 3044 2 38 rp C 
+ L ; : N 1936 3082 2 2 rp C 
+ L ; : N 1938 3082 234 2 rp C 
+ L ; : N 2172 3044 2 38 rp C 
+ L ; : N 2172 3082 2 2 rp C 
+ L ; : N 2174 3082 176 2 rp C 
+ L ; : N 2350 3044 2 38 rp C 
+ L ; : N 2350 3082 2 2 rp C 
+ L ; : N 2350 3082 2 2 rp C 
+ L ; F1S21 Ji 
+99 3084 M ( )S 
+: N 75 2874 2 2 rp C 
+ L ; : N 77 2874 1121 2 rp C 
+ L ; : N 1198 2874 2 2 rp C 
+ L ; : N 1200 2874 1179 2 rp C 
+ L ; : N 2379 2874 2 2 rp C 
+ L ; : N 75 2876 2 209 rp C 
+ L ; : N 2379 2876 2 209 rp C 
+ L ; : N 77 3087 M 77 3431 I 1198 3431 I 1198 3087 I 1177 3087 I 1177 3393 I 99 3393 I 99 3087 I C 
+eoclip : N 77 3087 1121 344 rp C 
+1 1 1 1 scol  L ; ; : N 99 3087 1078 38 rp C 
+1 1 1 1 scol  L ; F3S21 Ji 
+99 3117 M (Enquiries )[18 17 17 17 8 10 8 15 15  0]xS 
+F4S21 Ji 
+234 3117 M (-)S 
+F3S21 Ji 
+243 3117 M ( )S 
+F4S21 Ji 
+253 3117 M (For Lo)[17 15 9 10 15  0]xS 
+334 3117 M (st / Stolen Card reporting, Change of Contact Details, Notification of )
+[14 8 10 8 10 18 8 15 6 15 15 10 20 15 9 15 10 9 15 15 15 9 8 6 15 15 8 10 20 15 15 15
+15 15 10 15 8 10 20 15 15 8 15 14 8 10 20 15 8 15 6 6 13 8 10 20 15 8 6 8 5 14 15 8
+5 15 15 10 15 9  0]xS 
+: N 99 3125 1078 38 rp C 
+1 1 1 1 scol  L ; 99 3155 M (Error or Disputes on Card Statement, Enquiries or Complaints, please contact us at )
+[18 9 9 15 9 13 15 10 13 20 6 14 15 15 8 15 14 13 15 16 13 20 15 9 15 13 18 8 15 8 15 23
+15 15 8 8 13 18 15 16 15 6 9 6 15 14 13 15 10 13 20 15 23 15 6 15 6 15 8 14 8 13 15 6
+15 15 14 16 13 14 15 15 8 15 14 8 13 15 14 13 15 9  0]xS 
+: N 99 3163 1078 38 rp C 
+1 1 1 1 scol  L ; 99 3193 M (1300)[15 15 15  0]xS 
+159 3193 M (-)S 
+168 3193 M (88)[15  0]xS 
+198 3193 M (-)S 
+208 3193 M (5000 or 03)[15 15 15 15 10 15 9 10 15  0]xS 
+342 3193 M (-)S 
+352 3193 M (8317 5000 \(if calling from overseas\) or mail to Cards & Unsecured )
+[15 15 15 15 10 15 16 15 15 10 9 6 8 10 14 15 6 6 6 15 15 10 8 9 15 23 10 15 14 15 9 14
+15 15 14 9 10 15 9 10 23 15 6 6 10 8 15 9 20 15 9 15 14 10 18 10 20 15 14 15 13 15 9 15
+16  0]xS 
+: N 99 3201 1078 39 rp C 
+1 1 1 1 scol  L ; 99 3231 M (Lending Departmen)[15 15 15 15 6 15 15 14 20 15 15 15 9 8 23 15  0]xS 
+344 3231 M (t, OCBC Bank \(Malaysia\) Berhad, P.O. Box 10418, 50712 Kuala )[8 8 14 21 20 18 20 14 18 15 15 14 14 9 23 15 6 15 14 14 6 15 9 14 18 15 9 15 15 15 8 14
+18 8 21 7 14 18 15 14 14 15 15 15 15 15 8 14 15 15 15 15 15 13 18 15 15 7 16  0]xS 
+: N 99 3240 1078 38 rp C 
+1 1 1 1 scol  L ; 99 3270 M (Lumpur or visit our website at )[15 15 23 15 15 9 10 15 9 10 14 6 14 6 8 10 15 15 9 10 20 15 15 14 6 8 15 10 15 7  0]xS 
+477 3270 M (www.ocbc.com.my)[20 20 19 8 15 14 15 13 8 14 15 23 7 23  0]xS 
+: N 477 3273 228 2 rp C 
+ L ; 705 3270 M (. If you wish to seek alternative views, )[7 10 8 7 10 14 15 15 10 20 6 14 15 9 8 15 10 14 15 15 14 10 15 5 8 15 9 15 15 8 6 14
+15 10 14 5 15 20 14 8  0]xS 
+: N 99 3278 1078 38 rp C 
+1 1 1 1 scol  L ; 99 3308 M (you may contact Bank Negara Malaysia, BNMTELELINK at 1300)[14 15 15 18 23 15 14 18 14 15 15 8 15 14 8 18 18 15 15 14 18 20 15 15 15 9 15 18 23 15 6 15
+14 14 6 15 8 18 18 20 23 17 18 15 18 15 8 20 18 18 15 8 18 15 15 15  0]xS 
+968 3308 M (-)S 
+977 3308 M (88)[15  0]xS 
+1007 3308 M (-)S 
+1016 3308 M (5465, ema)[15 16 15 15 8 18 16 23  0]xS 
+1157 3308 M (il: )[6 6 8  0]xS 
+: N 99 3316 1078 38 rp C 
+1 1 1 1 scol  L ; 99 3346 M (bnmtelelink@bnm.gov.my)[15 15 23 8 15 6 15 6 6 15 14 27 15 15 23 8 15 15 14 8 23  0]xS 
+: N 99 3349 315 2 rp C 
+ L ; 414 3346 M (; or Financial Mediation Bureau at 03)[8 19 15 9 19 17 6 15 15 15 14 6 15 6 19 23 15 15 6 15 8 6 15 15 19 18 15 9 15 15 15 19
+15 8 19 15  0]xS 
+927 3346 M (-)S 
+936 3346 M (2272 2811, email: )[15 15 15 15 19 16 15 15 15 8 19 16 23 15 6 6 8  0]xS 
+: N 99 3354 1078 39 rp C 
+1 1 1 1 scol  L ; 99 3384 M (enquiry@fmb.org.my)[15 15 15 15 6 9 14 27 8 23 15 8 15 9 15 8 23  0]xS 
+: N 99 3387 254 2 rp C 
+ L ; 353 3384 M (. )[8  0]xS 
+F3S21 Ji 
+369 3384 M ( )S 
+: N 1200 3087 M 1200 3431 I 1221 3431 I 1221 3087 I C 
+2358 3087 M 2358 3431 I 2379 3431 I 2379 3087 I C 
+eoclip : N 1200 3087 1179 344 rp C 
+1 1 1 1 scol  L ; ; : N 1221 3087 1137 38 rp C 
+1 1 1 1 scol  L ; F1S21 Ji 
+1221 3117 M (Pertanyaan )[18 15 11 9 15 17 15 15 15 17  0]xS 
+F5S21 Ji 
+1378 3117 M (-)S 
+F1S21 Ji 
+1387 3117 M ( )S 
+F5S21 Ji 
+1397 3117 M (Untuk Laporan)[20 15 8 15 14 10 16 15 15 15 9 15  0]xS 
+1580 3117 M ( Kehilangan / Kecurian Card, Penukaran )[10 18 16 15 6 6 15 15 15 16 15 10 8 10 19 15 14 15 9 6 15 16 10 20 15 9 15 8 10 18 15 16
+15 14 15 9 15 15  0]xS 
+2093 3117 M (Maklumat Hubungan, )[23 15 14 6 15 23 15 8 10 21 15 15 15 15 15 15 15 9  0]xS 
+: N 1221 3125 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 3155 M (Pemberitahuan mengenai Kesilapan atau Pertikaian mengenai Penyata Kad, Pertanyaan )
+[18 15 23 15 15 9 6 8 15 15 15 15 15 15 23 15 16 15 15 15 15 6 16 18 15 14 6 6 15 15 15 15
+15 15 8 15 15 16 18 15 9 8 6 14 15 6 15 15 15 23 15 15 15 16 15 15 6 15 18 15 15 14 15 8
+15 15 19 15 15 8 15 19 15 9 8 15 15 14 15 15 15  0]xS 
+: N 1221 3163 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 3193 M (atau Aduan, sila hubungi kami di 1300)[15 8 15 15 10 18 15 15 15 15 8 10 14 6 6 15 10 15 15 15 15 15 15 6 10 14 15 23 6 10 15 6
+10 15 15 15  0]xS 
+1696 3193 M (-)S 
+1705 3193 M (88)[15  0]xS 
+1735 3193 M (-)S 
+1744 3193 M (5000 atau 03)[15 16 15 15 10 15 8 15 15 10 15  0]xS 
+1908 3193 M (-)S 
+1917 3193 M (8317)[15 15 15  0]xS 
+1978 3193 M (-)S 
+1987 3193 M (5000 \(bagi panggilan dari luar )[15 15 15 15 10 9 15 16 15 6 10 15 15 15 15 15 6 7 16 15 10 15 15 9 6 10 6 15 15 9  0]xS 
+: N 1221 3201 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 3231 M (negeri\) atau tulis kepada kami di Cards & Unsecured Lending Depar)
+[15 15 15 15 9 6 9 14 15 8 15 15 14 8 15 6 6 14 14 14 15 15 15 16 15 14 14 15 23 6 14 15
+6 14 20 15 9 15 14 14 18 14 20 15 14 15 14 15 9 15 15 14 15 16 15 15 6 15 15 14 20 16 15 15
+ 0]xS 
+2111 3231 M (tment, OCBC Bank )[8 23 15 15 8 8 14 21 20 18 20 14 18 15 15 14  0]xS 
+: N 1221 3240 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 3270 M (\(Malaysia\) Berhad, Karung Berkunci 10418, 50712 Kuala Lumpur atau layari halaman web )
+[9 23 15 6 15 14 14 6 15 9 11 18 15 9 15 15 15 8 12 18 15 9 15 15 16 11 18 15 9 14 15 15
+14 6 12 15 15 15 15 15 8 11 16 15 15 15 16 11 18 15 15 6 16 11 15 15 23 15 15 10 11 15 8 15
+15 11 6 15 14 15 10 6 11 15 15 6 16 23 15 15 11 20 15 16  0]xS 
+: N 1221 3278 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 3308 M (kami di )[14 15 23 6 11 15 6  0]xS 
+1322 3308 M (www.ocbc.com.my)[20 20 20 8 15 14 15 13 8 14 15 22 8 23  0]xS 
+: N 1322 3311 228 2 rp C 
+ L ; 1550 3308 M (. Jika anda inginkan pandangan alternatif selain dari Bank, anda )
+[8 11 14 6 14 15 11 15 15 15 15 11 6 15 15 6 15 14 15 15 11 15 15 15 16 15 15 15 15 15 12 15
+6 8 15 9 15 15 8 6 8 11 14 15 6 15 6 15 11 15 15 9 6 12 19 15 15 14 8 11 15 15 15 15
+ 0]xS 
+: N 1221 3316 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 3346 M (boleh hubungi Bank Negara M)[15 15 6 15 15 31 15 16 15 15 15 15 6 32 18 15 15 14 31 20 15 15 15 9 15 31  0]xS 
+1683 3346 M (alaysia, BNMTELELINK di 1300)[16 6 15 14 14 6 15 8 31 18 20 23 17 18 15 18 15 8 20 18 31 15 6 31 15 15 15  0]xS 
+2141 3346 M (-)S 
+2150 3346 M (88)[16  0]xS 
+2181 3346 M (-)S 
+2190 3346 M (5465, emel: )[15 15 16 15 8 31 15 23 15 6 8  0]xS 
+: N 1221 3354 1137 39 rp C 
+1 1 1 1 scol  L ; 1221 3384 M (bnmtelelink@bnm.gov.my)[15 15 23 8 15 6 15 6 6 15 14 27 15 15 23 8 15 15 14 8 23  0]xS 
+: N 1221 3387 315 2 rp C 
+ L ; 1536 3384 M ( atau Financial Mediation Bureau di 03)[24 15 8 15 15 24 17 6 15 15 15 14 6 15 7 24 23 15 15 6 15 8 6 15 16 24 18 15 9 15 16 15
+24 15 7 24 15  0]xS 
+2102 3384 M (-)S 
+2111 3384 M (2272 2811, emel: )[16 15 15 15 25 15 15 16 15 8 24 15 23 15 6 8  0]xS 
+: N 1221 3393 1137 38 rp C 
+1 1 1 1 scol  L ; 1221 3423 M (enquiry@fmb.org.my)[15 15 15 15 6 9 14 27 8 23 15 8 15 9 15 8 23  0]xS 
+: N 1221 3426 254 2 rp C 
+ L ; 1475 3423 M (.)S 
+F3S21 Ji 
+1483 3423 M ( )S 
+: N 75 3085 2 2 rp C 
+ L ; : N 77 3085 1121 2 rp C 
+ L ; : N 1198 3085 2 2 rp C 
+ L ; : N 1200 3085 1179 2 rp C 
+ L ; : N 2379 3085 2 2 rp C 
+ L ; : N 75 3087 2 344 rp C 
+ L ; : N 75 3431 2 2 rp C 
+ L ; : N 75 3431 2 2 rp C 
+ L ; : N 77 3431 1121 2 rp C 
+ L ; : N 1198 3087 2 344 rp C 
+ L ; : N 1198 3431 2 2 rp C 
+ L ; : N 1200 3431 1179 2 rp C 
+ L ; : N 2379 3087 2 344 rp C 
+ L ; : N 2379 3431 2 2 rp C 
+ L ; : N 2379 3431 2 2 rp C 
+ L ; /F5S11 F5 [17 0 0 -17 0 0 ] mFS
+F5S11 Ji 
+135 3447 M ( )S 
+LH
+(%%[Page: 1]%%) = 
+%%PageTrailer
+
+%%Trailer
+%%BoundingBox: 0 0 595 842
+%%DocumentNeededResources: 
+%%+ font Helvetica
+%%+ font Helvetica-Narrow-BoldOblique
+%%+ font Times-Roman
+%%+ font Helvetica-Narrow-Bold
+%%+ font Helvetica-Narrow
+%%+ font Helvetica-Narrow-Oblique
+%%DocumentSuppliedResources: 
+%%+ procset Pscript_WinNT_ErrorHandler 5.0 0
+%%+ procset Pscript_FatalError 5.0 0
+%%+ procset Pscript_Win_Basic 5.0 0
+%%+ procset Pscript_Win_Utils_L2 5.0 0
+%%+ procset Pscript_Text 5.0 0
+%%+ procset Pscript_Encoding256 5.0 0
+%%+ procset Pscript_Win_Euro_L2 5.0 0
+%%+ procset Pscript_Win_Dib_L2 5.0 0
+%%+ procset Pscript_Win_GdiObject 5.0 0
+%%+ procset Pscript_Win_GdiObject_L2 5.0 0
+Pscript_WinNT_Incr dup /terminate get exec
+ehsave restore
+%%Pages: 1
+(%%[LastPage]%%) = 
+%%EOF
+

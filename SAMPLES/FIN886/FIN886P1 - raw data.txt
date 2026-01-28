@@ -1,0 +1,111 @@
+%!
+XGF
+[(OCBC) (FIN886)] SETPROJECT
+2000 SETBUFSIZE
+(merstmtd.jdt) STARTLM
+1
+0 OCBC BANK (MALAYSIA) BERHAD                                       Page:     1
+0 DETAIL STATEMENT                                                       1
+- MERCHANT STATEMENT -
+  Merchant Number
++                        ZXYZXYYXZYX
++                                                    Production date:
++                                                                     18/08/25
+0                             15 XXX XXX XXX
+                              XXX XXXXXX XXX
+                              LOT XX, XXX 101/1A, , , XXXXXXXX
+                              XXXXXX XXXX
+-                             4YYYY   ZXYYXZXYZY
+  ___
+  Period:  16/08/25 to 18/08/25
+  ====================================================================================================
+0 Merchant Deposit Slip Number
+0 Period                      :  18/08/25 to 18/08/25
+  Settlement date             :  18/08/25
+0 HD1  Card Number             Type          Amount (RM) Transaction Date Remark
+0      5YYY 67XX XXXX ZZZZ     CCDF              1000.00     18/08/25
+       5YYY 74XX XXXX ZZZZ     DCDF               200.00-    18/08/25
+0  *Total of Deposit Slip      2             800.00
+0 -Refunds/Reversals
+0 HD1  Card Number             Type          Amount (RM) Transaction Date Remark
+0      ZZZZ 74XX XXXX YYYY     DCDF               200.00-    18/08/25
+0 SUMMARY
+0 -Sales                           Number      Amount(RM)   Adjustment(RM)      Discount(RM)  TC          GST(RM)            Net(RM)
+  VISA CREDIT (INT)                    0              .00              .00              .00                   .00               .00
+  MC CREDIT (INT)                      0              .00              .00              .00                   .00               .00
+  VISA DEBIT (INT)                     0              .00              .00              .00                   .00               .00
+  MC DEBIT (INT)                       0              .00              .00              .00                   .00               .00
+  VISA CREDIT (DOM-OFF-US)             0              .00              .00              .00                   .00               .00
+  MC CREDIT (DOM-OFF-US)               1          1000.00              .00            13.50-  OS              .00            986.50
+  VISA CREDIT (DOM-ON-US)              0              .00              .00              .00                   .00               .00
+  MC CREDIT (DOM-ON-US)                0              .00              .00              .00                   .00               .00
+  VISA DEBIT (DOM-OFF-US)              0              .00              .00              .00                   .00               .00
+  MC DEBIT (DOM-OFF-US)                1           200.00-             .00             1.00   OS              .00            199.00-
+  VISA DEBIT (DOM-ON-US)               0              .00              .00              .00                   .00               .00
+  MC DEBIT (DOM-ON-US)                 0              .00              .00              .00                   .00               .00
+  MyDebit Visa (DOM-OFF-US)            0              .00              .00              .00                   .00               .00
+  MyDebit MC (DOM-OFF-US)              0              .00              .00              .00                   .00               .00
+  MyDebit Visa (DOM-ON-US)             0              .00              .00              .00                   .00               .00
+  MyDebit MC (DOM-ON-US)               0              .00              .00              .00                   .00               .00
+1
+0 OCBC BANK (MALAYSIA) BERHAD                                       Page:     2
+0 DETAIL STATEMENT                                                       2
+- MERCHANT STATEMENT -
+  Merchant Number
++                        ZXYZXYYXZYZ
++                                                    Production date:
++                                                                     18/08/25
+0                             15 XXX XXX XXX
+                              XXX XXXXXX XXX
+                              LOT XX, XXX 101/1A, , , XXXXXXXX
+                              XXXXXX XXXX
+  ___
+0 ___                         4YYYY   ZXYYXZXZZY
+  ___
+  Period:  16/08/25 to 18/08/25
+0 From Merchant Number   ZYXYZXYXZXZ 15 ZZZ XXX RRR
+  ====================================================================================================
+0 SUMMARY
+-         TOTAL NET SALES              2           800.00              .00            12.50-                  .00            787.50
+0 -CashOuts                        Number      Amount(RM)   Adjustment(RM)      Discount(RM)  TC          GST(RM)            Net(RM)
+  MyDebit Visa (DOM-OFF-US)            0              .00              .00              .00                   .00               .00
+  MyDebit Visa (DOM-ON-US)             0              .00              .00              .00                   .00               .00
+  MyDebit MC (DOM-OFF-US)              0              .00              .00              .00                   .00               .00
+  MyDebit MC (DOM-ON-US)               0              .00              .00              .00                   .00               .00
+0         TOTAL MYDEBIT CASHOUT                       .00              .00              .00                   .00               .00
+0 -Refunds/Reversals
+          Chargebacks/Dispute                         .00
+          Refunds                      1           200.00-
+0  ****Total of Merchant Net Sales     2           800.00              .00            12.50-                                 787.50
+1
+0 OCBC BANK (MALAYSIA) BERHAD                                       Page:     3
+0 DETAIL STATEMENT                                                       3
+- MERCHANT STATEMENT -
+  Merchant Number
++                        ZXYYXZEYXRZ
++                                                    Production date:
++                                                                     18/08/25
+0                             15 XXX XXX XXX
+                              XXX XXXXXX XXX
+                              LOT XX, XXX 101/1A, , , XXXXXXXX
+                              XXXXXX XXXX
+- ___                         4YYYZ   YXZZYXZYYX
+  ___
+  Period:  16/08/25 to 18/08/25
+0 From Merchant Number   ZYXYZXYRZXZ 15 XXX ZZR YYY
+  ====================================================================================================
+0 HD1  Card Number             Type          Amount (RM) Transaction Date Remark
+-
+   DCI = DEBIT CARD INTERNATIONAL
+   CCI = CREDIT CARD INTERNATIONAL
+   DCDO = DEBIT CARD DOMESTIC (ON-US)
+   CCDO = CREDIT CARD DOMESTIC (ON-US)
+   DCDF = DEBIT CARD DOMESTIC (OFF-US)
+   CCDF = CREDIT CARD DOMESTIC (OFF-US)
+   PCI  = PREPAID CARD INTERNATIONAL
+   PCDF = PREPAID CARD DOMESTIC(OFF-US)
+   MYD  = MYDEBIT CARD (ON-US)
+   MYDF = MYDEBIT CARD (OFF-US)
+-  GST Summary
+   Rumusan GST                                                          Amount (MYR)                      GST (MYR)
+   OS   OUT OF SCOPE SUPPLY      GST  0 %                                      12.50-                         .00

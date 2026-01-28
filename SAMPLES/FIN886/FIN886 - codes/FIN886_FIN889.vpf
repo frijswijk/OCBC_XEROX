@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<VPF Version='2.0'>
+
+<INFORMATION>
+ <COPYRIGHT>Copyright (c) 2020. All Rights Reserved.</COPYRIGHT>
+ <FOLDER_NAME>OCBC</FOLDER_NAME>
+ <PROJECT_NAME>FIN886_FIN889</PROJECT_NAME>
+ <PROJECT_VERSION>16.01</PROJECT_VERSION>
+ <PROJECT_TITLE>FIN886 Merchant Statement</PROJECT_TITLE>
+ <PROJECT_DESCRIPTION>FIN886 Merchant Statement</PROJECT_DESCRIPTION>
+ <AUTHOR>Lian</AUTHOR>
+ <KEYWORDS>VIPP, VPC, VI Project</KEYWORDS>
+ <GENERATOR>VI Design Pro 16.0.1.0 (BuildTime: Sep 13 2019, 17:47:39)</GENERATOR>
+ <CREATION_DATE>Fri Jul 24 2020, 18:48:19</CREATION_DATE>
+</INFORMATION>
+
+<RESOURCES>
+ <RESOURCE Name='FIN886P' Type='sub' Scope='0' SubmissionOrder='0' Description='Print file specified in VI Design Pro'/>
+ <RESOURCE Name='OCBC.eps' Type='mis' Scope='0'/>
+ <RESOURCE Name='MESTDc.frm' Type='mis' Scope='0'/>
+ <RESOURCE Name='merstmtd.jdt' Type='jdt' Scope='0'/>
+ <RESOURCE Name='OCBC-LOGO.TIF' Type='img' Scope='0'/>
+</RESOURCES>
+
+</VPF>

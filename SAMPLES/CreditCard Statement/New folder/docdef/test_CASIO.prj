@@ -1,0 +1,7 @@
+  JOBNAME="test_CASIO"                        *D:\00VERA\v241208_v792\w3\lib\v792\pdd.exe
+  DEPROF="D:\TEST\OCBC\Xerox_Converter_CASIO\test\userisis\ppde.prf"  *D:\00VERA\v241208_v792\w3\lib\v792\pdd.exe
+  DOCDEF="D:\TEST\OCBC\Xerox_Converter_CASIO\test\docdef\CASIO.DFA"  *D:\00VERA\v241208_v792\w3\lib\v792\pdd.exe
+  LINEDATA="D:\TEST\OCBC\Xerox_Converter_CASIO\test\data\BKCSTMA.txt"  *D:\00VERA\v241208_v792\w3\lib\v792\pdd.exe
+  OUTPUT="D:\TEST\OCBC\Xerox_Converter_CASIO\test\afpds\lesson1.afp"  *D:\00VERA\v241208_v792\w3\lib\v792\pdd.exe
+  HSTSAVE=""                                  *D:\00VERA\v241208_v792\w3\lib\v792\pdd.exe
+  STICKERFILENAME="D:\TEST\OCBC\Xerox_Converter_CASIO\test\afpds\afpds"  *D:\00VERA\v241208_v792\w3\lib\v792\pdd.exe

@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Output directories
+output/
+*.dfa
+*.html
+
+# Test outputs
+test_output/
+casio_test/
+casio_test2/
+casio_fixed/
+sibs_baseline/
+sibs_regression/
+sibs_test2/
+test_revert/
+final_test.dfa/
+
+# Compressed files
+*.7z
+*.zip
+*.rar
+
+# PDF samples (keep structure, ignore content if too large)
+# *.pdf
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.claude/
+
+# Logs
+*.log
+nul
+
+# Temporary
+*.tmp
+*.temp
+*.bak
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Backup folders
+XeroxV1/
+snapshot_*/
+LucaB/
+
+# Environment
+.env

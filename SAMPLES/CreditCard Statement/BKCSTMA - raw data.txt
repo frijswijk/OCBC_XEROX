@@ -1,0 +1,49 @@
+%!
+XGF
+[(CASIO) (CASIO)] SETPROJECT
+2 SETCYCLECOPY
+2000 SETBUFSIZE
+(|) SETDBSEP
+(CASIO.DBM) STARTDBM
+PREFIX|FLD1|FLD2|FLD3|FLD4|FLD5|FLD6|FLD7|FLD8|FLD9|FLD10|FLD11|FLD12|FLD13|FLD14|FLD15|FLD16|FLD17|FLD18|FLD19|FLD20|FLD21|FLD22|FLD23|FLD24|FLD25|
+MR|                                        |
+A0|MS XXXXXXXX                             |1                                       |                                        |                                        |                                        |                                        |                                        |
+YA|GE MASTERCARD PLATINUM YYYY-ZZZZ-XXXX-RRRR (BASIC)                     |
+Y0|2025|        75,328.57|  |             0.00|  |             0.00|  |             8.80|  |             0.00|  |             0.00|  |             0.00|  |             0.00|  |             0.00|  |
+Y1|            55.24|  |            55.24|  |03 Feb 2026|     1%|                5|               50|    1 Month |N/A              |N/A              |  N/A       |N/A              |N/A              |
+Y2|
+B0|  |         53.62|  |          0.00|  |          0.00|  |          0.00|  |          1.62|  |          0.00|  |          0.00|  |         55.24|  |          1.62|  |         53.62|  |         55.24|14 Jan 2026|IMMEDIATE  |
+C0|    100,000|     24,671|
+T1|
+M1|
+D0|GE MASTERCARD PLATINUM   |XXXX-YYYY-XXXX-ZZZZ    |         55.66|         55.24|              |
+D1|         55.66|         55.24|
+M2|
+E0|GE MASTERCARD PLATINUM   |XXXX-YYYY-XXXX-ZZZZ    |MS XXXXXXXX                             |
+E1|BALANCE OF LAST MONTH                                                                                    |DR|         53.62|Retail Interest 17.50 %                                     |
+E2|14/01/2026|14/01/2026|Monthly interest                        |                         |   |DR|          1.62|                                                                                |                         |                 |
+E3|          |          |NEW BALANCE                              |DR|         55.24|
+T2|
+M4|non voyage message                                                                                  |This is the non VOyage Message                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+1
+MR|                                        |
+A0|MS YYYYYYY                              |1                                       |                                        |                                        |                                        |                                        |                                        |
+YA|GE MASTERCARD PLATINUM RRRR-YYYY-ZZZZ-XXXX (BASIC)                     |
+Y0|2025|        31,262.75|  |             0.00|  |             0.00|  |         4,098.98|  |             0.00|  |             0.00|  |             0.00|  |             0.00|  |             0.00|  |
+Y1|        26,321.77|  |        24,499.00|  |03 Feb 2026|     1%|                5|               50|   42 Months|           522.60|        26,321.77|    1 Month |N/A              |           522.60|
+Y2|
+B0|  |     25,565.33|  |          0.00|  |          0.00|  |          0.00|  |        756.44|  |          0.00|  |          0.00|  |     26,321.77|  |      1,317.00|  |     23,182.00|  |     24,499.00|14 Jan 2026|IMMEDIATE  |
+C0|    100,000|     68,737|
+T1|
+M1|
+D0|GE MASTERCARD PLATINUM   |RRRR-YYYY-ZZZZ-XXXX    |     26,321.77|     26,321.77|              |
+D1|     26,321.77|     26,321.77|
+M2|
+E0|GE MASTERCARD PLATINUM   |RRRR-YYYY-ZZZZ-XXXX    |MS YYYYYYY                              |
+E1|BALANCE OF LAST MONTH                                                                                    |DR|     25,565.33|Retail Interest 17.50 %                                     |
+E2|14/01/2026|14/01/2026|Monthly interest                        |                         |   |DR|        756.44|                                                                                |                         |                 |
+E3|          |          |NEW BALANCE                              |DR|     26,321.77|
+T2|
+M4|non voyage message                                                                                  |This is the non VOyage Message                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+1
+%%EOF
