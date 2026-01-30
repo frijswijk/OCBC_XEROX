@@ -76,6 +76,7 @@ class XeroxCommand:
     parent: Optional['XeroxCommand'] = None
     children: List['XeroxCommand'] = field(default_factory=list)
     tokens: List[XeroxToken] = field(default_factory=list)
+    is_initialization: bool = False  # For SETVAR with /INI flag
 
 
 @dataclass
@@ -528,14 +529,16 @@ class XeroxLexer:
         start_pos = self.pos
         self.pos += 1  # Skip /
         self.col += 1
-        
-        while self.pos < len(self.input) and (self.input[self.pos].isalnum() or 
+
+        while self.pos < len(self.input) and (self.input[self.pos].isalnum() or
                                          self.input[self.pos] in '_$'):
             self.pos += 1
             self.col += 1
-        
+
         # Create token for the Xerox identifier
         identifier = self.input[start_pos:self.pos]
+        if identifier == '/INI':
+            logger.debug(f"Tokenizer created /INI token at line {start_line}")
         token = XeroxToken(
             type='variable',
             value=identifier,
@@ -692,6 +695,10 @@ class XeroxParser:
         while i < len(tokens):
             token = tokens[i]
 
+            # Debug: log /INI tokens
+            if token.value == '/INI':
+                logger.debug(f"Found /INI token: type={token.type}, value={token.value}, line={token.line_number}")
+
             # Skip comments
             if token.type == 'comment':
                 i += 1
@@ -747,15 +754,20 @@ class XeroxParser:
 
                 elif cmd_name == 'SETVAR':
                     # SETVAR: /var value [/INI] SETVAR
-                    # Pop params, handling optional /INI
+                    # Pop up to 4 params to handle /INI flag
                     params = []
-                    while len(stack) > 0 and len(params) < 3:
+                    while len(stack) > 0 and len(params) < 4:
                         p = stack.pop()
                         if isinstance(p, tuple) and p[0] == 'block':
                             # Convert block tokens to string using our method
                             params.insert(0, self._tokens_to_string(p[1]))
                         else:
                             params.insert(0, str(p))
+                    logger.debug(f"SETVAR params before filtering: {params}")
+                    # Check for /INI flag before filtering
+                    has_ini_flag = '/INI' in params
+                    if has_ini_flag:
+                        logger.debug(f"Found /INI SETVAR: {params}")
                     # Filter out /INI if present
                     params = [p for p in params if p != '/INI']
                     if len(params) >= 2:
@@ -765,6 +777,9 @@ class XeroxParser:
                             column=token.column
                         )
                         cmd.parameters = params[:2]  # [var_name, value]
+                        cmd.is_initialization = has_ini_flag  # Track /INI flag
+                        if has_ini_flag:
+                            logger.debug(f"Created SETVAR with is_initialization=True: {cmd.parameters}")
                         commands.append(cmd)
 
                 elif cmd_name == 'IF':
@@ -1033,6 +1048,8 @@ class XeroxParser:
 
             elif token.type == 'variable':
                 # Variable reference - push to stack
+                if token.value == '/INI':
+                    logger.debug(f"Pushing /INI onto stack at position {i}")
                 stack.append(token.value)
 
             elif token.type == 'identifier':
@@ -1715,16 +1732,47 @@ class VIPPToDFAConverter:
         self.dfa_config = DFAGenerationConfig()
         self.format_registry = {}  # Maps PREFIX values to DOCFORMAT names
 
+        # Track PREFIX references for stub generation
+        self.referenced_prefixes = set()  # PREFIX values referenced in data or WIZVAR
+        self.defined_prefixes = set()     # PREFIX values with generated DOCFORMATs
+
         # Track SETLSP (line spacing) from DBM
         self.line_spacing = None  # Will be set if SETLSP found in DBM
 
         # Track SETPAGEDEF layout positions for OUTLINE generation
         self.page_layout_position = None  # (x, y) from last SETLKF in SETPAGEDEF
 
+        # Track when to set box positioning anchors
+        self.should_set_box_anchor = True  # Set anchors before first box in a group
+
+        # Track last command type for positioning logic
+        self.last_command_type = None  # 'OUTPUT', 'TEXT', 'NL'
+
+        # Track subroutine definitions for SCALL handling
+        self.subroutines = {}  # Maps subroutine name to {'commands': [...], 'type': 'simple'|'complex'}
+
         # Auto-detect input format from DBM
         self._detect_input_format()
         self._build_format_registry()
         self._extract_layout_info()
+        self._extract_subroutines()
+
+    def _escape_dfa_quotes(self, text: str) -> str:
+        """
+        Escape single quotes in text for DFA string literals.
+        In DFA, single quotes within strings must be doubled.
+
+        Example:
+            "It's done" → "It''s done"
+            "Payments 'Without Prejudice'" → "Payments ''Without Prejudice''"
+
+        Args:
+            text: The text to escape
+
+        Returns:
+            Text with escaped quotes
+        """
+        return text.replace("'", "''")
 
     def generate_dfa_code(self) -> str:
         """
@@ -1852,6 +1900,9 @@ class VIPPToDFAConverter:
         # Track current color
         current_color = None
 
+        # Reset box anchor flag for this FRM conversion
+        self.should_set_box_anchor = True
+
         for cmd in frm.commands:
             # Handle font changes
             if cmd.name == 'SETFONT':
@@ -1916,6 +1967,7 @@ class VIPPToDFAConverter:
                 # After NL, next OUTPUT should use NEXT (advance to next line)
                 y_was_explicitly_set = False
                 y_is_next_line = True
+                self.last_command_type = 'NL'
                 continue
 
             # Handle SETLSP (line spacing)
@@ -2120,6 +2172,7 @@ class VIPPToDFAConverter:
                 # After NL, next OUTPUT should use NEXT (advance to next line)
                 y_was_explicitly_set = False
                 y_is_next_line = True
+                self.last_command_type = 'NL'
                 continue
 
             # Handle SETLSP (line spacing)
@@ -2546,7 +2599,7 @@ class VIPPToDFAConverter:
         if is_variable:
             self.add_line(f"OUTPUT {text}")
         else:
-            self.add_line(f"OUTPUT '{text}'")
+            self.add_line(f"OUTPUT '{self._escape_dfa_quotes(text)}'")
 
         self.indent()
 
@@ -2676,13 +2729,25 @@ class VIPPToDFAConverter:
 
         VIPP: /TXNB { 0 0 188 09 LMED DRAWB } XGFRESDEF
         DFA: Store definition, convert SCALL to BOX later
+
+        Also stores subroutine commands for inlining simple subroutines.
         """
         if not cmd.parameters or not cmd.children:
             return
 
         resource_name = cmd.parameters[0]
 
-        # Analyze commands to determine resource type
+        # Store all subroutine commands for potential inlining
+        command_count = len(cmd.children)
+        subroutine_type = 'simple' if command_count <= 5 else 'complex'
+
+        self.subroutines[resource_name] = {
+            'commands': cmd.children,
+            'type': subroutine_type,
+            'command_count': command_count
+        }
+
+        # Analyze commands to determine resource type (for backward compatibility)
         if cmd.children and cmd.children[0].name == 'DRAWB':
             # It's a box drawing resource
             box_cmd = cmd.children[0]
@@ -2735,10 +2800,21 @@ class VIPPToDFAConverter:
         if len(cmd.parameters) < 4:
             return
 
+        # First box in a group should set anchors
+        if self.should_set_box_anchor:
+            self.add_line("POSY = $SL_CURRY;")
+            self.add_line("POSX = $SL_CURRX;")
+            self.should_set_box_anchor = False
+
         # Parse parameters
-        x = cmd.parameters[0]
-        y = cmd.parameters[1]
-        param3 = cmd.parameters[2]  # width or length
+        try:
+            x = float(cmd.parameters[0])
+            y = float(cmd.parameters[1])
+            param3 = float(cmd.parameters[2])  # width or length
+        except (ValueError, IndexError):
+            return
+
+        # Parse param4 - can be numeric or keyword
         param4 = cmd.parameters[3]  # height or thickness
         style = cmd.parameters[4] if len(cmd.parameters) > 4 else "R_S1"
 
@@ -2790,32 +2866,43 @@ class VIPPToDFAConverter:
             param4_float = thickness_map.get(param4, 0.2)
             param4_val = str(param4_float)
 
+        # Invert Y coordinate (negative becomes positive)
+        y_inverted = abs(y)
+
+        # Convert tiny widths/heights to 0.1 MM for thin lines
+        width = param3 if param3 >= 0.01 else 0.1
+        height = param4_float if param4_float >= 0.01 else 0.1
+
         # Determine if this is a BOX (rectangle) or RULE (line)
         # If param4 (height/thickness) > 1.0 mm, it's a BOX
         is_box = param4_float > 1.0
 
         if is_box:
-            # Generate BOX command
-            width = param3
-            height = param4
-
+            # Generate BOX command with anchored position
             self.add_line("BOX")
             self.indent()
 
-            # Position
-            self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y} MM-$MR_TOP)")
+            # Position with anchors and inverted Y
+            self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
 
             # Dimensions
             self.add_line(f"WIDTH {width} MM")
             self.add_line(f"HEIGHT {height} MM")
 
-            # Thickness (border)
-            self.add_line(f"THICKNESS MEDIUM TYPE {line_type};")
+            # Color if specified
+            if color:
+                self.add_line(f"COLOR {color}")
+
+            # Thickness with shade if specified
+            if shade is not None:
+                self.add_line(f"THICKNESS 0 TYPE {line_type} SHADE {shade};")
+            else:
+                self.add_line(f"THICKNESS MEDIUM TYPE {line_type};")
 
             self.dedent()
         else:
-            # Generate RULE command (line)
-            length = param3
+            # Generate RULE command (line) with anchored position
+            length = width
             thickness = param4_val
 
             # Determine direction based on length vs thickness
@@ -2829,8 +2916,8 @@ class VIPPToDFAConverter:
             self.add_line("RULE")
             self.indent()
 
-            # Position
-            self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y} MM-$MR_TOP)")
+            # Position with anchors and inverted Y
+            self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
 
             # Direction
             self.add_line(f"DIRECTION {direction}")
@@ -2894,6 +2981,25 @@ class VIPPToDFAConverter:
             resource_name = filename.rsplit('.', 1)[0]  # Remove extension
         else:
             resource_name = filename
+
+        # Check if this is a subroutine that can be inlined
+        # Inlining criteria: Simple subroutine (<=5 commands), no file extension (internal resource)
+        if not file_ext and resource_name in self.subroutines:
+            subroutine_info = self.subroutines[resource_name]
+
+            if subroutine_info['type'] == 'simple':
+                # Inline the subroutine commands
+                self.add_line(f"/* Inlined subroutine: {resource_name} ({subroutine_info['command_count']} commands) */")
+
+                # Convert the subroutine commands directly
+                self._convert_frm_command_list(
+                    subroutine_info['commands'],
+                    start_x=x if x_was_set else 0.0,
+                    start_y=y if y_was_set else 0.0,
+                    start_font='',
+                    frm=frm
+                )
+                return
 
         # Extract CACHE dimensions if available
         cache_width = None
@@ -3099,8 +3205,29 @@ class VIPPToDFAConverter:
         """
         Build mapping of PREFIX values to DOCFORMAT names.
         Each CASE block becomes a separate DOCFORMAT.
+        Also tracks referenced prefixes from WIZVAR.
         """
         self.format_registry = {}
+
+        # Track PREFIX references from WIZVAR
+        if hasattr(self.dbm, 'wizvar_prefixes') and self.dbm.wizvar_prefixes:
+            for prefix_var in self.dbm.wizvar_prefixes:
+                # Extract prefix value from variable name like "PREFIX_XX"
+                # WIZVAR entries are like: PREFIX eq (XX), PREFIX eq (Y1), etc.
+                # We'll track these when we see them in raw content
+                pass
+
+        # Also scan raw content for PREFIX references like "PREFIX eq (XX)"
+        if self.dbm.raw_content:
+            import re
+            # Pattern to match: PREFIX eq (XX) or PREFIX ne (YY) etc.
+            prefix_pattern = r'PREFIX\s+(?:eq|ne|gt|lt|ge|le)\s+\(([A-Z0-9]+)\)'
+            matches = re.findall(prefix_pattern, self.dbm.raw_content, re.IGNORECASE)
+            for prefix_value in matches:
+                self.referenced_prefixes.add(prefix_value.upper())
+                logger.debug(f"Found PREFIX reference: {prefix_value}")
+
+        # Register CASE blocks as defined formats
         for case_value in self.dbm.case_blocks.keys():
             if case_value != "{}":
                 docformat_name = f"DF_{case_value}"
@@ -3190,6 +3317,25 @@ class VIPPToDFAConverter:
 
         if last_setlkf_position:
             self.page_layout_position = last_setlkf_position
+
+    def _extract_subroutines(self):
+        """
+        Extract XGFRESDEF subroutine definitions from DBM commands.
+        Stores them in self.subroutines for later inlining or SEGMENT generation.
+        """
+        for cmd in self.dbm.commands:
+            if cmd.name == 'XGFRESDEF' and cmd.parameters and cmd.children:
+                resource_name = cmd.parameters[0]
+                command_count = len(cmd.children)
+                subroutine_type = 'simple' if command_count <= 5 else 'complex'
+
+                self.subroutines[resource_name] = {
+                    'commands': cmd.children,
+                    'type': subroutine_type,
+                    'command_count': command_count
+                }
+
+                logger.info(f"Found subroutine '{resource_name}' with {command_count} commands ({subroutine_type})")
 
     def set_input_config(self, delimiter: str = None, field_names: List[str] = None, record_length: int = None):
         """
@@ -3307,11 +3453,17 @@ class VIPPToDFAConverter:
         # PRINTFOOTER outputs page numbers (called for each page in buffer)
         self.add_line("    PRINTFOOTER")
 
-        # Add form usage in PRINTFOOTER (moved from main DOCFORMAT)
-        self.add_line("  /*Put here the layout forms (.FRM)*/")
-        self._generate_form_usage_in_printfooter()
-
+        # Increment P counter BEFORE form selection
         self.add_line("        P = P + 1;")
+        self.add_line("")
+
+        # Add form usage in PRINTFOOTER (moved from main DOCFORMAT)
+        self.add_line("        /* Cycle through FRM files */")
+        self._generate_form_usage_in_printfooter()
+        self.add_line("")
+
+        # Page numbering
+        self.add_line("        /* Page numbering */")
         self.add_line("        OUTLINE")
         self.add_line("            POSITION RIGHT (0 MM)")
         self.add_line("            DIRECTION ACROSS;")
@@ -3335,11 +3487,17 @@ class VIPPToDFAConverter:
         self.add_line("    FOOTEREND")
         self.add_line("    PRINTFOOTER")
 
-        # Add form usage in PRINTFOOTER for page 2 (same as page 1)
-        self.add_line("  /*Put here the layout forms (.FRM)*/")
-        self._generate_form_usage_in_printfooter()
-
+        # Increment P counter BEFORE form selection
         self.add_line("        P = P + 1;")
+        self.add_line("")
+
+        # Add form usage in PRINTFOOTER for page 2 (same as page 1)
+        self.add_line("        /* Cycle through FRM files */")
+        self._generate_form_usage_in_printfooter()
+        self.add_line("")
+
+        # Page numbering
+        self.add_line("        /* Page numbering */")
         self.add_line("        OUTLINE")
         self.add_line("            POSITION RIGHT (0 MM)")
         self.add_line("            DIRECTION ACROSS;")
@@ -3413,20 +3571,27 @@ class VIPPToDFAConverter:
         for frm in self.frm_files.values():
             all_colors.update(frm.colors)
 
-        # Standard color mappings to RGB values (percentages)
+        # Standard color mappings to RGB values (0-255 scale)
+        # Note: Converting from percentages to 0-255 scale
+        # LMED/MED = RGB 217,217,217 (light gray 85%)
+        # XDRK = RGB 166,166,166 (dark gray 65%)
         color_rgb_map = {
             'BLACK': (0, 0, 0),
-            'WHITE': (100, 100, 100),
-            'RED': (100, 0, 0),
-            'GREEN': (0, 100, 0),
-            'BLUE': (0, 0, 100),
-            'YELLOW': (100, 100, 0),
-            'CYAN': (0, 100, 100),
-            'MAGENTA': (100, 0, 100),
-            'ORANGE': (100, 64.7, 0),
-            'GRAY': (50, 50, 50),
-            'LIGHTGRAY': (75, 75, 75),
-            'DARKGRAY': (25, 25, 25),
+            'FBLACK': (0, 0, 0),  # Same as BLACK
+            'WHITE': (255, 255, 255),
+            'RED': (255, 0, 0),
+            'GREEN': (0, 255, 0),
+            'BLUE': (0, 0, 255),
+            'YELLOW': (255, 255, 0),
+            'CYAN': (0, 255, 255),
+            'MAGENTA': (255, 0, 255),
+            'ORANGE': (255, 165, 0),
+            'GRAY': (128, 128, 128),
+            'LIGHTGRAY': (192, 192, 192),
+            'DARKGRAY': (64, 64, 64),
+            'LMED': (217, 217, 217),  # Light gray for OCBC
+            'MED': (217, 217, 217),   # Same as LMED
+            'XDRK': (166, 166, 166),  # Dark gray for OCBC
         }
 
         # Generate DFA color definitions using DEFINE syntax
@@ -3441,7 +3606,20 @@ class VIPPToDFAConverter:
                 r, g, b = 0, 0, 0  # Default to black
 
             self.color_mappings[alias] = dfa_alias
-            self.add_line(f"DEFINE {dfa_alias} COLOR RGB RVAL {r} GVAL {g} BVAL {b};")
+            self.add_line(f"COLOR {dfa_alias} AS RGB {r} {g} {b};")
+
+        # Always add standard OCBC colors if not already defined
+        standard_ocbc_colors = {
+            'FBLACK': (0, 0, 0),
+            'LMED': (217, 217, 217),
+            'MED': (217, 217, 217),
+            'XDRK': (166, 166, 166),
+        }
+
+        for color_name, (r, g, b) in standard_ocbc_colors.items():
+            if color_name not in self.color_mappings.values():
+                self.color_mappings[color_name] = color_name
+                self.add_line(f"COLOR {color_name} AS RGB {r} {g} {b};")
 
         self.add_line("")
 
@@ -3522,8 +3700,8 @@ class VIPPToDFAConverter:
 
         if isinstance(y, str):
             y_upper = y.upper()
-            # Check if it's a keyword or starts with a keyword (for expressions like NEXT-(...))
-            if y_upper in ('SAME', 'NEXT', 'TOP', 'BOTTOM') or y_upper.startswith(('NEXT-', 'NEXT+', 'SAME-', 'SAME+')):
+            # Check if it's a keyword or starts with a keyword (for expressions like NEXT-(...) or LASTMAX+...)
+            if y_upper in ('SAME', 'NEXT', 'TOP', 'BOTTOM') or y_upper.startswith(('NEXT-', 'NEXT+', 'SAME-', 'SAME+', 'LASTMAX+')):
                 y_part = f"({y})"
             else:
                 # Numeric position - use margin correction and font correction
@@ -3569,6 +3747,7 @@ class VIPPToDFAConverter:
         - Data manipulation (GETINTV, SUBSTR, VSUB)
         - Complex logic (IF/THEN with operations)
         - Page management (PAGEBRK, NEWFRAME, ADD with arrays)
+        - PREFIX assignment (e.g., /VAR_Y2 PREFIX SETVAR)
 
         Skip truly empty cases that only have simple variable assignments.
 
@@ -3601,12 +3780,22 @@ class VIPPToDFAConverter:
         # Check for IF blocks (structural logic)
         has_if = any(cmd.name == 'IF' for cmd in commands)
 
+        # Check for PREFIX assignment (e.g., /VAR_Y2 PREFIX SETVAR)
+        # This is significant as it defines a record type prefix for data processing
+        has_prefix_assignment = any(
+            cmd.name == 'SETVAR' and
+            len(cmd.parameters) >= 2 and
+            str(cmd.parameters[1]).upper() == 'PREFIX'
+            for cmd in commands
+        )
+
         # Generate if has ANY of:
         # 1. Output commands
         # 2. Data manipulation (GETINTV, SUBSTR)
         # 3. Page management + IF (like page counting)
         # 4. Counters (++ or --)
-        return has_output or has_data_manip or (has_page_mgmt and has_if) or has_counter
+        # 5. PREFIX assignment (important for data record definitions)
+        return has_output or has_data_manip or (has_page_mgmt and has_if) or has_counter or has_prefix_assignment
 
     def _convert_vsub(self, text: str) -> str:
         """
@@ -3697,24 +3886,196 @@ class VIPPToDFAConverter:
 
         return parts  # Return list for special handling
 
+    def _convert_vipp_format_to_dfa(self, vipp_format: str) -> str:
+        """
+        Convert VIPP numeric format pattern to DFA NUMPICTURE format.
+
+        VIPP format: (@@@,@@@,@@@,@@#.##)
+        DFA format: '#,##0.00'
+
+        Conversion rules:
+        - @ = optional digit → # in DFA
+        - # = required digit → 0 in DFA
+        - , = thousands separator → keep as ,
+        - . = decimal point → keep as .
+
+        For repeating patterns (like @@@,@@@,@@@), simplify to single group pattern.
+
+        Args:
+            vipp_format: VIPP format string (e.g., "(@@@,@@@,@@@,@@#.##)")
+
+        Returns:
+            DFA NUMPICTURE format string (e.g., "'#,##0.00'")
+        """
+        # Remove parentheses if present
+        format_str = vipp_format.strip('()')
+
+        # Split by decimal point to handle integer and decimal parts separately
+        if '.' in format_str:
+            integer_part, decimal_part = format_str.rsplit('.', 1)
+        else:
+            integer_part = format_str
+            decimal_part = ""
+
+        # For the integer part, simplify to standard thousands separator pattern
+        # VIPP patterns with multiple groups (@@@,@@@,@@@,@@#) should use minimal DFA pattern
+        # Standard DFA pattern is: #,##0 for thousands separator
+        if ',' in integer_part:
+            # Get all groups
+            groups = integer_part.split(',')
+            last_group = groups[-1]
+
+            # Convert last group: @ -> # and # -> 0
+            dfa_last_group = ""
+            for char in last_group:
+                if char == '@':
+                    dfa_last_group += '#'
+                elif char == '#':
+                    dfa_last_group += '0'
+
+            # Determine optimal prefix pattern
+            # If there are more than 2 groups (indicating large numbers), use minimal pattern (#)
+            # If there are exactly 2 groups, use the second-to-last group pattern
+            if len(groups) > 2:
+                # Multiple groups: use minimal standard pattern (#,##0 or similar)
+                # Just use one optional digit before comma
+                dfa_integer = f"#{',#' * (len(dfa_last_group) - 1)},{dfa_last_group}"
+                # Simplify: if last group is ##0 or similar, standard is #,##0
+                if len(dfa_last_group) == 3:
+                    dfa_integer = f"#,{dfa_last_group}"
+                else:
+                    dfa_integer = f"#,{dfa_last_group}"
+            else:
+                # Exactly 2 groups: use both groups
+                prev_group = groups[-2]
+                dfa_prev = ""
+                for char in prev_group:
+                    if char == '@':
+                        dfa_prev += '#'
+                    elif char == '#':
+                        dfa_prev += '0'
+                dfa_integer = f"{dfa_prev},{dfa_last_group}"
+        else:
+            # No comma, just convert characters
+            dfa_integer = ""
+            for char in integer_part:
+                if char == '@':
+                    dfa_integer += '#'
+                elif char == '#':
+                    dfa_integer += '0'
+
+        # Convert decimal part
+        dfa_decimal = ""
+        for char in decimal_part:
+            if char == '@':
+                dfa_decimal += '#'
+            elif char == '#':
+                dfa_decimal += '0'
+
+        # Combine integer and decimal parts
+        if dfa_decimal:
+            dfa_format = f"{dfa_integer}.{dfa_decimal}"
+        else:
+            dfa_format = dfa_integer
+
+        return f"'{dfa_format}'"
+
     def _convert_comparison_operators(self, params: List[str]) -> List[str]:
         """
         Convert VIPP comparison operators to DFA equivalents.
+        Also wraps variables in NOSPACE() when being compared to string literals.
 
         Args:
             params: List of parameters that may contain comparison operators
 
         Returns:
-            List with converted operators
+            List with converted operators and NOSPACE() wrappers
         """
         result = []
-        for param in params:
+        i = 0
+        while i < len(params):
+            param = params[i]
+
             # Check if this is a comparison operator
             if param.lower() in self.COMPARISON_OPERATORS:
-                result.append(self.COMPARISON_OPERATORS[param.lower()])
+                dfa_op = self.COMPARISON_OPERATORS[param.lower()]
+                result.append(dfa_op)
+
+                # Check if this is a string comparison (==, <>, etc.) and if so,
+                # wrap the variable (before the operator) in NOSPACE()
+                if dfa_op in ['==', '<>'] and len(result) >= 2:
+                    # Look back at the previous parameter (the variable)
+                    prev_param = result[-2]
+
+                    # Check if the next parameter is a string literal
+                    if i + 1 < len(params):
+                        next_param = params[i + 1]
+
+                        # If comparing to a string literal and prev is a variable
+                        if (next_param.startswith("'") or next_param.upper() == next_param) and \
+                           not prev_param.startswith("NOSPACE(") and \
+                           (prev_param.startswith("VAR_") or prev_param.startswith("FLD[")):
+                            # Wrap the variable in NOSPACE()
+                            result[-2] = f"NOSPACE({prev_param})"
             else:
                 result.append(param)
+
+            i += 1
+
         return result
+
+    def _convert_frleft_condition(self, params: List[str]) -> tuple[str, bool]:
+        """
+        Convert FRLEFT (frame left) condition to DFA page break logic.
+
+        VIPP: FRLEFT 60 lt → page has less than 60mm left
+        DFA: $SL_MAXY>$LP_HEIGHT-MM(60)
+
+        Args:
+            params: List of parameters that may contain FRLEFT condition
+
+        Returns:
+            Tuple of (converted_condition, is_frleft) where is_frleft indicates if conversion happened
+        """
+        # Look for FRLEFT pattern in params
+        # Pattern can be: FRLEFT 60 lt  OR  FRLEFT lt 60
+        for i in range(len(params)):
+            if params[i] == 'FRLEFT':
+                # Check if we have at least 2 more parameters
+                if i + 2 < len(params):
+                    # Try both orders: FRLEFT 60 lt  and  FRLEFT lt 60
+                    param1 = params[i + 1]
+                    param2 = params[i + 2]
+
+                    # Check if param1 is the operator (FRLEFT lt 60)
+                    if param1.lower() in ['lt', '<', 'gt', '>', 'ge', '>=', 'le', '<=']:
+                        operator = param1.lower()
+                        threshold = param2
+                    # Otherwise assume param2 is the operator (FRLEFT 60 lt)
+                    else:
+                        threshold = param1
+                        operator = param2.lower()
+
+                    # Convert to DFA condition
+                    if operator in ['lt', '<']:
+                        # FRLEFT 60 lt → page has less than 60mm left
+                        # This means we're close to bottom of page
+                        condition = f"$SL_MAXY>$LP_HEIGHT-MM({threshold})"
+                        return (condition, True)
+                    elif operator in ['gt', '>']:
+                        # FRLEFT 60 gt → page has more than 60mm left
+                        condition = f"$SL_MAXY<$LP_HEIGHT-MM({threshold})"
+                        return (condition, True)
+                    elif operator in ['ge', '>=']:
+                        # FRLEFT 60 ge → page has at least 60mm left
+                        condition = f"$SL_MAXY<=$LP_HEIGHT-MM({threshold})"
+                        return (condition, True)
+                    elif operator in ['le', '<=']:
+                        # FRLEFT 60 le → page has at most 60mm left
+                        condition = f"$SL_MAXY>=$LP_HEIGHT-MM({threshold})"
+                        return (condition, True)
+
+        return (None, False)
 
     def _generate_docformat_main(self):
         """Generate the main DOCFORMAT section."""
@@ -3758,6 +4119,9 @@ class VIPPToDFAConverter:
 
         # Generate individual DOCFORMATs for each record type
         self._generate_individual_docformats()
+
+        # Generate stub DOCFORMATs for undefined PREFIX cases
+        self._generate_undefined_prefix_stubs()
 
         # Generate initialization in $_BEFOREFIRSTDOC
         self._generate_initialization()
@@ -4010,6 +4374,9 @@ class VIPPToDFAConverter:
             self.add_line(f"DOCFORMAT {docformat_name};")
             self.indent()
 
+            # Track that this PREFIX has a defined DOCFORMAT
+            self.defined_prefixes.add(case_value)
+
             # Generate case-specific processing
             self._convert_case_commands(commands)
 
@@ -4023,7 +4390,34 @@ class VIPPToDFAConverter:
 
         self.add_line("/* END OF INDIVIDUAL DOCFORMATS */")
         self.add_line("")
-    
+
+    def _generate_undefined_prefix_stubs(self):
+        """
+        Generate stub DOCFORMATs for undefined PREFIX cases.
+        Creates empty DOCFORMAT stubs for prefixes that are referenced but don't have definitions.
+        """
+        undefined_prefixes = self.referenced_prefixes - self.defined_prefixes
+
+        if not undefined_prefixes:
+            return
+
+        self.add_line("/* Stub DOCFORMATs for undefined PREFIX cases */")
+        self.add_line("")
+
+        for prefix in sorted(undefined_prefixes):
+            docformat_name = f"DF_{prefix}"
+            self.add_line(f"DOCFORMAT {docformat_name};")
+            self.indent()
+            self.add_line(f"/* {prefix} Prefix not found or commented out */")
+            self.add_line("/* Add implementation here */")
+            self.dedent()
+            self.add_line("ENDFORMAT;")
+            self.add_line("")
+
+        logger.info(f"Generated {len(undefined_prefixes)} stub DOCFORMATs for undefined prefixes: {', '.join(sorted(undefined_prefixes))}")
+        self.add_line("/* END OF STUB DOCFORMATS */")
+        self.add_line("")
+
     def _convert_case_commands(self, commands: List[XeroxCommand]):
         """Convert VIPP commands within a case block to DFA."""
         self.indent()
@@ -4042,12 +4436,17 @@ class VIPPToDFAConverter:
         has_output = self._has_output_commands(commands)
         outline_opened = False
 
-        for i, cmd in enumerate(commands):
+        # Track consumed commands for lookahead processing (IF/ELSE/ENDIF)
+        i = 0
+        while i < len(commands):
+            cmd = commands[i]
+
             # Map command name if possible
             dfa_cmd = self.COMMAND_MAPPINGS.get(cmd.name, cmd.name)
 
             # Skip comments or unsupported commands
             if cmd.name.startswith('%') or dfa_cmd.startswith('/'):
+                i += 1
                 continue
 
             # Handle SETVAR -> direct assignment (DFA uses var = value; not ASSIGN)
@@ -4084,6 +4483,7 @@ class VIPPToDFAConverter:
                             self.add_line(f"/* {full_expr} */")
                         else:
                             self.add_line(f"/* {assignment} */")
+                        i += 1
                         continue
 
                     # Handle VIPP increment/decrement operators
@@ -4102,12 +4502,14 @@ class VIPPToDFAConverter:
                         elif var_value.startswith('(') and var_value.endswith(')'):
                             var_value = f"'{var_value[1:-1]}'"
                         self.add_line(f"{var_name} = {var_value};")
+                i += 1
                 continue
 
             # Handle SETFONT - store font for next OUTPUT
             if cmd.name == 'SETFONT':
                 if cmd.parameters:
                     current_font = cmd.parameters[0].upper()
+                i += 1
                 continue
 
             # Open OUTLINE before first output command
@@ -4120,6 +4522,8 @@ class VIPPToDFAConverter:
                 self.add_line("DIRECTION ACROSS;")
                 self.add_line("")
                 outline_opened = True
+                # Reset box anchor flag for new OUTLINE block
+                self.should_set_box_anchor = True
 
             # Handle NL (newline) - generate OUTPUT '' POSITION SAME NEXT
             if cmd.name == 'NL':
@@ -4149,6 +4553,8 @@ class VIPPToDFAConverter:
                 # After NL, next OUTPUT should use NEXT (advance to next line)
                 y_was_explicitly_set = False
                 y_is_next_line = True
+                self.last_command_type = 'NL'
+                i += 1
                 continue
 
             # Handle SETLSP (line spacing) - convert to SETUNITS LINESP
@@ -4159,38 +4565,21 @@ class VIPPToDFAConverter:
                 else:
                     # Default to AUTO (uses font's line spacing)
                     self.add_line("SETUNITS LINESP AUTO;")
+                i += 1
                 continue
 
             # Handle if/else conditions
             if dfa_cmd == 'IF':
-                # Convert the IF command with its children
-                self._convert_if_command(cmd)
-
-                # Note: ELSE/ENDIF will be handled as separate commands in the loop
-                # They should NOT be consumed here because they might belong to this IF
-                # at the current nesting level, not as lookahead from nested IFs
-
+                # Convert the IF command with lookahead for ELSE/ENDIF
+                consumed = self._convert_if_command(cmd, commands, i)
+                # Skip the consumed commands (ELSE, ENDIF, and their bodies)
+                i += consumed
                 continue
 
-            if cmd.name == 'ENDIF':
-                # ENDIF closes a block, so dedent before outputting
-                self.dedent()
-                self.add_line("ENDIF;")
-                # Note: Don't re-indent here - parent will handle indentation
-                continue
-
-            if cmd.name == 'ELSE':
-                # ELSE transitions from true to false block
-                # Dedent from true block, output ELSE, then process else-block
-                self.dedent()
-                self.add_line("ELSE;")
-
-                # If ELSE has children (else-block content), process them
-                if cmd.children:
-                    self._convert_case_commands(cmd.children)
-                else:
-                    # No children, just re-indent for potential sibling commands
-                    self.indent()
+            # ENDIF and ELSE are now handled within _convert_if_command
+            # Skip them if they appear here (shouldn't happen with proper lookahead)
+            if cmd.name in ('ENDIF', 'ELSE'):
+                i += 1
                 continue
 
             # Handle increment/decrement operators
@@ -4199,6 +4588,7 @@ class VIPPToDFAConverter:
                 if cmd.parameters:
                     var_name = cmd.parameters[0].lstrip('/')
                     self.add_line(f"{var_name} = {var_name} + 1;")
+                i += 1
                 continue
 
             if cmd.name == '--':
@@ -4206,15 +4596,18 @@ class VIPPToDFAConverter:
                 if cmd.parameters:
                     var_name = cmd.parameters[0].lstrip('/')
                     self.add_line(f"{var_name} = {var_name} - 1;")
+                i += 1
                 continue
 
             # Handle for loops
             if dfa_cmd == 'FOR':
                 self._convert_for_command(cmd)
+                i += 1
                 continue
 
             if cmd.name == 'ENDFOR':
                 self.add_line("ENDFOR;")
+                i += 1
                 continue
 
             # Handle output commands (SH, SHL, SHR, SHC, SHP)
@@ -4225,6 +4618,7 @@ class VIPPToDFAConverter:
                 x_was_explicitly_set = False
                 y_was_explicitly_set = False
                 y_is_next_line = True
+                i += 1
                 continue
 
             # Handle positioning commands - store position for next OUTPUT
@@ -4238,6 +4632,7 @@ class VIPPToDFAConverter:
                         y_is_next_line = False  # Explicit Y position overrides NEXT
                     except ValueError:
                         pass
+                i += 1
                 continue
 
             if cmd.name == 'MOVEH':
@@ -4249,16 +4644,19 @@ class VIPPToDFAConverter:
                         y_is_next_line = False  # MOVEH resets next-line flag, Y should be SAME
                     except ValueError:
                         pass
+                i += 1
                 continue
 
             # Handle box drawing
             if dfa_cmd == 'BOX':
                 self._convert_box_command_dfa(cmd)
+                i += 1
                 continue
 
             # Handle segment/image calls
             if cmd.name == 'SCALL' or cmd.name == 'ICALL':
                 self._convert_resource_command_dfa(cmd, current_x, current_y)
+                i += 1
                 continue
 
             # Handle SUBSTR (GETINTV in VIPP)
@@ -4269,33 +4667,77 @@ class VIPPToDFAConverter:
                     # GETINTV now pops 4 parameters: /result, source, start, length
                     result_param = cmd.parameters[0]
                     source_var = cmd.parameters[1]
-                    start = int(cmd.parameters[2])
+                    start_param = cmd.parameters[2]
+                    
+                    # Try to parse start as integer, or use as-is if it's a variable/expression
+                    try:
+                        start = int(start_param)
+                        # XEROX uses 0-based indexing, DFA uses 1-based
+                        dfa_start = start + 1
+                    except ValueError:
+                        # If start is not an integer, it might be a variable or expression
+                        # Use it as-is and add 1 in the expression
+                        dfa_start = f"{start_param} + 1"
+                        start = 0  # placeholder
                     length = cmd.parameters[3]
 
                     # Extract result variable name (remove leading / if present)
                     result_var = result_param[1:] if result_param.startswith('/') else result_param
 
-                    # XEROX uses 0-based indexing, DFA uses 1-based
-                    dfa_start = start + 1
+                    # Note: dfa_start already set above in try/except
+                    if 'dfa_start' not in dir():
+                        dfa_start = start + 1
                     self.add_line(f"{result_var} = SUBSTR({source_var}, {dfa_start}, {length}, '');")
+                i += 1
                 continue
 
             # Handle CLIP/ENDCLIP - not supported in DFA
             if cmd.name in ('CLIP', 'ENDCLIP'):
                 self.add_line("/* Note: DFA does not support CLIP/ENDCLIP. */")
                 self.add_line("/* Use MARGIN, SHEET/LOGICALPAGE dimensions, WIDTH on TEXT, or image size params instead */")
+                i += 1
                 continue
 
             # Skip SETPAGEDEF silently - already handled at docformat level
             if cmd.name in ('SETLKF', 'SETPAGEDEF'):
+                i += 1
+                continue
+
+            # Handle page break commands
+            if cmd.name == 'PAGEBRK':
+                # PAGEBRK → USE LP NEXT (or let DFA handle automatically)
+                self.add_line("USE LP NEXT;")
+                i += 1
+                continue
+
+            if cmd.name == 'NEWFRONT':
+                # NEWFRONT → USE LP NEXT SIDE FRONT
+                self.add_line("USE LP NEXT SIDE FRONT;")
+                i += 1
+                continue
+
+            if cmd.name == 'NEWBACK':
+                # NEWBACK → USE LP NEXT SIDE BACK
+                self.add_line("USE LP NEXT SIDE BACK;")
+                i += 1
+                continue
+
+            if cmd.name == 'NEWFRAME':
+                # NEWFRAME → USE LP NEXT (automatic page break)
+                self.add_line("USE LP NEXT;")
+                i += 1
                 continue
 
             # Skip other unsupported VIPP commands with comment
-            if cmd.name in ('CACHE', 'PAGEBRK', 'NEWFRAME',
+            if cmd.name in ('CACHE',
                           'BOOKMARK', 'SETPAGENUMBER', 'PAGEDEF',
                           'CPCOUNT', 'GETITEM'):
                 self.add_line(f"/* VIPP command not directly supported: {cmd.name} */")
+                i += 1
                 continue
+
+            # Increment counter for any unhandled commands (shouldn't reach here)
+            i += 1
 
         # Close OUTLINE if it was opened
         if outline_opened:
@@ -4304,8 +4746,18 @@ class VIPPToDFAConverter:
 
         self.dedent()
     
-    def _convert_if_command(self, cmd: XeroxCommand):
-        """Convert an IF command to DFA."""
+    def _convert_if_command(self, cmd: XeroxCommand, commands: List[XeroxCommand] = None, idx: int = -1):
+        """
+        Convert an IF command to DFA, handling ELSE and ENDIF at the same nesting level.
+
+        Args:
+            cmd: The IF command to convert
+            commands: Full list of commands (for lookahead to find ELSE/ENDIF)
+            idx: Current index of the IF command in the commands list
+
+        Returns:
+            Number of commands consumed (including IF, ELSE, ENDIF, and their bodies)
+        """
         # Split parameters if they're combined into a single string
         split_params = []
         for param in cmd.parameters:
@@ -4338,23 +4790,209 @@ class VIPPToDFAConverter:
                 clean_params.append(param)
             i += 1
 
-        # Convert comparison operators (eq -> ==, ne -> <>, etc.)
-        converted_ops = self._convert_comparison_operators(clean_params)
-        condition = " ".join(self._convert_params(converted_ops))
+        # Check for FRLEFT condition BEFORE converting comparison operators
+        # (because we need to see 'lt' not '<')
+        frleft_condition, is_frleft = self._convert_frleft_condition(clean_params)
+
+        if is_frleft:
+            # Use FRLEFT condition directly (already in DFA format)
+            condition = frleft_condition
+            needs_istrue = True
+        else:
+            # Convert comparison operators (eq -> ==, ne -> <>, etc.)
+            converted_ops = self._convert_comparison_operators(clean_params)
+            condition = " ".join(self._convert_params(converted_ops))
+            # Check if condition needs ISTRUE() wrapper (has comparison operators)
+            needs_istrue = any(op in condition for op in ['==', '<>', '>', '<', '>=', '<='])
 
         # Don't output empty conditions - just output IF with THEN
         if condition.strip():
-            self.add_line(f"IF {condition}; THEN;")
+            if needs_istrue:
+                self.add_line(f"IF ISTRUE({condition});")
+            else:
+                self.add_line(f"IF {condition};")
         else:
-            self.add_line("IF 1; THEN;")  # Default true condition if empty
+            self.add_line("IF 1;")  # Default true condition if empty
+
+        self.add_line("THEN;")
+
+        # Initialize consumed commands counter (starts at 1 for the IF itself)
+        consumed = 1
 
         # Process children (IF body) if present
         if cmd.children:
             self._convert_case_commands(cmd.children)
-            # IF blocks with children need ENDIF, but only if one wasn't already
-            # processed as a child command (some VIPP blocks include ENDIF as last child)
-            if not (cmd.children and cmd.children[-1].name == 'ENDIF'):
-                self.add_line("ENDIF;")
+            # IF blocks with children need ENDIF
+            # No lookahead needed - children are already parsed
+            self.add_line("ENDIF;")
+            return consumed
+
+        # If no children, we need to look ahead in the flat commands list
+        # to find THEN block, ELSE (optional), and ENDIF at the same nesting level
+        if commands is None or idx < 0:
+            # No lookahead available - just close the IF
+            self.add_line("ENDIF;")
+            return consumed
+
+        # Look ahead to find matching ELSE and ENDIF at same nesting level
+        nesting_level = 0
+        else_idx = -1
+        endif_idx = -1
+
+        for j in range(idx + 1, len(commands)):
+            cmd_name = commands[j].name
+
+            # Track nesting level
+            if cmd_name == 'IF':
+                nesting_level += 1
+            elif cmd_name == 'ENDIF':
+                if nesting_level == 0:
+                    # Found matching ENDIF at our level
+                    endif_idx = j
+                    break
+                else:
+                    nesting_level -= 1
+            elif cmd_name == 'ELSE' and nesting_level == 0:
+                # Found matching ELSE at our level
+                else_idx = j
+
+        # Process THEN block commands (from idx+1 to else_idx or endif_idx)
+        self.indent()
+        then_end = else_idx if else_idx >= 0 else endif_idx
+        if then_end > idx + 1:
+            then_commands = commands[idx + 1:then_end]
+            # Process commands with nested IF handling
+            consumed += self._process_command_block(then_commands)
+        self.dedent()
+
+        # Process ELSE block if present
+        if else_idx >= 0:
+            self.add_line("ELSE;")
+            consumed += 1  # Count the ELSE command
+
+            self.indent()
+            if endif_idx > else_idx + 1:
+                else_commands = commands[else_idx + 1:endif_idx]
+                # Process commands with nested IF handling
+                consumed += self._process_command_block(else_commands)
+            self.dedent()
+
+        # Close the IF block
+        self.add_line("ENDIF;")
+        if endif_idx >= 0:
+            consumed += 1  # Count the ENDIF command
+
+        return consumed
+
+    def _process_command_block(self, commands: List[XeroxCommand]) -> int:
+        """
+        Process a block of commands (e.g., THEN or ELSE block), handling nested IFs.
+
+        Args:
+            commands: List of commands to process
+
+        Returns:
+            Number of commands processed (for consumption tracking)
+        """
+        i = 0
+        processed = 0
+        while i < len(commands):
+            cmd = commands[i]
+            dfa_cmd = self.COMMAND_MAPPINGS.get(cmd.name, cmd.name)
+
+            # Handle nested IF with lookahead
+            if dfa_cmd == 'IF':
+                consumed = self._convert_if_command(cmd, commands, i)
+                i += consumed
+                processed += consumed
+            else:
+                # Process single command
+                self._process_single_command(cmd)
+                i += 1
+                processed += 1
+
+        return processed
+
+    def _process_single_command(self, cmd: XeroxCommand):
+        """
+        Process a single command within an IF/ELSE block.
+        This is a simplified version of the main command loop in _convert_case_commands.
+        Note: Nested IF/ELSE/ENDIF are handled by lookahead in _convert_if_command,
+        so they won't appear here when processing flat command lists.
+        """
+        # Map command name if possible
+        dfa_cmd = self.COMMAND_MAPPINGS.get(cmd.name, cmd.name)
+
+        # Skip comments or unsupported commands
+        if cmd.name.startswith('%') or dfa_cmd.startswith('/'):
+            return
+
+        # Handle SETVAR -> direct assignment
+        if cmd.name == 'SETVAR':
+            if len(cmd.parameters) >= 2:
+                var_name = cmd.parameters[0].lstrip('/')
+                var_value = cmd.parameters[1]
+
+                # Fix parameter order if they're swapped
+                if var_name in ('++', '--', '+', '-', '*', '/'):
+                    var_name, var_value = var_value.lstrip('/'), var_name
+
+                # Detect malformed SETVAR patterns
+                malformed_keywords = ['IF', 'ELSE', 'THEN', 'ENDIF', 'PAGEBRK', '{', '}', '%']
+                is_malformed = (
+                    var_value == '-' or
+                    var_value == '=' or
+                    any(keyword in str(cmd.parameters) for keyword in malformed_keywords) or
+                    any(keyword in var_name for keyword in malformed_keywords)
+                )
+
+                if is_malformed:
+                    assignment = f"{var_name} = {var_value};"
+                    self.add_line(f"/* {assignment} */")
+                    return
+
+                # Handle increment/decrement operators
+                if var_value == '++':
+                    self.add_line(f"{var_name} = {var_name} + 1;")
+                elif var_value == '--':
+                    self.add_line(f"{var_name} = {var_name} - 1;")
+                else:
+                    # Convert to proper DFA direct assignment
+                    if var_value.startswith('/'):
+                        var_value = var_value.lstrip('/')
+                    elif var_value.startswith('(') and var_value.endswith(')'):
+                        var_value = f"'{var_value[1:-1]}'"
+                    self.add_line(f"{var_name} = {var_value};")
+            return
+
+        # Handle increment/decrement operators
+        if cmd.name == '++':
+            if cmd.parameters:
+                var_name = cmd.parameters[0].lstrip('/')
+                self.add_line(f"{var_name} = {var_name} + 1;")
+            return
+
+        if cmd.name == '--':
+            if cmd.parameters:
+                var_name = cmd.parameters[0].lstrip('/')
+                self.add_line(f"{var_name} = {var_name} - 1;")
+            return
+
+        # Note: Nested IF commands should NOT appear here when processing flat lists,
+        # because the parent _convert_if_command uses lookahead to consume them.
+        # However, if cmd has children (hierarchical structure), process it.
+        if dfa_cmd == 'IF':
+            if cmd.children:
+                self._convert_if_command(cmd)
+            return
+
+        # Skip ELSE/ENDIF - they should be consumed by lookahead
+        if cmd.name in ('ELSE', 'ENDIF'):
+            return
+
+        # Log unhandled commands for debugging
+        # This helps identify commands that need proper conversion
+        logger.debug(f"Unhandled command in IF/ELSE block: {cmd.name} {cmd.parameters}")
 
     def _convert_for_command(self, cmd: XeroxCommand):
         """Convert a FOR loop to DFA."""
@@ -4370,6 +5008,7 @@ class VIPPToDFAConverter:
         position = ""
         align = ""
         is_variable_output = False
+        format_string = None  # Will hold the FORMAT pattern if detected
 
         # Determine alignment based on original command
         if cmd.name == 'SHL':
@@ -4384,27 +5023,64 @@ class VIPPToDFAConverter:
             align = "ALIGN PARAM"  # Parameterized alignment
 
         # Extract parameters
-        for param in cmd.parameters:
+        # Note: In VIPP, /NAME can be either:
+        # - Variable reference if it's the first/main parameter (what to output)
+        # - Font reference if it comes after text (how to format)
+        i = 0
+        while i < len(cmd.parameters):
+            param = cmd.parameters[i]
             if param == 'VSUB':
                 # Skip VSUB marker - already handled inline
+                i += 1
                 continue
-            elif param.startswith('/'):
-                # Font reference
-                font_alias = param.lstrip('/')
-                font = self.font_mappings.get(font_alias, font_alias.upper())
+            elif param == 'FORMAT':
+                # Next parameter is the format string
+                if i + 1 < len(cmd.parameters):
+                    format_string = cmd.parameters[i + 1]
+                    i += 2  # Skip both FORMAT and the format pattern
+                    continue
+                else:
+                    i += 1
+                    continue
             elif param.startswith('(') and param.endswith(')'):
-                # Text string - check for VSUB and font switches
-                text = param
-            elif param.startswith('VAR_') or param.startswith('VAR') or param.startswith('FLD'):
-                # Variable reference - output the variable directly
+                # Could be text string or format pattern
+                # If previous param was FORMAT, this is already handled above
+                if not format_string or i == 0 or cmd.parameters[i-1] != 'FORMAT':
+                    # Text string - check for VSUB and font switches
+                    text = param
+                i += 1
+            elif param.startswith('/'):
+                # If we haven't found text yet, this is a variable reference
+                # If we already have text, this is a font reference
+                if not text:
+                    # Variable reference - output the variable directly
+                    text = param.lstrip('/')
+                    is_variable_output = True
+                else:
+                    # Font reference
+                    font_alias = param.lstrip('/')
+                    font = self.font_mappings.get(font_alias, font_alias.upper())
+                i += 1
+            elif param.startswith('VAR_') or param.startswith('VAR') or param.startswith('FLD') or param.startswith('$'):
+                # Explicit variable or system variable reference
                 text = param
                 is_variable_output = True
+                i += 1
+            else:
+                i += 1
 
         # Process text for VSUB variable substitution
         if text:
             if is_variable_output:
                 # Variable reference - output directly without quotes
-                output_parts = [f"OUTPUT {text}"]
+                # If FORMAT is detected, wrap in NUMPICTURE
+                if format_string:
+                    dfa_format = self._convert_vipp_format_to_dfa(format_string)
+                    output_text = f"NUMPICTURE({text},{dfa_format})"
+                else:
+                    output_text = text
+
+                output_parts = [f"OUTPUT {output_text}"]
                 if font:
                     output_parts.append(f"FONT {font} NORMAL")
                 if align:
@@ -4436,24 +5112,154 @@ class VIPPToDFAConverter:
                 output_parts.append(position)
             if align:
                 output_parts.append(align)
-
             self.add_line(" ".join(output_parts) + ";")
+
+
+    def _should_use_text_baseline(self, text: str, params: list, alignment: int = None) -> bool:
+        """
+        Determine if TEXT BASELINE should be used instead of OUTPUT.
+
+        Use TEXT BASELINE if:
+        - Text is long (> 50 chars)
+        - Text contains font style markers (**F5, **FC, **BOLD, **ITALIC)
+        - Multiple fonts referenced in parameters
+        - Alignment is JUSTIFY (alignment == 3)
+
+        Args:
+            text: The text string to output
+            params: Command parameters
+            alignment: Alignment code (0=LEFT, 1=RIGHT, 2=CENTER, 3=JUSTIFY)
+
+        Returns:
+            True if should use TEXT BASELINE, False for OUTPUT
+        """
+        # JUSTIFY requires TEXT BASELINE (OUTPUT doesn't support JUSTIFY)
+        if alignment == 3:
+            return True
+
+        # Check length
+        if len(text) > 50:
+            return True
+
+        # Check for font style markers in text
+        if '**' in text:
+            return True
+
+        # Check for multiple font references in parameters
+        font_count = sum(1 for p in params if str(p).startswith('/') and str(p)[1:].isupper())
+        if font_count > 1:
+            return True
+
+        return False
+
+    def _generate_text_baseline(self, text: str, font: str, position: tuple, alignment: int, width: float = None):
+        """
+        Generate TEXT command with BASELINE positioning.
+
+        Args:
+            text: The text to output
+            font: Font name
+            position: (x, y) position tuple
+            alignment: Alignment code (0=LEFT, 1=RIGHT, 2=CENTER, 3=JUSTIFY)
+            width: Optional width for JUSTIFY alignment
+        """
+        x_pos, y_pos = position
+
+        self.add_line("TEXT")
+        self.indent()
+
+        # Position SAME SAME BASELINE
+        self.add_line("POSITION SAME SAME BASELINE")
+
+        # Width for JUSTIFY
+        if alignment == 3 and width:
+            self.add_line(f"WIDTH {width} MM")
+
+        # Font
+        self.add_line(f"FONT {font}")
+
+        # Alignment
+        align_map = {0: 'LEFT', 1: 'RIGHT', 2: 'CENTER', 3: 'JUSTIFY'}
+        if alignment in align_map:
+            self.add_line(f"ALIGN {align_map[alignment]}")
+
+        # Text - split long lines at ~70 chars
+        if len(text) > 70:
+            # Split into chunks at word boundaries
+            chunks = []
+            remaining = text
+            while remaining:
+                if len(remaining) <= 70:
+                    chunks.append(remaining)
+                    break
+                # Find last space before 70 chars
+                split_pos = remaining[:70].rfind(' ')
+                if split_pos == -1:
+                    split_pos = 70
+                chunks.append(remaining[:split_pos])
+                remaining = remaining[split_pos:].lstrip()
+
+            for i, chunk in enumerate(chunks):
+                if i == len(chunks) - 1:
+                    # Last chunk gets semicolon
+                    self.add_line(f"'{self._escape_dfa_quotes(chunk)}';")
+                else:
+                    self.add_line(f"'{self._escape_dfa_quotes(chunk)}'")
+        else:
+            self.add_line(f"'{self._escape_dfa_quotes(text)}';")
+
+        self.dedent()
+
+        self.dedent()
+
+
 
     def _convert_output_command_dfa(self, cmd: XeroxCommand, x_pos: float, y_pos: float, current_font: str,
                                    x_was_set: bool = True, y_was_set: bool = True, y_is_next: bool = False):
         """Convert an output command to proper DFA OUTPUT with FONT and POSITION."""
         text = ""
         is_variable = False
+        format_string = None  # Will hold the FORMAT pattern if detected
 
         # Extract text from parameters
-        for param in cmd.parameters:
+        # Note: In VIPP, /NAME can be either:
+        # - Variable reference if it's the first/main parameter (what to output)
+        # - Font reference if it comes after text (how to format)
+        i = 0
+        while i < len(cmd.parameters):
+            param = cmd.parameters[i]
             if param == 'VSUB':
+                i += 1
                 continue
+            elif param == 'FORMAT':
+                # Next parameter is the format string
+                if i + 1 < len(cmd.parameters):
+                    format_string = cmd.parameters[i + 1]
+                    i += 2  # Skip both FORMAT and the format pattern
+                    continue
+                else:
+                    i += 1
+                    continue
             elif param.startswith('(') and param.endswith(')'):
-                text = param[1:-1]  # Remove parentheses
-            elif param.startswith('VAR_') or param.startswith('VAR') or param.startswith('FLD'):
+                # Could be text string or format pattern
+                # If previous param was FORMAT, this is already handled above
+                if not format_string or i == 0 or cmd.parameters[i-1] != 'FORMAT':
+                    text = param[1:-1]  # Remove parentheses - this is a string literal
+                i += 1
+            elif param.startswith('/'):
+                # If we haven't found text yet, this is a variable reference
+                # If we already have text, this would be a font reference (skip here)
+                if not text:
+                    text = param.lstrip('/')
+                    is_variable = True
+                i += 1
+            elif param.startswith('VAR_') or param.startswith('VAR') or param.startswith('FLD') or param.startswith('$'):
+                # Explicit variable or system variable reference
                 text = param
                 is_variable = True
+                i += 1
+            else:
+                i += 1
 
         if not text:
             return
@@ -4475,51 +5281,110 @@ class VIPPToDFAConverter:
             alignment = 2  # Center
 
         # Use flags to determine position format
+        # X position: pass raw numeric value if set (MM will be added by _format_position), SAME otherwise
         x_final = x_pos if x_was_set else 'SAME'
+
+        # Y position: use LASTMAX+6MM after TEXT, NEXT after NL, explicit value when positioned
         if y_is_next:
-            y_final = 'NEXT'  # After NL or previous OUTPUT, use NEXT to stay on the new line
+            # Check if previous command was TEXT - use LASTMAX+6MM after TEXT
+            if self.last_command_type == 'TEXT':
+                y_final = 'LASTMAX+6 MM'
+            else:
+                y_final = 'NEXT'  # After NL or previous OUTPUT, use NEXT to stay on the new line
         elif y_was_set:
-            y_final = y_pos  # Explicit position
+            y_final = y_pos  # Explicit position (MM will be added by _format_position)
         else:
             y_final = 'SAME'  # Implicit position
 
-        # Generate proper DFA OUTPUT with FONT and POSITION on separate lines
-        # Format: OUTPUT text FONT fontname NORMAL POSITION x y [ALIGN ...];
-        if is_variable:
-            self.add_line(f"OUTPUT {text}")
+        # Check if we should use TEXT BASELINE instead of OUTPUT
+        # Only for literal text (not variables)
+        if not is_variable and self._should_use_text_baseline(text, cmd.parameters, alignment):
+            # Use TEXT BASELINE for long strings, multi-font text, or JUSTIFY alignment
+            # For width, use a default of 193 MM (common page width) for JUSTIFY
+            width = 193.0 if alignment == 3 else None
+            self._generate_text_baseline(text, current_font, (x_final, y_final), alignment, width)
+            self.last_command_type = 'TEXT'
         else:
-            self.add_line(f"OUTPUT '{text}'")
-        self.add_line(f"    FONT {current_font} NORMAL")
-        self.add_line(f"    {self._format_position(x_final, y_final)}")
+            # Generate proper DFA OUTPUT with FONT and POSITION on separate lines
+            # Format: OUTPUT text FONT fontname NORMAL POSITION x y [ALIGN ...];
+            if is_variable:
+                # If FORMAT is detected, wrap in NUMPICTURE
+                if format_string:
+                    dfa_format = self._convert_vipp_format_to_dfa(format_string)
+                    self.add_line(f"OUTPUT NUMPICTURE({text},{dfa_format})")
+                else:
+                    self.add_line(f"OUTPUT {text}")
+            else:
+                self.add_line(f"OUTPUT '{self._escape_dfa_quotes(text)}'")
+            self.add_line(f"    FONT {current_font} NORMAL")
+            self.add_line(f"    {self._format_position(x_final, y_final)}")
 
-        # Add alignment if specified
-        if alignment == 0:
-            self.add_line("    ALIGN LEFT NOPAD;")
-        elif alignment == 1:
-            self.add_line("    ALIGN RIGHT NOPAD;")
-        elif alignment == 2:
-            self.add_line("    ALIGN CENTER NOPAD;")
-        elif alignment == 3:
-            self.add_line("    ALIGN JUSTIFY NOPAD;")
-        else:
-            self.add_line("    ;")
+            # Add alignment if specified (but NOT JUSTIFY - that's not valid for OUTPUT)
+            if alignment == 0:
+                self.add_line("    ALIGN LEFT NOPAD;")
+            elif alignment == 1:
+                self.add_line("    ALIGN RIGHT NOPAD;")
+            elif alignment == 2:
+                self.add_line("    ALIGN CENTER NOPAD;")
+            else:
+                self.add_line("    ;")
+            self.last_command_type = 'OUTPUT'
 
     def _convert_box_command_dfa(self, cmd: XeroxCommand):
-        """Convert a box drawing command to proper DFA BOX."""
-        if len(cmd.parameters) >= 4:
-            x = cmd.parameters[0]
-            y = cmd.parameters[1]
-            width = cmd.parameters[2]
-            height = cmd.parameters[3]
+        """Convert a box drawing command to proper DFA BOX with anchoring.
 
-            # Use proper DFA BOX syntax with POSITION
-            self.add_line("BOX")
-            self.indent()
-            self.add_line(f"POSITION ({x}) ({y})")
-            self.add_line(f"WIDTH {width} MM")
-            self.add_line(f"HEIGHT {height} MM")
-            self.add_line("THICKNESS LIGHT TYPE SOLID;")
-            self.dedent()
+        Uses POSX/POSY anchors for relative positioning and inverts Y coordinates.
+
+        VIPP: 00 -13.5 193 0.001 XDRK DRAWB (Y = -13.5)
+        DFA:  POSITION (POSX+0 MM) (POSY+13.5 MM) (Y = +13.5)
+        """
+        if len(cmd.parameters) < 4:
+            return
+
+        # First box in a group should set anchors
+        if self.should_set_box_anchor:
+            self.add_line("POSY = $SL_CURRY;")
+            self.add_line("POSX = $SL_CURRX;")
+            self.should_set_box_anchor = False
+
+        # Parse parameters
+        try:
+            x = float(cmd.parameters[0])
+            y = float(cmd.parameters[1])
+            width = float(cmd.parameters[2])
+            height = float(cmd.parameters[3])
+        except (ValueError, IndexError):
+            return
+
+        # Invert Y coordinate (negative becomes positive)
+        y_inverted = abs(y)
+
+        # Convert tiny widths/heights to 0.1 MM for thin lines
+        if width < 0.01:
+            width = 0.1
+        if height < 0.01:
+            height = 0.1
+
+        # Parse color parameter if present
+        color = None
+        if len(cmd.parameters) >= 5:
+            color_param = str(cmd.parameters[4]).upper()
+            if color_param in ['LMED', 'MED', 'XDRK', 'FBLACK', 'LTHN', 'LTHK']:
+                color = color_param
+
+        # Generate BOX with anchored position
+        self.add_line("BOX")
+        self.indent()
+        self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
+        self.add_line(f"WIDTH {width} MM HEIGHT {height} MM")
+
+        # Add color if specified
+        if color:
+            self.add_line(f"COLOR {color}")
+
+        # Use THICKNESS 0 for filled boxes (SHADE 100)
+        self.add_line("THICKNESS 0 TYPE SOLID SHADE 100;")
+        self.dedent()
 
     def _convert_resource_command_dfa(self, cmd: XeroxCommand, x_pos: float, y_pos: float):
         """Convert a resource call (SCALL/ICALL) to proper DFA SEGMENT."""
@@ -4551,7 +5416,7 @@ class VIPPToDFAConverter:
                 i += 1
 
             if text.strip():
-                output_parts = [f"OUTPUT '{text}'", f"FONT {current_font} NORMAL"]
+                output_parts = [f"OUTPUT '{self._escape_dfa_quotes(text)}'", f"FONT {current_font} NORMAL"]
                 if align:
                     output_parts.append(align)
                 self.add_line(" ".join(output_parts) + ";")
@@ -4736,7 +5601,7 @@ class VIPPToDFAConverter:
             # Handle string literals
             elif param.startswith('(') and param.endswith(')'):
                 text = param.strip('()')
-                dfa_params.append(f"'{text}'")
+                dfa_params.append(f"'{self._escape_dfa_quotes(text)}'")
             # Handle numeric values
             elif param.isdigit() or (param.replace('.', '', 1).isdigit() and param.count('.') <= 1):
                 dfa_params.append(param)
@@ -4782,7 +5647,9 @@ class VIPPToDFAConverter:
     def _generate_form_usage_in_printfooter(self):
         """
         Generate form selection code in PRINTFOOTER.
-        Uses IF P < 1 to select first page vs subsequent pages.
+        Cycles through all FRM files using P counter pattern.
+
+        Order priority: S (subsequent) → F (first) → TNC → F3 → B (back) → others
         """
         # List available forms
         frm_names = []
@@ -4794,91 +5661,86 @@ class VIPPToDFAConverter:
         if len(frm_names) == 0:
             return  # No forms to use
 
-        # Find first page form (ending in F) and subsequent page form (ending in S)
-        first_form = next((f for f in frm_names if f.endswith('F')), frm_names[0])
-        subseq_form = next((f for f in frm_names if f.endswith('S')), frm_names[-1] if len(frm_names) > 1 else frm_names[0])
+        # Custom sorting based on FRM naming conventions
+        # Priority: S (subsequent) → F (first) → TNC → F3 → B (back) → B2 → others
+        def frm_sort_key(name):
+            base_name = name.rsplit('_', 1)[0] if '_' in name else name
+            # Extract suffix (last character or _TNC)
+            if name.endswith('_TNC'):
+                suffix = '_TNC'
+            elif name.endswith('S'):
+                suffix = 'S'
+            elif name.endswith('F3'):
+                suffix = 'F3'
+            elif name.endswith('F'):
+                suffix = 'F'
+            elif name.endswith('B2'):
+                suffix = 'B2'
+            elif name.endswith('B'):
+                suffix = 'B'
+            else:
+                suffix = 'Z'  # Others at the end
 
-        self.add_line("      IF P<1;")
-        self.add_line("      THEN;")
-        self.add_line("        USE")
-        self.add_line(f"          FORMAT {first_form} EXTERNAL;")
-        self.add_line("      ELSE;")
-        self.add_line("        USE")
-        self.add_line(f"          FORMAT {subseq_form} EXTERNAL;")
-        self.add_line("      ENDIF;")
+            # Priority order
+            priority = {
+                'S': 0,     # Subsequent pages (CASIOS, SIBS_CASTS)
+                'F': 1,     # First page (CASIOF, SIBS_CASTF)
+                '_TNC': 2,  # Terms & Conditions (CASIO_TNC)
+                'F3': 3,    # First page variant 3 (CASIOF3)
+                'B': 4,     # Back page (CASIOB)
+                'B2': 5,    # Back page variant 2 (CASIOB2)
+                'Z': 99     # Others
+            }
+
+            return (priority.get(suffix, 99), base_name, name)
+
+        frm_names = sorted(frm_names, key=frm_sort_key)
+
+        # Generate cycling logic through all FRM files
+        # Pattern: P counter cycles through FRM files (1, 2, 3, ..., N, then back to 1)
+        for idx, frm_name in enumerate(frm_names, start=1):
+            self.add_line(f"      IF P=={idx}; THEN; USE FORMAT {frm_name} EXTERNAL; ENDIF;")
+
+        # Reset P if it exceeds the number of FRMs
+        if frm_names:
+            first_frm = frm_names[0]
+            self.add_line(f"      IF P>{len(frm_names)}; THEN; P=1; USE FORMAT {first_frm} EXTERNAL; ENDIF;")
 
     def _generate_variable_initialization(self):
         """
         Generate variable initialization from DBM commands.
 
         Processes the initialization section at the beginning of the DBM file
-        (typically a VARINI IF block) and adds it to $_BEFOREFIRSTDOC.
+        (typically a VARINI IF block) and extracts all /INI SETVAR commands.
         Since $_BEFOREFIRSTDOC only runs once, we don't need the VARINI IF pattern
-        or /INI checks - variables don't exist yet.
+        - variables don't exist yet so they will be created with these initial values.
         """
         self.add_line("/* Variable Initialization from DBM */")
         self.add_line("")
 
-        # Add standard counter and flag initializations
-        # These are typically inside the IF VARINI block in OCBC VIPP files
-        # Note: SETLSP is already added to main DOCFORMAT after MARGIN
-        self.add_line("")
-
-        self.add_line("/* Counter initializations */")
-        self.add_line("VAR_COUNTERC = 0;")
-        self.add_line("VAR_COUNTERI = 0;")
-        self.add_line("VAR_COUNT_TX = 0;")
-        self.add_line("VAR_COUNTTX2 = 0;")
-        self.add_line("VAR_COUNTTS2 = 0;")
-        self.add_line("VAR_TXNF = 0;")
-        self.add_line("VAR_NF = 0;")
-        self.add_line("VAR_RACC = 0;")
-        self.add_line("VAR_COUNTPAGE = 0;")
-        self.add_line("VAR_COUNTERS = 0;")
-        self.add_line("")
-
-        self.add_line("/* Date format variables */")
-        self.add_line("VARMdate = 0;")
-        self.add_line("VARMmonth = 0;")
-        self.add_line("VARMyear = 0;")
-        self.add_line("VARTdate = 0;")
-        self.add_line("VARTmonth = 0;")
-        self.add_line("VARTyear = 0;")
-        self.add_line("")
-
-        self.add_line("/* Flag variables */")
-        self.add_line("VAR_NoTrx = 1;  /* for multiple account without transaction */")
-        self.add_line("VAR_NotBeign = 0;")
-        self.add_line("VAR_New_DOC = 1;")
-        self.add_line("VAR_DOC_count = 0;")
-        self.add_line("VAR_Brk_count = '000';")
-        self.add_line("")
-
-        self.add_line("/* Page numbering */")
-        self.add_line("VARtab = '';  /* Array placeholder */")
-        self.add_line("VARdoc = 0;")
-        self.add_line("")
-
-        # Process any additional SETVAR commands from dbm.commands
+        # Extract /INI SETVAR commands from DBM
+        # These are the variables defined with /INI flag in the VARINI block
         self._process_initialization_commands(self.dbm.commands)
 
         self.add_line("")
 
     def _process_initialization_commands(self, commands: List[XeroxCommand]):
         """Recursively process commands to extract variable initializations."""
+        init_var_count = 0
         for cmd in commands:
-            # Handle SETVAR commands (skip VARINI itself)
-            if cmd.name == 'SETVAR':
+            # Handle SETVAR commands with /INI flag (initialization variables only)
+            if cmd.name == 'SETVAR' and cmd.is_initialization:
+                init_var_count += 1
                 var_name = None
                 var_value = None
 
-                # Parse parameters: /VarName value [/INI] SETVAR
+                # Parse parameters: /VarName value SETVAR (already filtered /INI)
                 params = cmd.parameters
                 for i, param in enumerate(params):
-                    if param.startswith('/') and param not in ('/INI',):
+                    if param.startswith('/'):
                         # Variable name (remove leading /)
                         var_name = param[1:]
-                    elif param not in ('/INI', 'SETVAR') and var_name and var_value is None:
+                    elif var_name and var_value is None:
                         # This is the value
                         var_value = param
 
@@ -4918,6 +5780,8 @@ class VIPPToDFAConverter:
             # Recursively process any children (for nested structures)
             if hasattr(cmd, 'children') and cmd.children:
                 self._process_initialization_commands(cmd.children)
+
+        logger.debug(f"Processed {init_var_count} initialization variables")
 
     def _convert_setvar_value(self, value: str) -> str:
         """
