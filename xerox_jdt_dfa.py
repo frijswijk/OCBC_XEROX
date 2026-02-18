@@ -2618,6 +2618,24 @@ class VIPPToDFAConverter:
 
         self.add_line("")
 
+    def _convert_xerox_position_to_dfa(self, x_xerox: int, y_xerox: int) -> Tuple[str, str]:
+        """
+        Convert Xerox positions (0-2440 internal resolution) to DFA expressions.
+
+        VPF Point 1: Xerox uses internal resolution of 2440 units.
+        Formula: POSITION (UNIH*#xpos) (MTOP+UNIH*#ypos)
+
+        Args:
+            x_xerox: Horizontal position in Xerox units (0-2440)
+            y_xerox: Vertical position in Xerox units
+
+        Returns:
+            Tuple of (x_dfa_expr, y_dfa_expr) as strings
+        """
+        x_dfa = f"UNIH*#{x_xerox}"
+        y_dfa = f"MTOP+UNIH*#{y_xerox}"
+        return (x_dfa, y_dfa)
+
     def _generate_jdt_docformat_main(self):
         """Generate main DOCFORMAT for JDT with line mode processing."""
         self.add_line("/* Main document format - LINE MODE PROCESSING */")
@@ -2651,69 +2669,29 @@ class VIPPToDFAConverter:
         self.add_line("ELSE;")
         self.indent()
 
-        # Output comment and reset counter
-        self.add_line("/*Output at the end of data reading*/")
+        # VPF Point 3: Proper document structure - extract channel code and content
+        self.add_line("/* Reset to continue processing */")
         self.add_line("N = 0;")
         self.add_line("C = C+1;")
-
-        # Extract carriage control and content into arrays
-        self.add_line("/* Reset to continue processing */")
-        self.add_line("/* Extract carriage control character and CONTENT[C] */")
+        self.add_line("")
+        self.add_line("/* Extract carriage control character and content */")
         self.add_line("CC[C] = LEFT(LINE1,1, '');")
         self.add_line("CONTENT[C] = SUBSTR(LINE1,2,LENGTH(LINE1)-1, '');")
-
-        # Generate conditional routing based on SETRCD conditions
-        if self.jdt.conditions:
-            self.add_line("/* Route to appropriate format based on line CONTENT[C] */")
-
-            # Build IF/ELSE chain from conditions
-            first = True
-            for cond_name, cond in self.jdt.conditions.items():
-                if cond.is_compound:
-                    continue  # Skip compound conditions for now
-
-                if first:
-                    self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')=='{cond.value}';")
-                    first = False
-                else:
-                    self.add_line(f"ELSE;")
-                    self.indent()
-                    self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')=='{cond.value}';")
-                    self.dedent()
-
-                self.add_line("THEN;")
-                self.indent()
-                # Format name from condition name
-                fmt_name = cond_name.replace('IF_CND', 'FMT_CND')
-                self.add_line("USE")
-                self.indent()
-                self.add_line(f"FORMAT {fmt_name};")
-                self.dedent()
-                self.dedent()
-
-            # Default format
-            self.add_line("ELSE;")
-            self.indent()
-            self.add_line("USE")
-            self.indent()
-            self.add_line("FORMAT FMT_DEFAULT;")
-            self.dedent()
-            self.dedent()
-
-            # Close all ENDIF
-            for _ in range(len([c for c in self.jdt.conditions.values() if not c.is_compound])):
-                self.add_line("ENDIF;")
-        else:
-            # No conditions - use default format
-            self.add_line("USE")
-            self.indent()
-            self.add_line("FORMAT FMT_DEFAULT;")
-            self.dedent()
+        self.add_line("")
 
         self.dedent()
         self.add_line("ENDIF;")
         self.dedent()
         self.add_line("ENDFOR;")
+        self.add_line("")
+
+        # VPF Point 2: Evaluate ALL conditions after reading complete document
+        if self.jdt.conditions:
+            self._generate_condition_evaluation_block()
+
+        # Generate output based on RPE arrays
+        self.add_line("/* Output generation based on RPE arrays */")
+        self.add_line("/* This section will output formatted content */")
         self.add_line("")
 
         # Generate DOCFORMAT sections for each condition
@@ -2748,6 +2726,42 @@ class VIPPToDFAConverter:
         self.add_line("VAR_DT1 = 0;")
         self.add_line("VAR_DT2 = 0;")
         self.add_line("VAR_INIT = 0;")
+        self.add_line("")
+
+        # Add UNIH unit variables for Xerox-to-DFA position conversion (VPF Point 1)
+        self.add_line("/* Xerox positioning units - from SETMARGIN */")
+        self.add_line("VARIABLE UNIH SCALAR DECIMAL;")
+        self.add_line("UNIH = $LP_WIDTH/2440;")
+        self.add_line("")
+
+        # Extract margin values from SETMARGIN
+        mtop = self.jdt.margins.get('top', 140) if self.jdt.margins else 140
+        mleft = self.jdt.margins.get('left', 30) if self.jdt.margins else 30
+        mright = self.jdt.margins.get('right', 100) if self.jdt.margins else 100
+
+        self.add_line(f"VARIABLE MTOP SCALAR DECIMAL;")
+        self.add_line(f"MTOP = UNIH*{mtop};")
+        self.add_line(f"VARIABLE MLEFT SCALAR DECIMAL;")
+        self.add_line(f"MLEFT = UNIH*{mleft};")
+        self.add_line(f"VARIABLE MRIGHT SCALAR DECIMAL;")
+        self.add_line(f"MRIGHT = UNIH*{mright};")
+        self.add_line("")
+
+        # Add arrays for document structure (VPF Point 3)
+        self.add_line("/* Document structure arrays */")
+        self.add_line("VARIABLE C SCALAR INTEGER;")
+        self.add_line("VARIABLE CONTENT ARRAY 10000 VARCHAR 1024;")
+        self.add_line("VARIABLE CC ARRAY 10000 VARCHAR 1;")
+        self.add_line("C = 1;")
+        self.add_line("CONTENT[C] = '1';")
+        self.add_line("")
+
+        # Add condition flags for SETRCD conditions (VPF Point 2)
+        if self.jdt.conditions:
+            self.add_line("/* Condition flags for SETRCD */")
+            for cond_name in sorted(self.jdt.conditions.keys()):
+                self.add_line(f"VARIABLE {cond_name} SCALAR INTEGER INITIAL 0;")
+            self.add_line("")
 
         # Add header reading loop
         self.add_line("FOR I")
@@ -2776,46 +2790,378 @@ class VIPPToDFAConverter:
 
         self.dedent()  # End THEMAIN
 
-    def _generate_jdt_condition_formats(self):
-        """Generate DOCFORMAT sections for each SETRCD condition referenced in routing."""
-        # Generate format for each condition used in routing
-        generated_formats = set()
+    def _generate_simple_condition_check(self, cond_name: str, cond: 'XeroxCondition'):
+        """
+        Generate a simple condition check for SETRCD.
 
-        for cond_name, cond in self.jdt.conditions.items():
+        VPF Point 2: Simple conditions check SUBSTR in the FOR C loop.
+        Example: IF SUBSTR(CONTENT[C],2,7)=='Period:' THEN IF_CND1=1 ENDIF
+        """
+        if cond.operator == 'HOLD':
+            # HOLD operator preserves value across iterations
+            self.add_line(f"/* {cond_name}: HOLD condition */")
+            self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')=='{cond.value}';")
+            self.add_line("THEN;")
+            self.indent()
+            self.add_line(f"{cond_name} = 1;")
+            self.dedent()
+            self.add_line("ENDIF;")
+        elif cond.operator == 'eq':
+            self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')=='{cond.value}';")
+            self.add_line("THEN;")
+            self.indent()
+            self.add_line(f"{cond_name} = 1;")
+            self.dedent()
+            self.add_line("ENDIF;")
+        elif cond.operator == 'ne':
+            self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')<>'{cond.value}';")
+            self.add_line("THEN;")
+            self.indent()
+            self.add_line(f"{cond_name} = 1;")
+            self.dedent()
+            self.add_line("ENDIF;")
+        elif cond.operator == 'gt':
+            self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')>'{cond.value}';")
+            self.add_line("THEN;")
+            self.indent()
+            self.add_line(f"{cond_name} = 1;")
+            self.dedent()
+            self.add_line("ENDIF;")
+        elif cond.operator == 'lt':
+            self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')<'{cond.value}';")
+            self.add_line("THEN;")
+            self.indent()
+            self.add_line(f"{cond_name} = 1;")
+            self.dedent()
+            self.add_line("ENDIF;")
+
+    def _generate_compound_condition_check(self, cond_name: str, cond: 'XeroxCondition'):
+        """
+        Generate compound condition check combining other conditions.
+
+        VPF Point 2: Compound conditions use AND/OR on other condition flags.
+        Example: IF ISTRUE(IF_CND1) OR ISTRUE(IF_CND2) THEN IF_CND3=1 ENDIF
+        """
+        if not cond.sub_conditions or len(cond.sub_conditions) < 2:
+            return
+
+        # Build condition expression
+        conditions_expr = []
+        for sub_cond in cond.sub_conditions:
+            conditions_expr.append(f"ISTRUE({sub_cond}==1)")
+
+        operator_str = " OR " if cond.compound_operator == "or" else " AND "
+        full_expr = operator_str.join(conditions_expr)
+
+        self.add_line(f"IF {full_expr};")
+        self.add_line("THEN;")
+        self.indent()
+        self.add_line(f"{cond_name} = 1;")
+        self.dedent()
+        self.add_line("ENDIF;")
+
+    def _generate_condition_evaluation_block(self):
+        """
+        Generate FOR C loop that evaluates all SETRCD conditions.
+
+        VPF Point 2: All conditions are evaluated by looping through CONTENT array
+        and checking SUBSTR matches. Compound conditions are evaluated after simple ones.
+        """
+        self.add_line("/* VPF Point 2: Evaluate all SETRCD conditions */")
+        self.add_line("FOR C")
+        self.indent()
+        self.add_line("REPEAT MAXINDEX(CONTENT);")
+        self.add_line("")
+
+        # Reset all condition flags at start of each page
+        self.add_line("/* Reset condition flags */")
+        for cond_name in sorted(self.jdt.conditions.keys()):
+            cond = self.jdt.conditions[cond_name]
+            if cond.operator != 'HOLD':  # HOLD conditions preserve their value
+                self.add_line(f"{cond_name} = 0;")
+        self.add_line("")
+
+        # Generate simple conditions first
+        self.add_line("/* Simple condition checks */")
+        for cond_name, cond in sorted(self.jdt.conditions.items()):
+            if not cond.is_compound:
+                self._generate_simple_condition_check(cond_name, cond)
+                self.add_line("")
+
+        # Generate compound conditions after simple ones
+        self.add_line("/* Compound condition checks */")
+        for cond_name, cond in sorted(self.jdt.conditions.items()):
             if cond.is_compound:
-                continue  # Skip compound conditions
+                self._generate_compound_condition_check(cond_name, cond)
+                self.add_line("")
 
-            fmt_name = cond_name.replace('IF_CND', 'FMT_CND')
+        self.dedent()
+        self.add_line("ENDFOR;")
+        self.add_line("")
 
-            # Check if already generated
-            if fmt_name in generated_formats:
+    def _group_rpe_by_condition(self, line_num: int) -> List[Tuple[str, List]]:
+        """
+        Group RPE arrays by their condition_name for a given FROMLINE.
+
+        Returns:
+            List of tuples (condition_name, [rpe_arrays])
+            Empty string for condition_name means unconditional output.
+        """
+        if line_num not in self.jdt.rpe_lines:
+            return []
+
+        grouped = {}
+        for rpe in self.jdt.rpe_lines[line_num]:
+            cond = rpe.condition_name if rpe.condition_name else ""
+            if cond not in grouped:
+                grouped[cond] = []
+            grouped[cond].append(rpe)
+
+        # Return in order: unconditional first, then conditional
+        result = []
+        if "" in grouped:
+            result.append(("", grouped[""]))
+        for cond in sorted(grouped.keys()):
+            if cond != "":
+                result.append((cond, grouped[cond]))
+
+        return result
+
+    def _generate_rpe_output_statement(self, rpe: 'XeroxRPEArray', use_measure: bool = False,
+                                     measure_offset: int = 0):
+        """
+        Generate a single OUTPUT statement from RPE array.
+
+        VPF Point 1 & 4: Uses UNIH positioning and handles field extraction.
+
+        Args:
+            rpe: RPE array to convert
+            use_measure: If True, use MEASURE variable for Y position
+            measure_offset: Offset to add to MEASURE
+        """
+        # Determine output content
+        if rpe.literal_text:
+            # Literal text output
+            content_expr = f"'{rpe.literal_text}'"
+        elif rpe.special_call:
+            # Special resource call (SCALL)
+            self.add_line(f"/* WARNING: SCALL {rpe.literal_text} - placeholder generated */")
+            content_expr = f"'[{rpe.literal_text}]'"
+        else:
+            # Field extraction from CONTENT array
+            if rpe.align_right:
+                # Right-aligned field
+                if rpe.length > 0:
+                    content_expr = f"SUBSTR(CONTENT[II],{rpe.start_position},{rpe.length}, '')"
+                else:
+                    content_expr = f"CONTENT[II]"
+            else:
+                # Normal field extraction
+                if rpe.length > 0:
+                    content_expr = f"SUBSTR(CONTENT[II],{rpe.start_position},{rpe.length}, '')"
+                else:
+                    content_expr = f"CONTENT[II]"
+
+        # Generate OUTPUT statement
+        self.add_line(f"OUTPUT {content_expr}")
+        self.indent()
+
+        # Font
+        font_name = rpe.font if rpe.font else "NCR"
+        self.add_line(f"FONT {font_name} NORMAL")
+
+        # Position using UNIH
+        x_dfa, y_dfa = self._convert_xerox_position_to_dfa(rpe.x_position, rpe.horizontal_position)
+
+        if use_measure:
+            # Use MEASURE variable for vertical position
+            y_dfa = f"MTOP+UNIH*MEASURE"
+            if measure_offset != 0:
+                y_dfa = f"MTOP+UNIH*(MEASURE+#{measure_offset})"
+
+        self.add_line(f"POSITION ({x_dfa}) ({y_dfa})")
+
+        # Color
+        color_name = rpe.color if rpe.color else "B"
+        self.add_line(f"COLOR {color_name};")
+
+        self.dedent()
+
+    def _generate_fromline_output(self, line_num: int, rpe_arrays: List['XeroxRPEArray']):
+        """
+        Generate output for a FROMLINE with channel code checking.
+
+        VPF Point 4: Uses LIN and MEASURE variables for line tracking and positioning.
+        Checks CC[LIN+1] for channel continuation.
+        """
+        if not rpe_arrays:
+            return
+
+        self.add_line(f"/* FROMLINE {line_num} output */")
+        self.add_line(f"LIN = {line_num};")
+
+        # Calculate initial MEASURE based on line number (approximate)
+        # Each line is roughly 50 units apart in Xerox coordinates
+        initial_measure = 320 + (line_num - 11) * 50
+        self.add_line(f"MEASURE = {initial_measure};")
+        self.add_line("")
+
+        # Channel code checking loop
+        self.add_line("FOR Z")
+        self.indent()
+        self.add_line("REPEAT 1;")
+        self.add_line("")
+
+        # Output all RPE arrays for this line
+        self.add_line("II = LIN;")
+        for rpe in rpe_arrays:
+            self._generate_rpe_output_statement(rpe, use_measure=False, measure_offset=0)
+            self.add_line("")
+
+        # Check for line continuation via channel code
+        self.add_line("/* Check channel code for continuation */")
+        self.add_line("IF CC[LIN+1]<>'-';")
+        self.add_line("THEN;")
+        self.indent()
+        self.add_line("Z = 0;")
+        self.add_line("LIN = LIN+1;")
+        self.add_line("MEASURE = MEASURE+50;")
+        self.dedent()
+        self.add_line("ENDIF;")
+        self.add_line("")
+
+        self.dedent()
+        self.add_line("ENDFOR;")
+        self.add_line("")
+
+    def _generate_nested_condition_block(self, conditions: List[Tuple[str, List]], depth: int = 0):
+        """
+        Generate nested IF/ELSE blocks for conditional RPE arrays.
+
+        VPF Point 5: Handles deep nesting (up to 8+ levels) with /ENDIFALL markers.
+
+        Args:
+            conditions: List of (condition_name, rpe_arrays) tuples
+            depth: Current nesting depth (for tracking)
+        """
+        if not conditions:
+            return
+
+        first_cond, first_arrays = conditions[0]
+        remaining = conditions[1:]
+
+        if first_cond == "ELSE":
+            # ELSE clause
+            self.add_line("ELSE;")
+            self.indent()
+
+            if remaining:
+                self._generate_nested_condition_block(remaining, depth)
+
+            self.dedent()
+        else:
+            # Conditional clause
+            if depth == 0:
+                self.add_line(f"IF ISTRUE({first_cond}==1);")
+            else:
+                self.add_line("ELSE;")
+                self.indent()
+                self.add_line(f"IF ISTRUE({first_cond}==1);")
+                self.dedent()
+
+            self.add_line("THEN;")
+            self.indent()
+
+            # Output RPE arrays for this condition
+            for rpe in first_arrays:
+                self._generate_rpe_output_statement(rpe, use_measure=True, measure_offset=0)
+                self.add_line("")
+
+            self.dedent()
+
+            # Process remaining conditions
+            if remaining:
+                self._generate_nested_condition_block(remaining, depth + 1)
+
+            # Close ENDIF
+            if depth == 0:
+                self.add_line("ENDIF;")
+
+    def _generate_conditional_rpe_output(self, line_num: int, conditional_groups: List[Tuple[str, List]]):
+        """
+        Generate conditional output for RPE arrays with nested IF/ELSE.
+
+        VPF Point 5: Generates nested IF ISTRUE(IF_CNDxx==1) blocks based on
+        condition_name from RPE arrays.
+        """
+        if not conditional_groups:
+            return
+
+        self.add_line(f"/* Conditional output for line {line_num} */")
+        self.add_line(f"II = {line_num};")
+        self.add_line("")
+
+        # Build nested structure
+        self._generate_nested_condition_block(conditional_groups, depth=0)
+        self.add_line("")
+
+    def _generate_jdt_condition_formats(self):
+        """
+        Generate output based on RPE arrays from FROMLINE sections.
+
+        VPF Points 4 & 5: Uses FROMLINE data to generate OUTPUT statements with
+        proper positioning, channel code checking, and conditional logic.
+        """
+        if not self.jdt.rpe_lines:
+            self.add_line("/* No RPE arrays to process */")
+            return
+
+        self.add_line("/* RPE-based output generation */")
+        self.add_line("")
+
+        # Add LIN, MEASURE, Z variables for line tracking
+        self.add_line("/* Line tracking variables */")
+        self.add_line("VARIABLE LIN SCALAR INTEGER;")
+        self.add_line("VARIABLE MEASURE SCALAR INTEGER;")
+        self.add_line("VARIABLE Z SCALAR INTEGER;")
+        self.add_line("VARIABLE II SCALAR INTEGER;")
+        self.add_line("")
+
+        # Process each FROMLINE
+        for line_num in sorted(self.jdt.rpe_lines.keys()):
+            grouped = self._group_rpe_by_condition(line_num)
+
+            if not grouped:
                 continue
 
-            generated_formats.add(fmt_name)
+            # Separate unconditional and conditional RPE arrays
+            unconditional = []
+            conditional_groups = []
 
-            # Generate stub format - just outputs the line like FMT_DEFAULT
-            # In future, this can be enhanced with RPE array data for column formatting
-            self.add_line(f"/* Format for {cond_name} */")
-            self.add_line(f"DOCFORMAT {fmt_name};")
-            self.indent()
+            for cond_name, arrays in grouped:
+                if cond_name == "":
+                    unconditional = arrays
+                else:
+                    conditional_groups.append((cond_name, arrays))
 
-            self.add_line("OUTLINE")
-            self.indent()
-            self.add_line("POSITION LEFT NEXT")
-            self.add_line("DIRECTION ACROSS;")
-            self.add_line("")
+            # Generate unconditional output first
+            if unconditional:
+                self._generate_fromline_output(line_num, unconditional)
 
-            # Output full line content (stub - can be enhanced later)
-            self.add_line("OUTPUT CONTENT[C]")
-            self.indent()
-            self.add_line("FONT NCR NORMAL")
-            self.add_line("POSITION (SAME) (NEXT)")
-            self.add_line("COLOR B;")
-            self.dedent()
-            self.dedent()
-            self.add_line("ENDIO;")
-            self.dedent()
-            self.add_line("")
+            # Generate conditional output
+            if conditional_groups:
+                # Handle /ELSE/IF_CND pattern from JDT
+                # Need to build proper nested structure
+                nested_structure = []
+                for i, (cond_name, arrays) in enumerate(conditional_groups):
+                    nested_structure.append((cond_name, arrays))
+
+                # Check if last condition should be ELSE
+                # (In JDT, last condition before /ENDIFALL is often the default)
+                if nested_structure:
+                    self._generate_conditional_rpe_output(line_num, nested_structure)
+
+        self.add_line("")
 
     def generate_frm_dfa_code(self, frm: XeroxFRM, as_include: bool = False) -> str:
         """

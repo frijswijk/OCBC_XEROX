@@ -3606,7 +3606,16 @@ class VIPPToDFAConverter:
                 r, g, b = 0, 0, 0  # Default to black
 
             self.color_mappings[alias] = dfa_alias
-            self.add_line(f"COLOR {dfa_alias} AS RGB {r} {g} {b};")
+            # Convert RGB from 0-255 to 0-100 percentage scale
+            r_pct = round(r * 100 / 255, 1)
+            g_pct = round(g * 100 / 255, 1)
+            b_pct = round(b * 100 / 255, 1)
+            # Format as integer if whole number, otherwise keep decimal
+            r_str = str(int(r_pct)) if r_pct == int(r_pct) else str(r_pct)
+            g_str = str(int(g_pct)) if g_pct == int(g_pct) else str(g_pct)
+            b_str = str(int(b_pct)) if b_pct == int(b_pct) else str(b_pct)
+            # Use correct DEFINE COLOR syntax
+            self.add_line(f"DEFINE {dfa_alias} COLOR RGB RVAL {r_str} GVAL {g_str} BVAL {b_str};")
 
         # Always add standard OCBC colors if not already defined
         standard_ocbc_colors = {
@@ -3619,7 +3628,16 @@ class VIPPToDFAConverter:
         for color_name, (r, g, b) in standard_ocbc_colors.items():
             if color_name not in self.color_mappings.values():
                 self.color_mappings[color_name] = color_name
-                self.add_line(f"COLOR {color_name} AS RGB {r} {g} {b};")
+                # Convert RGB from 0-255 to 0-100 percentage scale
+                r_pct = round(r * 100 / 255, 1)
+                g_pct = round(g * 100 / 255, 1)
+                b_pct = round(b * 100 / 255, 1)
+                # Format as integer if whole number, otherwise keep decimal
+                r_str = str(int(r_pct)) if r_pct == int(r_pct) else str(r_pct)
+                g_str = str(int(g_pct)) if g_pct == int(g_pct) else str(g_pct)
+                b_str = str(int(b_pct)) if b_pct == int(b_pct) else str(b_pct)
+                # Use correct DEFINE COLOR syntax
+                self.add_line(f"DEFINE {color_name} COLOR RGB RVAL {r_str} GVAL {g_str} BVAL {b_str};")
 
         self.add_line("")
 
@@ -3983,13 +4001,115 @@ class VIPPToDFAConverter:
     def _convert_comparison_operators(self, params: List[str]) -> List[str]:
         """
         Convert VIPP comparison operators to DFA equivalents.
+        Handles VIPP's Reverse Polish Notation (postfix) for logical operators.
         Also wraps variables in NOSPACE() when being compared to string literals.
+
+        VIPP uses postfix notation for conditions:
+            VAR_CCD '' eq VAR_CCD 'MY' eq or
+        This should become (infix):
+            NOSPACE(VAR_CCD) == '' or NOSPACE(VAR_CCD) == 'MY'
 
         Args:
             params: List of parameters that may contain comparison operators
 
         Returns:
-            List with converted operators and NOSPACE() wrappers
+            List with converted operators in infix notation
+        """
+        # Logical operators that use postfix notation in VIPP
+        LOGICAL_OPERATORS = {'or': 'or', 'and': 'and'}
+
+        # Check if we have any postfix logical operators
+        has_postfix_logical = any(p.lower() in LOGICAL_OPERATORS for p in params)
+
+        if has_postfix_logical:
+            # Use RPN to infix conversion
+            return self._convert_rpn_to_infix(params)
+        else:
+            # Simple linear conversion (no postfix logical operators)
+            return self._convert_simple_comparison(params)
+
+    def _convert_rpn_to_infix(self, params: List[str]) -> List[str]:
+        """
+        Convert VIPP condition to DFA infix notation.
+
+        VIPP uses a hybrid notation:
+        - Comparisons are INFIX: VAR_CCD eq ()  → VAR_CCD == ''
+        - Logical operators are POSTFIX: [expr1] [expr2] or → expr1 or expr2
+
+        VIPP format example:
+            VAR_CCD eq () VAR_CCD eq (MY) or
+        Should become:
+            NOSPACE(VAR_CCD) == '' or NOSPACE(VAR_CCD) == 'MY'
+        """
+        LOGICAL_OPERATORS = {'or': 'or', 'and': 'and'}
+
+        # First pass: convert parenthesized values to string literals
+        converted_params = []
+        for param in params:
+            if param == '()':
+                converted_params.append("''")
+            elif param.startswith('(') and param.endswith(')') and len(param) > 2:
+                content = param[1:-1]
+                converted_params.append(f"'{content}'")
+            else:
+                converted_params.append(param)
+
+        # Second pass: parse infix comparisons and postfix logical operators
+        # VIPP comparison format: operand1 operator operand2 (infix)
+        # Logical format: comparison1 comparison2 or/and (postfix)
+        expressions = []
+        i = 0
+        while i < len(converted_params):
+            param = converted_params[i]
+            param_lower = param.lower()
+
+            # Check for logical operators (postfix) - combine previous expressions
+            if param_lower in LOGICAL_OPERATORS:
+                dfa_logical = LOGICAL_OPERATORS[param_lower]
+                if len(expressions) >= 2:
+                    right = expressions.pop()
+                    left = expressions.pop()
+                    combined = f"{left} {dfa_logical} {right}"
+                    expressions.append(combined)
+                else:
+                    # Not enough expressions - append as-is
+                    expressions.append(dfa_logical)
+                i += 1
+            # Check for comparison operators (infix) - look for pattern: operand op operand
+            elif param_lower in self.COMPARISON_OPERATORS:
+                dfa_op = self.COMPARISON_OPERATORS[param_lower]
+                # Get left operand (previous param) and right operand (next param)
+                if i >= 1 and i + 1 < len(converted_params):
+                    left = converted_params[i - 1]
+                    right = converted_params[i + 1]
+                    # Remove left from expressions if it was added
+                    if expressions and expressions[-1] == left:
+                        expressions.pop()
+                    # Wrap left in NOSPACE() if it's a variable being compared to string
+                    if right.startswith("'") and \
+                       not left.startswith("NOSPACE(") and \
+                       (left.startswith("VAR_") or left.startswith("FLD[") or left.startswith("&")):
+                        left = f"NOSPACE({left})"
+                    comparison = f"{left} {dfa_op} {right}"
+                    expressions.append(comparison)
+                    i += 2  # Skip the right operand as we've consumed it
+                else:
+                    # Can't form comparison - just add operator
+                    expressions.append(dfa_op)
+                    i += 1
+            else:
+                # Regular operand - add to expressions
+                expressions.append(param)
+                i += 1
+
+        # Return the result as a single-element list
+        if expressions:
+            return [' '.join(expressions)]
+        return []
+
+    def _convert_simple_comparison(self, params: List[str]) -> List[str]:
+        """
+        Simple linear conversion for conditions without postfix logical operators.
         """
         result = []
         i = 0
@@ -4014,7 +4134,7 @@ class VIPPToDFAConverter:
                         # If comparing to a string literal and prev is a variable
                         if (next_param.startswith("'") or next_param.upper() == next_param) and \
                            not prev_param.startswith("NOSPACE(") and \
-                           (prev_param.startswith("VAR_") or prev_param.startswith("FLD[")):
+                           (prev_param.startswith("VAR_") or prev_param.startswith("FLD[") or prev_param.startswith("&")):
                             # Wrap the variable in NOSPACE()
                             result[-2] = f"NOSPACE({prev_param})"
             else:
@@ -4127,7 +4247,8 @@ class VIPPToDFAConverter:
         self._generate_initialization()
 
         # End document definition
-        self.add_line("/* END OF DOCDEF FILE */")
+        self.add_line("")
+        self.add_line("ENDDOCDEF;")
 
     def _generate_main_loop(self):
         """
@@ -4705,26 +4826,26 @@ class VIPPToDFAConverter:
 
             # Handle page break commands
             if cmd.name == 'PAGEBRK':
-                # PAGEBRK → USE LP NEXT (or let DFA handle automatically)
-                self.add_line("USE LP NEXT;")
+                # PAGEBRK → PAGEBREAK
+                self.add_line("PAGEBREAK;")
                 i += 1
                 continue
 
             if cmd.name == 'NEWFRONT':
-                # NEWFRONT → USE LP NEXT SIDE FRONT
-                self.add_line("USE LP NEXT SIDE FRONT;")
+                # NEWFRONT → USE LOGICALPAGE NEXT SIDE FRONT
+                self.add_line("USE LOGICALPAGE NEXT SIDE FRONT;")
                 i += 1
                 continue
 
             if cmd.name == 'NEWBACK':
-                # NEWBACK → USE LP NEXT SIDE BACK
-                self.add_line("USE LP NEXT SIDE BACK;")
+                # NEWBACK → USE LOGICALPAGE NEXT SIDE BACK
+                self.add_line("USE LOGICALPAGE NEXT SIDE BACK;")
                 i += 1
                 continue
 
             if cmd.name == 'NEWFRAME':
-                # NEWFRAME → USE LP NEXT (automatic page break)
-                self.add_line("USE LP NEXT;")
+                # NEWFRAME → PAGEBREAK (automatic page break)
+                self.add_line("PAGEBREAK;")
                 i += 1
                 continue
 
@@ -5818,6 +5939,12 @@ class VIPPToDFAConverter:
         self.add_line("/* Initialize variables */")
         self.add_line("DOCFORMAT $_BEFOREFIRSTDOC;")
         self.indent()
+
+        # Initialize boolean constants
+        self.add_line("/* Boolean constants */")
+        self.add_line("FALSE = 0;")
+        self.add_line("TRUE = 1;")
+        self.add_line("")
 
         # Initialize page counters
         self.add_line("/* Current page */")
