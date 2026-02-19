@@ -269,6 +269,16 @@ class XeroxLexer:
                 self._handle_xerox_identifier()
                 continue
             
+            # Handle PostScript/VIPP hex string literals <XXYY...>
+            # Must be checked before the generic '<' operator path
+            if self.input[self.pos] == '<':
+                j = self.pos + 1
+                while j < len(self.input) and self.input[j] in '0123456789abcdefABCDEF \t':
+                    j += 1
+                if j < len(self.input) and self.input[j] == '>':
+                    self._handle_hex_string()
+                    continue
+
             # Handle operators
             if self.input[self.pos] in '+-*/=!<>&|':
                 self._handle_operator()
@@ -456,6 +466,52 @@ class XeroxLexer:
         token = XeroxToken(
             type='string',
             value=string_text,
+            line_number=start_line,
+            column=start_col
+        )
+        self.tokens.append(token)
+
+    def _handle_hex_string(self):
+        """Handle a PostScript/VIPP hex string literal <XXYY...>.
+
+        In VIPP (PostScript-derived), <76> means the byte 0x76 = 'v'.
+        Multi-byte: <4F43> means 'OC'.  Whitespace inside is ignored.
+        Produces a 'string' token in VIPP parentheses form, e.g. '(v)'.
+        """
+        start_line = self.line
+        start_col = self.col
+        self.pos += 1  # Skip <
+        self.col += 1
+
+        hex_chars = []
+        while self.pos < len(self.input) and self.input[self.pos] != '>':
+            ch = self.input[self.pos]
+            if ch in '0123456789abcdefABCDEF':
+                hex_chars.append(ch)
+            # Spaces/tabs inside hex string are legal whitespace — skip silently
+            if ch == '\n':
+                self.line += 1
+                self.col = 1
+            else:
+                self.col += 1
+            self.pos += 1
+
+        if self.pos < len(self.input):  # consume closing '>'
+            self.pos += 1
+            self.col += 1
+
+        # Convert hex digit pairs to characters (latin-1 / ISO-8859-1)
+        hex_str = ''.join(hex_chars)
+        if len(hex_str) % 2:
+            hex_str = hex_str + '0'  # PostScript pads odd-length with trailing 0
+        try:
+            chars = bytes.fromhex(hex_str).decode('latin-1')
+        except Exception:
+            chars = hex_str  # fallback: keep raw hex digits as text
+
+        token = XeroxToken(
+            type='string',
+            value=f'({chars})',
             line_number=start_line,
             column=start_col
         )
