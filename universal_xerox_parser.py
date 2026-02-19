@@ -186,7 +186,7 @@ class XeroxLexer:
         'WHILE', 'ENDWHILE', 'REPEAT', 'BREAK', 'CONTINUE', 'GOTO',
         
         # Font and color handling
-        'INDEXFONT', 'INDEXCOLOR', 'INDEXBAT', 'XGFRESDEF',
+        'INDEXFONT', 'INDEXCOLOR', 'INDEXBAT', 'INDEXSST', 'XGFRESDEF',
         
         # Page and positioning
         'SETPAGESIZE', 'SETLSP', 'SETPAGENUMBER', 'SETPAGEDEF', 'SETLKF', 'SETFORM',
@@ -530,8 +530,9 @@ class XeroxLexer:
         self.pos += 1  # Skip /
         self.col += 1
 
+        # Include hyphens for VIPP font names like /Helvetica-Bold, /Courier-BoldOblique
         while self.pos < len(self.input) and (self.input[self.pos].isalnum() or
-                                         self.input[self.pos] in '_$'):
+                                         self.input[self.pos] in '_$-'):
             self.pos += 1
             self.col += 1
 
@@ -611,7 +612,7 @@ class XeroxParser:
 
         # Resources
         'SCALL': 1,   # (name) SCALL or (name) scale SCALL
-        'ICALL': 1,   # (name) ICALL
+        'ICALL': 3,   # (name) scale rotation ICALL
         'CACHE': 0,   # (name) CACHE [dimensions] - variable params, handled specially
 
         # Page layout
@@ -634,6 +635,12 @@ class XeroxParser:
         'ELSE': 0,
         'FOR': 0,
         'ENDFOR': 0,
+        'CASE': 0,    # Handled specially (prefix: CASE var {default} (val){body}... ENDCASE)
+        'ENDCASE': 0,
+
+        # Table commands
+        'BEGINTABLE': 1,  # [...] BEGINTABLE
+        'SHROW': 1,       # [...] SHROW
 
         # Comparison operators (binary, consume 2 from stack)
         'eq': 2,
@@ -905,6 +912,177 @@ class XeroxParser:
                     if else_body_tokens:
                         child_commands = self._parse_vipp_block(else_body_tokens, line_offset)
                         cmd.children = child_commands
+
+                elif cmd_name == 'CASE':
+                    # CASE is prefix syntax: CASE variable {default} (value){body}... ENDCASE
+                    # Convert to series of IF commands with children
+
+                    # Variable name is ALWAYS the next token after CASE (prefix syntax)
+                    case_var = None
+                    j = i + 1
+                    while j < len(tokens) and tokens[j].type == 'comment':
+                        j += 1
+                    if j < len(tokens) and tokens[j].type in ('identifier', 'variable', 'keyword'):
+                        case_var = tokens[j].value
+                        if case_var.startswith('/'):
+                            case_var = case_var.lstrip('/')
+                        j += 1
+
+                    # Continue looking ahead to collect default block and case entries
+                    while j < len(tokens) and tokens[j].type == 'comment':
+                        j += 1
+
+                    # Collect default block if present
+                    if j < len(tokens) and tokens[j].value == '{':
+                        _, block_end = self._collect_block(tokens, j)
+                        j = block_end + 1
+
+                    # Collect (value) {body} pairs until ENDCASE
+                    case_entries = []
+                    while j < len(tokens):
+                        # Skip comments
+                        while j < len(tokens) and tokens[j].type == 'comment':
+                            j += 1
+                        if j >= len(tokens):
+                            break
+                        if tokens[j].value == 'ENDCASE':
+                            j += 1
+                            break
+
+                        # Expect a string value token
+                        if tokens[j].type == 'string':
+                            case_value = tokens[j].value
+                            j += 1
+
+                            # Skip comments
+                            while j < len(tokens) and tokens[j].type == 'comment':
+                                j += 1
+
+                            # Expect a block
+                            if j < len(tokens) and tokens[j].value == '{':
+                                body_tokens, block_end = self._collect_block(tokens, j)
+                                j = block_end + 1
+                                case_entries.append((case_value, body_tokens))
+                            else:
+                                continue
+                        else:
+                            j += 1  # Skip unexpected tokens
+
+                    # Update main loop index
+                    i = j - 1
+
+                    # Generate IF command for each case entry
+                    for case_value, body_tokens in case_entries:
+                        # Clean parenthesized value
+                        clean_value = case_value
+                        if clean_value.startswith('(') and clean_value.endswith(')'):
+                            clean_value = clean_value[1:-1]
+
+                        if_cmd = XeroxCommand(
+                            name='IF',
+                            line_number=token.line_number + line_offset,
+                            column=token.column
+                        )
+                        # Build condition as the variable eq string comparison
+                        if_cmd.parameters = [f"{case_var} eq ({clean_value})"]
+                        # Parse body block recursively
+                        child_commands = self._parse_vipp_block(body_tokens, line_offset)
+                        if_cmd.children = child_commands
+                        commands.append(if_cmd)
+
+                elif cmd_name == 'ENDCASE':
+                    # ENDCASE is consumed by CASE handler, but if we see a standalone one
+                    # (e.g., in DBM prefix parsing), just skip it
+                    pass
+
+                elif cmd_name == 'BEGINTABLE':
+                    # BEGINTABLE sets table defaults - consume from stack and skip
+                    if len(stack) > 0:
+                        stack.pop()  # Consume the defaults block
+                    # No DFA output needed - SHROW handles the actual rows
+
+                elif cmd_name == 'SHROW':
+                    # SHROW: [...] SHROW — table row with cell definitions
+                    # Extract cell text from the block on stack
+                    if len(stack) > 0:
+                        row_block = stack.pop()
+                        cell_texts = []
+                        cell_fonts = []
+
+                        if isinstance(row_block, tuple) and row_block[0] == 'block':
+                            block_tokens = row_block[1]
+                            # Parse the cell array to extract /CellText values and /TextAtt fonts
+                            current_cell_text = None
+                            current_cell_font = None
+                            bi = 0
+                            while bi < len(block_tokens):
+                                bt = block_tokens[bi]
+                                if bt.value == '/CellText':
+                                    # Next token is the cell text
+                                    bi += 1
+                                    if bi < len(block_tokens):
+                                        cell_val = block_tokens[bi].value
+                                        if cell_val.startswith('(') and cell_val.endswith(')'):
+                                            current_cell_text = cell_val[1:-1]
+                                        elif cell_val.startswith('($$') and cell_val.endswith('.)'):
+                                            # VSUB variable reference: ($$VAR_OFN.) -> VAR_OFN
+                                            var_name = cell_val[3:-2]
+                                            current_cell_text = ('VAR', var_name)
+                                        else:
+                                            current_cell_text = cell_val
+                                elif bt.value == '/TextAtt':
+                                    # Next token is font block {F3}
+                                    bi += 1
+                                    if bi < len(block_tokens):
+                                        font_val = block_tokens[bi]
+                                        if isinstance(font_val, XeroxToken) and font_val.value == '{':
+                                            # Collect until }
+                                            bi += 1
+                                            font_parts = []
+                                            while bi < len(block_tokens) and block_tokens[bi].value != '}':
+                                                font_parts.append(block_tokens[bi].value)
+                                                bi += 1
+                                            current_cell_font = font_parts[0] if font_parts else None
+                                        elif hasattr(font_val, 'value'):
+                                            current_cell_font = font_val.value
+                                elif bt.value == ']':
+                                    # End of cell - save accumulated text and font
+                                    if current_cell_text is not None:
+                                        cell_texts.append(current_cell_text)
+                                        cell_fonts.append(current_cell_font)
+                                    current_cell_text = None
+                                    current_cell_font = None
+                                bi += 1
+
+                        # Generate SHP command (TEXT block) with combined cell texts
+                        if cell_texts:
+                            # Combine cell texts with spaces
+                            combined_parts = []
+                            combined_font = cell_fonts[0] if cell_fonts else None
+                            for ct in cell_texts:
+                                if isinstance(ct, tuple) and ct[0] == 'VAR':
+                                    combined_parts.append(f'$${ct[1]}.')
+                                else:
+                                    combined_parts.append(ct)
+                            combined_text = ' '.join(combined_parts)
+
+                            shp_cmd = XeroxCommand(
+                                name='SHP',
+                                line_number=token.line_number + line_offset,
+                                column=token.column
+                            )
+                            shp_cmd.parameters = [f'({combined_text})', '185', '0']
+                            if combined_font:
+                                shp_cmd.font_override = combined_font
+                            commands.append(shp_cmd)
+
+                elif cmd_name == 'INDEXSST':
+                    # INDEXSST: /alias /value INDEXSST — consume from stack and skip
+                    if len(stack) >= 2:
+                        stack.pop()
+                        stack.pop()
+                    elif len(stack) >= 1:
+                        stack.pop()
 
                 elif cmd_name == 'VSUB':
                     # VSUB operates on the preceding string on the stack
@@ -1524,6 +1702,15 @@ class XeroxParser:
                 self.pos += 3
                 continue
 
+            # Handle INDEXSST definitions: /S0 /SUP INDEXSST or /N0 null INDEXSST
+            if (token.type == 'variable' and
+                self.pos + 2 < len(self.tokens) and
+                self.tokens[self.pos + 2].value == 'INDEXSST'):
+
+                # Consume INDEXSST definitions so they don't leak into form commands
+                self.pos += 3
+                continue
+
             self.pos += 1
 
         # Second pass: parse commands using VIPP RPN parser
@@ -1690,9 +1877,9 @@ class VIPPToDFAConverter:
         'SETFORM': 'SETFORM',
         'SETLKF': 'SETLKF',
         'SETPAGEDEF': 'SETPAGEDEF',
-        'PAGEBRK': 'PAGEBREAK',
-        'NEWFRAME': 'NEWFRAME',
-        'SKIPPAGE': 'SKIPPAGE',
+        'PAGEBRK': '/* VIPP command not supported: PAGEBRK */',
+        'NEWFRAME': '/* VIPP command not supported: NEWFRAME */',
+        'SKIPPAGE': '/* VIPP command not supported: SKIPPAGE */',
         'BOOKMARK': 'BOOKMARK',
         'SETPAGENUMBER': 'PAGENUMBER',
         'GETINTV': 'SUBSTR',
@@ -2237,21 +2424,44 @@ class VIPPToDFAConverter:
 
         self.dedent()
 
+    def _split_respecting_parens(self, text: str) -> List[str]:
+        """Split a string on spaces while keeping parenthesized substrings intact."""
+        parts = []
+        current = []
+        depth = 0
+        for char in text:
+            if char == '(':
+                depth += 1
+                current.append(char)
+            elif char == ')':
+                depth -= 1
+                current.append(char)
+            elif char == ' ' and depth == 0:
+                if current:
+                    parts.append(''.join(current))
+                    current = []
+            else:
+                current.append(char)
+        if current:
+            parts.append(''.join(current))
+        return parts
+
     def _convert_frm_condition(self, params: List[str]) -> str:
         """Convert FRM IF condition to DFA format."""
         if not params:
             return "TRUE"
 
         # Split parameters if they're combined into a single string
+        # Use parenthesis-aware splitter to preserve multi-word strings like (monthly investment plan)
         split_params = []
         for param in params:
             if ' ' in param:
-                split_params.extend(param.split())
+                split_params.extend(self._split_respecting_parens(param))
             else:
                 split_params.append(param)
 
         # Filter out definition keywords that should not be in IF conditions
-        DEFINITION_KEYWORDS = {'INDEXBAT', 'INDEXFONT', 'INDEXCOLOR', 'SETUNIT', 'MM', 'CM', 'INCH', 'null'}
+        DEFINITION_KEYWORDS = {'INDEXBAT', 'INDEXFONT', 'INDEXCOLOR', 'INDEXSST', 'SETUNIT', 'MM', 'CM', 'INCH', 'null'}
 
         # Track what was filtered for debugging
         filtered_params = [p for p in split_params if p in DEFINITION_KEYWORDS]
@@ -2273,11 +2483,20 @@ class VIPPToDFAConverter:
             elif param.startswith('/'):
                 condition_parts.append(param.lstrip('/'))
             elif param.startswith('(') and param.endswith(')'):
-                condition_parts.append(f"'{param[1:-1]}'")
+                # Multi-word parenthesized strings: wrap with NOSPACE() for string comparison
+                clean_val = param[1:-1]
+                condition_parts.append(f"'{clean_val}'")
             else:
                 condition_parts.append(param)
 
-        return ' '.join(condition_parts)
+        # Apply NOSPACE() wrapper to string comparisons
+        # Pattern: VAR == 'value' → NOSPACE(VAR) == 'value'
+        result = ' '.join(condition_parts)
+        import re
+        # Wrap variable names before == with NOSPACE() if comparing to string literals
+        result = re.sub(r'\b([A-Z][A-Z0-9_]*)\s*==\s*\'', r"NOSPACE(\1) == '", result)
+
+        return result
 
     def _convert_frm_output(self, cmd: XeroxCommand, x: float, y: float, font: str, frm: XeroxFRM,
                            x_was_set: bool = True, y_was_set: bool = True, y_is_next: bool = False,
@@ -2822,10 +3041,12 @@ class VIPPToDFAConverter:
 
         # Classify style into line-only vs fill styles
         # Line styles: LMED, LTHN, LTHK, LDSH, LDOT — border only, no color, no shade
-        # Fill styles: R_S1, G_S1, B_S1, F_S1, S1-S4 — filled, with color and shade
+        # Standalone shade styles: S1, S2, S3, S4 — border only (no color prefix)
+        # Fill styles: R_S1, G_S1, B_S1, F_S1 — filled, with color and shade
         # CLIP: not a box style
         is_line_style = style in ('LMED', 'LTHN', 'LTHK', 'LDSH', 'LDOT',
-                                  'L_MED', 'L_THN', 'L_THK', 'L_DSH', 'L_DOT')
+                                  'L_MED', 'L_THN', 'L_THK', 'L_DSH', 'L_DOT',
+                                  'S1', 'S2', 'S3', 'S4')
         is_clip = style == 'CLIP'
 
         if is_clip:
@@ -2846,6 +3067,7 @@ class VIPPToDFAConverter:
                 'LTHK': 'THICK', 'L_THK': 'THICK',
                 'LDSH': 'MEDIUM', 'L_DSH': 'MEDIUM',
                 'LDOT': 'MEDIUM', 'L_DOT': 'MEDIUM',
+                'S1': 'MEDIUM', 'S2': 'MEDIUM', 'S3': 'MEDIUM', 'S4': 'MEDIUM',
             }
             thickness_keyword = line_thickness_map.get(style, 'MEDIUM')
             if style in ('LDSH', 'L_DSH'):
@@ -2855,12 +3077,12 @@ class VIPPToDFAConverter:
         else:
             # Fill styles: parse color prefix and shade suffix
             if style.startswith('R'):
-                color = 'RED'
+                color = 'R'
             elif style.startswith('G'):
-                color = 'GREEN'
+                color = 'G'
             elif style.startswith('B') and not style.startswith('BLACK'):
-                color = 'BLUE'
-            elif style.startswith('F') or style.startswith('S'):
+                color = 'B'
+            elif style.startswith('F'):
                 color = 'FBLACK'
 
             # Parse shade suffix (S1=100%, S2=75%, S3=50%, S4=25%)
@@ -3010,24 +3232,32 @@ class VIPPToDFAConverter:
         else:
             resource_name = filename
 
-        # Check if this is a subroutine that can be inlined
-        # Inlining criteria: Simple subroutine (<=5 commands), no file extension (internal resource)
+        # Check if this is a subroutine defined via XGFRESDEF
+        # When called via SCALL with explicit MOVETO coordinates, generate a SEGMENT reference
+        # rather than inlining, since POSX/POSY anchors require prior capture
         if not file_ext and resource_name in self.subroutines:
-            subroutine_info = self.subroutines[resource_name]
-
-            if subroutine_info['type'] == 'simple':
-                # Inline the subroutine commands
-                self.add_line(f"/* Inlined subroutine: {resource_name} ({subroutine_info['command_count']} commands) */")
-
-                # Convert the subroutine commands directly
-                self._convert_frm_command_list(
-                    subroutine_info['commands'],
-                    start_x=x if x_was_set else 0.0,
-                    start_y=y if y_was_set else 0.0,
-                    start_font='',
-                    frm=frm
-                )
+            if x_was_set or y_was_set:
+                # Generate SEGMENT reference with MOVETO coordinates
+                self.add_line(f"SEGMENT {resource_name}")
+                self.indent()
+                x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
+                y_part = f"{y} MM-$MR_TOP+&CORSEGMENT" if y_was_set else "SAME"
+                self.add_line(f"POSITION ({x_part}) ({y_part});")
+                self.dedent()
                 return
+            else:
+                # No MOVETO — inline the subroutine (POSX/POSY inherited from context)
+                subroutine_info = self.subroutines[resource_name]
+                if subroutine_info['type'] == 'simple':
+                    self.add_line(f"/* Inlined subroutine: {resource_name} ({subroutine_info['command_count']} commands) */")
+                    self._convert_frm_command_list(
+                        subroutine_info['commands'],
+                        start_x=x if x_was_set else 0.0,
+                        start_y=y if y_was_set else 0.0,
+                        start_font='',
+                        frm=frm
+                    )
+                    return
 
         # Extract CACHE dimensions if available
         cache_width = None
@@ -3087,15 +3317,16 @@ class VIPPToDFAConverter:
             self.dedent()
 
         elif file_ext == 'eps':
-            # EPS files: use SEGMENT with position from MOVETO
+            # EPS files: use SEGMENT with absolute position from MOVETO
+            # EPS images are placed at exact page coordinates — no &CORSEGMENT offset
             self.add_line(f"SEGMENT {resource_name}")
             self.indent()
             if x_was_set or y_was_set:
                 x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
-                y_part = f"{y} MM-$MR_TOP+&CORSEGMENT" if y_was_set else "0 MM-$MR_TOP+&CORSEGMENT"
+                y_part = f"{y} MM-$MR_TOP" if y_was_set else "0 MM-$MR_TOP"
                 self.add_line(f"POSITION ({x_part}) ({y_part});")
             else:
-                self.add_line("POSITION (SAME) (0 MM-$MR_TOP+&CORSEGMENT);")
+                self.add_line("POSITION (SAME) (0 MM-$MR_TOP);")
             self.dedent()
 
         else:
@@ -3501,38 +3732,62 @@ class VIPPToDFAConverter:
         self.add_line("    PRINTEND;")
         self.add_line("")
 
-        # Add LOGICALPAGE 2 for duplex printing (back side of page)
-        self.add_line("LOGICALPAGE 2")
-        self.add_line("    SIDE FRONT")
-        self.add_line("    POSITION 0 0")
-        self.add_line("    WIDTH 210 MM")
-        self.add_line("    HEIGHT 297 MM")
-        self.add_line("    DIRECTION ACROSS")
-        self.add_line("    FOOTER")
-        self.add_line("        PP = PP + 1;")
-        self.add_line("    FOOTEREND")
-        self.add_line("    PRINTFOOTER")
-        self.add_line("")
+        # Add LOGICALPAGE 2 only for duplex printing (back side of page)
+        # Detect duplex from source: look for active (uncommented) DUPLEX command
+        is_duplex = self._detect_duplex()
+        if is_duplex:
+            self.add_line("LOGICALPAGE 2")
+            self.add_line("    SIDE BACK")
+            self.add_line("    POSITION 0 0")
+            self.add_line("    WIDTH 210 MM")
+            self.add_line("    HEIGHT 297 MM")
+            self.add_line("    DIRECTION ACROSS")
+            self.add_line("    FOOTER")
+            self.add_line("        PP = PP + 1;")
+            self.add_line("    FOOTEREND")
+            self.add_line("    PRINTFOOTER")
+            self.add_line("")
 
-        # Add form usage in PRINTFOOTER for page 2 (same as page 1)
-        self.add_line("        /* Cycle through FRM files */")
-        self._generate_form_usage_in_printfooter()
-        self.add_line("")
+            # Add form usage in PRINTFOOTER for page 2 (same as page 1)
+            self.add_line("        /* Cycle through FRM files */")
+            self._generate_form_usage_in_printfooter()
+            self.add_line("")
 
-        # Page numbering
-        self.add_line("        /* Page numbering */")
-        self.add_line("        OUTLINE")
-        self.add_line("            POSITION RIGHT (0 MM)")
-        self.add_line("            DIRECTION ACROSS;")
-        self.add_line("            OUTPUT 'Page '!P!' of '!PP")
-        self.add_line("                FONT F5_1")
-        self.add_line("                POSITION (RIGHT-11 MM)286 MM")
-        self.add_line("                ALIGN RIGHT NOPAD;")
-        self.add_line("        ENDIO;")
-        self.add_line("    PRINTEND;")
+            # Page numbering
+            self.add_line("        /* Page numbering */")
+            self.add_line("        OUTLINE")
+            self.add_line("            POSITION RIGHT (0 MM)")
+            self.add_line("            DIRECTION ACROSS;")
+            self.add_line("            OUTPUT 'Page '!P!' of '!PP")
+            self.add_line("                FONT F5_1")
+            self.add_line("                POSITION (RIGHT-11 MM)286 MM")
+            self.add_line("                ALIGN RIGHT NOPAD;")
+            self.add_line("        ENDIO;")
+            self.add_line("    PRINTEND;")
 
         self.dedent()
         self.add_line("")
+
+    def _detect_duplex(self) -> bool:
+        """Detect if the source document requires duplex printing.
+
+        Checks for active (uncommented) DUPLEX command in DBM raw content,
+        or FRM filenames containing 'B' suffix (e.g., CASIOB = back page).
+        """
+        # Check DBM raw content for DUPLEX command (not commented with %)
+        if self.dbm and self.dbm.raw_content:
+            for line in self.dbm.raw_content.split('\n'):
+                stripped = line.strip()
+                if stripped and not stripped.startswith('%'):
+                    if 'DUPLEX' in stripped.upper():
+                        return True
+        # Check if any FRM filename ends with 'B' (back page convention)
+        for frm_name in self.frm_files:
+            base = os.path.splitext(frm_name)[0].upper()
+            import re
+            if re.search(r'B\d*$', base):
+                return True
+        return False
 
     def _generate_fonts(self):
         """
@@ -5042,8 +5297,45 @@ class VIPPToDFAConverter:
         # Process children (IF body) if present
         if cmd.children:
             self._convert_case_commands(cmd.children)
-            # IF blocks with children need ENDIF
-            # No lookahead needed - children are already parsed
+            # IF blocks with children still need lookahead for ELSE at parent level
+            # In VIPP: IF cond { then_block } ELSE { else_block } ENDIF
+            # Parser creates children for {block} but ELSE/ENDIF remain as siblings
+            if commands is not None and idx >= 0:
+                nesting_level = 0
+                else_idx = -1
+                endif_idx = -1
+                for j in range(idx + 1, len(commands)):
+                    cmd_name = commands[j].name
+                    if cmd_name == 'IF':
+                        nesting_level += 1
+                    elif cmd_name == 'ENDIF':
+                        if nesting_level == 0:
+                            endif_idx = j
+                            break
+                        else:
+                            nesting_level -= 1
+                    elif cmd_name == 'ELSE' and nesting_level == 0:
+                        else_idx = j
+
+                if else_idx >= 0:
+                    self.add_line("ELSE;")
+                    else_cmd = commands[else_idx]
+                    if else_cmd.children:
+                        self._convert_case_commands(else_cmd.children)
+                    elif endif_idx > else_idx + 1:
+                        self.indent()
+                        else_commands = commands[else_idx + 1:endif_idx]
+                        self._process_command_block(else_commands)
+                        self.dedent()
+
+                self.add_line("ENDIF;")
+                # Total consumed = all commands from IF through ENDIF inclusive
+                if endif_idx >= 0:
+                    consumed = endif_idx - idx + 1
+                elif else_idx >= 0:
+                    consumed = else_idx - idx + 1
+                return consumed
+
             self.add_line("ENDIF;")
             return consumed
 
@@ -5611,11 +5903,11 @@ class VIPPToDFAConverter:
             # Fill style — determine color and shade
             color = 'FBLACK'
             if style.startswith('R'):
-                color = 'RED'
+                color = 'R'
             elif style.startswith('G'):
-                color = 'GREEN'
+                color = 'G'
             elif style.startswith('B') and style != 'BLACK':
-                color = 'BLUE'
+                color = 'B'
             elif style in ('XDRK', 'MED', 'LMED', 'FBLACK'):
                 color = style
 
@@ -5967,17 +6259,69 @@ class VIPPToDFAConverter:
         """
         Generate variable initialization from DBM commands.
 
-        Processes the initialization section at the beginning of the DBM file
-        (typically a VARINI IF block) and extracts all /INI SETVAR commands.
+        Scans raw DBM content for /INI SETVAR patterns in the VARINI block.
         Since $_BEFOREFIRSTDOC only runs once, we don't need the VARINI IF pattern
         - variables don't exist yet so they will be created with these initial values.
         """
         self.add_line("/* Variable Initialization from DBM */")
         self.add_line("")
 
-        # Extract /INI SETVAR commands from DBM
-        # These are the variables defined with /INI flag in the VARINI block
+        # First try parsed commands
         self._process_initialization_commands(self.dbm.commands)
+
+        # Fallback: scan raw content for /VarName value /INI SETVAR patterns
+        # This catches variables inside IF VARINI blocks that the parser may not
+        # propagate with the is_initialization flag
+        if self.dbm.raw_content:
+            import re
+            init_count = 0
+            already_emitted = set()  # Track only variables emitted in THIS section
+
+            # Scan for /VarName value /INI SETVAR within the VARINI block
+            # Variable names can contain hyphens (e.g., VAR_COUNT-TX)
+            in_varini_block = False
+            for line in self.dbm.raw_content.split('\n'):
+                stripped = line.strip()
+                # Skip comments
+                if stripped.startswith('%'):
+                    continue
+                # Detect VARINI block boundaries
+                if re.search(r'IF\s+VARINI', stripped):
+                    in_varini_block = True
+                    continue
+                if in_varini_block and stripped.startswith('}'):
+                    in_varini_block = False
+                    continue
+                if not in_varini_block:
+                    continue
+
+                # Match /VarName value /INI SETVAR (with /INI flag)
+                m = re.match(r'/([\w-]+)\s+(.+?)\s+/INI\s+SETVAR', stripped)
+                if m:
+                    var_name = m.group(1)
+                    var_value = m.group(2).strip()
+                    if var_name == 'VARINI' or var_name in already_emitted:
+                        continue
+                    dfa_value = self._convert_setvar_value(var_value)
+                    self.add_line(f"{var_name} = {dfa_value};")
+                    already_emitted.add(var_name)
+                    init_count += 1
+                    continue
+
+                # Match /VarName value SETVAR (without /INI, e.g., /VARdoc 0 SETVAR)
+                m2 = re.match(r'/([\w-]+)\s+(\S+)\s+SETVAR', stripped)
+                if m2 and '/INI' not in stripped:
+                    var_name = m2.group(1)
+                    var_value = m2.group(2)
+                    if var_name == 'VARINI' or var_name in already_emitted:
+                        continue
+                    dfa_value = self._convert_setvar_value(var_value)
+                    self.add_line(f"{var_name} = {dfa_value};")
+                    already_emitted.add(var_name)
+                    init_count += 1
+
+            if init_count > 0:
+                logger.info(f"Extracted {init_count} initialization variables from raw DBM content")
 
         self.add_line("")
 
@@ -6076,11 +6420,7 @@ class VIPPToDFAConverter:
         self.add_line("DOCFORMAT $_BEFOREFIRSTDOC;")
         self.indent()
 
-        # Initialize boolean constants
-        self.add_line("/* Boolean constants */")
-        self.add_line("FALSE = 0;")
-        self.add_line("TRUE = 1;")
-        self.add_line("")
+        # DFA has built-in true/false literals — no constant definitions needed
 
         # Initialize page counters
         self.add_line("/* Current page */")
@@ -6368,12 +6708,18 @@ def main():
                             logger.info(f"Added {len(missing_frm_colors)} FRM-referenced colors to main DFA: {', '.join(sorted(missing_frm_colors))}")
 
                     # Write FRM DFA files
+                    dbm_basename = os.path.splitext(dbm_file)[0].upper()
                     for frm_filename, frm in frm_files.items():
                         try:
                             frm_dfa_code = frm_dfa_outputs.get(frm_filename, '')
                             if not frm_dfa_code:
                                 continue
-                            frm_output_filename = os.path.splitext(frm_filename)[0] + '.dfa'
+                            frm_basename = os.path.splitext(frm_filename)[0]
+                            # Avoid collision: if FRM has same base name as DBM, append 'F' suffix
+                            if frm_basename.upper() == dbm_basename:
+                                frm_output_filename = frm_basename + 'F.dfa'
+                            else:
+                                frm_output_filename = frm_basename + '.dfa'
                             frm_output_path = os.path.join(args.output_dir, frm_output_filename)
 
                             with open(frm_output_path, 'w', encoding='utf-8') as f:

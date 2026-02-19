@@ -1518,7 +1518,7 @@ class XeroxParser:
             if token.value == 'SETMAXFORM':
                 self.pos += 1
                 if self.pos < len(self.tokens) and self.tokens[self.pos].type == 'number':
-                    jdt.max_forms = int(self.tokens[self.pos].value)
+                    jdt.max_forms = int(float(self.tokens[self.pos].value))
                 self.pos += 1
                 continue
 
@@ -1600,7 +1600,7 @@ class XeroxParser:
                 self.pos += 1
                 # Get the starting line number - this is also the line number for the first FROMLINE
                 if self.pos < len(self.tokens) and self.tokens[self.pos].type == 'number':
-                    start_line = int(self.tokens[self.pos].value)
+                    start_line = int(float(self.tokens[self.pos].value))
                     jdt.rpe_start_line = start_line
                     current_line = start_line  # Set current_line for the first FROMLINE
                     self.pos += 1
@@ -1614,7 +1614,7 @@ class XeroxParser:
 
             # Handle line numbers in RPE section (MUST come before FROMLINE check)
             if in_beginrpe and token.type == 'number':
-                current_line = int(token.value)
+                current_line = int(float(token.value))
                 self.pos += 1
                 continue
 
@@ -1650,7 +1650,7 @@ class XeroxParser:
         margins = []
         for i in range(4, 0, -1):
             if self.pos - i >= 0 and self.tokens[self.pos - i].type == 'number':
-                margins.append(int(self.tokens[self.pos - i].value))
+                margins.append(int(float(self.tokens[self.pos - i].value)))
 
         if len(margins) == 4:
             jdt.margins = {
@@ -1672,8 +1672,8 @@ class XeroxParser:
 
             if cpl_token.type == 'number' and lpp_token.type == 'number':
                 jdt.grid = {
-                    'cpl': int(cpl_token.value),
-                    'lpp': int(lpp_token.value)
+                    'cpl': int(float(cpl_token.value)),
+                    'lpp': int(float(lpp_token.value))
                 }
 
         self.pos += 1  # Move past SETGRID
@@ -1770,9 +1770,11 @@ class XeroxParser:
                 break
 
         # Find condition name by looking backward for /IF_CND or /BANNER
+        # Token value may include '/' prefix from lexer (e.g., '/IF_CND14')
         for i in range(self.pos - 1, max(0, self.pos - 20), -1):
-            if self.tokens[i].value.startswith('IF_CND') or self.tokens[i].value.startswith('BANNER'):
-                cond_name = self.tokens[i].value
+            val = self.tokens[i].value.lstrip('/')
+            if val.startswith('IF_CND') or val.startswith('BANNER'):
+                cond_name = val  # Store without '/' prefix
                 break
 
         # If not compound, extract simple condition parameters
@@ -1787,10 +1789,10 @@ class XeroxParser:
                 operator = self.tokens[self.pos - 2].value[1:]  # Remove /
 
             if self.pos >= 3 and self.tokens[self.pos - 3].type == 'number':
-                length = int(self.tokens[self.pos - 3].value)
+                length = int(float(self.tokens[self.pos - 3].value))
 
             if self.pos >= 4 and self.tokens[self.pos - 4].type == 'number':
-                position = int(self.tokens[self.pos - 4].value)
+                position = int(float(self.tokens[self.pos - 4].value))
 
         # Create condition
         if cond_name:
@@ -1869,20 +1871,30 @@ class XeroxParser:
                 # This is the next line number - let main loop handle it
                 break
 
-            # Check for conditional marker
-            if token.value == '/ELSE':
+            # Check for conditional markers
+            # Lexer produces '/ELSE', '/IF_CND*', '/ENDIFALL' as single variable tokens
+            token_val = token.value.lstrip('/')
+
+            if token_val == 'ENDIFALL':
+                current_condition = None
                 self.pos += 1
                 continue
 
-            if token.type == 'operator' and token.value == '/' and \
-               self.pos + 1 < len(self.tokens) and \
-               self.tokens[self.pos + 1].value.startswith('IF_CND'):
-                current_condition = self.tokens[self.pos + 1].value
-                self.pos += 2
+            if token_val == 'ELSE':
+                # Check if next token is /IF_CND (else-if pattern)
+                if self.pos + 1 < len(self.tokens):
+                    next_val = self.tokens[self.pos + 1].value.lstrip('/')
+                    if next_val.startswith('IF_CND'):
+                        # /ELSE/IF_CND pattern — skip ELSE, let next iteration handle IF_CND
+                        self.pos += 1
+                        continue
+                # Plain /ELSE — default else branch
+                current_condition = 'ELSE'
+                self.pos += 1
                 continue
 
-            if token.value == '/ENDIFALL':
-                current_condition = None
+            if token_val.startswith('IF_CND'):
+                current_condition = token_val  # Store without '/' prefix
                 self.pos += 1
                 continue
 
@@ -1923,7 +1935,7 @@ class XeroxParser:
                 continue
 
             if token.type == 'number':
-                elements.append(int(token.value))
+                elements.append(int(float(token.value)))
             elif token.type == 'string':
                 literal_text = token.value
             elif token.type == 'operator' and token.value == '/' and \
@@ -2447,6 +2459,9 @@ class VIPPToDFAConverter:
         # Generate main document format with line mode processing
         self._generate_jdt_docformat_main()
 
+        # Close DOCDEF
+        self.add_line("ENDDOCDEF;")
+
         return '\n'.join(self.output_lines)
 
     def _generate_jdt_header(self):
@@ -2697,7 +2712,11 @@ class VIPPToDFAConverter:
         # Generate DOCFORMAT sections for each condition
         self._generate_jdt_condition_formats()
 
-        # Generate default format
+        self.dedent()  # End THEMAIN content
+        self.add_line("ENDFORMAT;")
+        self.add_line("")
+
+        # Generate default format (separate DOCFORMAT)
         self.add_line("/* Default format - output full line */")
         self.add_line("DOCFORMAT FMT_DEFAULT;")
         self.indent()
@@ -2715,6 +2734,7 @@ class VIPPToDFAConverter:
         self.dedent()
         self.add_line("ENDIO;")
         self.dedent()
+        self.add_line("ENDFORMAT;")
         self.add_line("")
 
         # Initialization - CRITICAL: Read header lines first
@@ -2756,6 +2776,15 @@ class VIPPToDFAConverter:
         self.add_line("CONTENT[C] = '1';")
         self.add_line("")
 
+        # Add line tracking variables for FROMLINE output
+        if self.jdt.rpe_lines:
+            self.add_line("/* Line tracking variables for FROMLINE output */")
+            self.add_line("VARIABLE LIN SCALAR INTEGER;")
+            self.add_line("VARIABLE MEASURE SCALAR INTEGER;")
+            self.add_line("VARIABLE Z SCALAR INTEGER;")
+            self.add_line("VARIABLE II SCALAR INTEGER;")
+            self.add_line("")
+
         # Add condition flags for SETRCD conditions (VPF Point 2)
         if self.jdt.conditions:
             self.add_line("/* Condition flags for SETRCD */")
@@ -2786,54 +2815,42 @@ class VIPPToDFAConverter:
         self.dedent()
         self.add_line("ENDFOR;")
         self.dedent()
+        self.add_line("ENDFORMAT;")
         self.add_line("")
-
-        self.dedent()  # End THEMAIN
 
     def _generate_simple_condition_check(self, cond_name: str, cond: 'XeroxCondition'):
         """
         Generate a simple condition check for SETRCD.
 
         VPF Point 2: Simple conditions check SUBSTR in the FOR C loop.
-        Example: IF SUBSTR(CONTENT[C],2,7)=='Period:' THEN IF_CND1=1 ENDIF
+        Example: IF NOSPACE(SUBSTR(CONTENT[C],1,7, ''))=='Period:'; THEN; IF_CND1=1; ENDIF;
+
+        Position offset: VIPP positions include channel code (col 1), but CONTENT[C]
+        has channel code already stripped, so subtract 1. DFA SUBSTR is 1-based,
+        so minimum position is 1.
         """
+        # Adjust position: subtract 1 for channel code, minimum 1 (DFA is 1-based)
+        dfa_pos = max(1, cond.position - 1)
+
+        # Build the operator mapping
+        op_map = {
+            'eq': '==', 'ne': '<>', 'gt': '>', 'lt': '<',
+            'HOLD': '=='
+        }
+        dfa_op = op_map.get(cond.operator, '==')
+
+        # Build SUBSTR expression with NOSPACE wrapper
+        substr_expr = f"NOSPACE(SUBSTR(CONTENT[C],{dfa_pos},{cond.length}, ''))"
+
         if cond.operator == 'HOLD':
-            # HOLD operator preserves value across iterations
             self.add_line(f"/* {cond_name}: HOLD condition */")
-            self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')=='{cond.value}';")
-            self.add_line("THEN;")
-            self.indent()
-            self.add_line(f"{cond_name} = 1;")
-            self.dedent()
-            self.add_line("ENDIF;")
-        elif cond.operator == 'eq':
-            self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')=='{cond.value}';")
-            self.add_line("THEN;")
-            self.indent()
-            self.add_line(f"{cond_name} = 1;")
-            self.dedent()
-            self.add_line("ENDIF;")
-        elif cond.operator == 'ne':
-            self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')<>'{cond.value}';")
-            self.add_line("THEN;")
-            self.indent()
-            self.add_line(f"{cond_name} = 1;")
-            self.dedent()
-            self.add_line("ENDIF;")
-        elif cond.operator == 'gt':
-            self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')>'{cond.value}';")
-            self.add_line("THEN;")
-            self.indent()
-            self.add_line(f"{cond_name} = 1;")
-            self.dedent()
-            self.add_line("ENDIF;")
-        elif cond.operator == 'lt':
-            self.add_line(f"IF SUBSTR(CONTENT[C],{cond.position},{cond.length}, '')<'{cond.value}';")
-            self.add_line("THEN;")
-            self.indent()
-            self.add_line(f"{cond_name} = 1;")
-            self.dedent()
-            self.add_line("ENDIF;")
+
+        self.add_line(f"IF {substr_expr}{dfa_op}'{cond.value}';")
+        self.add_line("THEN;")
+        self.indent()
+        self.add_line(f"{cond_name} = 1;")
+        self.dedent()
+        self.add_line("ENDIF;")
 
     def _generate_compound_condition_check(self, cond_name: str, cond: 'XeroxCondition'):
         """
@@ -2905,25 +2922,30 @@ class VIPPToDFAConverter:
 
         Returns:
             List of tuples (condition_name, [rpe_arrays])
-            Empty string for condition_name means unconditional output.
+            Preserves source order: unconditional first, IF_CND* in parse order, ELSE last.
         """
         if line_num not in self.jdt.rpe_lines:
             return []
 
+        # Use ordered dict to preserve parse order
         grouped = {}
+        order = []
         for rpe in self.jdt.rpe_lines[line_num]:
             cond = rpe.condition_name if rpe.condition_name else ""
             if cond not in grouped:
                 grouped[cond] = []
+                order.append(cond)
             grouped[cond].append(rpe)
 
-        # Return in order: unconditional first, then conditional
+        # Return in order: unconditional first, IF_CND* in parse order, ELSE last
         result = []
         if "" in grouped:
             result.append(("", grouped[""]))
-        for cond in sorted(grouped.keys()):
-            if cond != "":
+        for cond in order:
+            if cond != "" and cond != "ELSE":
                 result.append((cond, grouped[cond]))
+        if "ELSE" in grouped:
+            result.append(("ELSE", grouped["ELSE"]))
 
         return result
 
@@ -2940,6 +2962,8 @@ class VIPPToDFAConverter:
             measure_offset: Offset to add to MEASURE
         """
         # Determine output content
+        # Position offset: VIPP positions include channel code (col 1), but CONTENT
+        # has channel code stripped, so subtract 1. DFA SUBSTR is 1-based, min = 1.
         if rpe.literal_text:
             # Literal text output
             content_expr = f"'{rpe.literal_text}'"
@@ -2949,18 +2973,11 @@ class VIPPToDFAConverter:
             content_expr = f"'[{rpe.literal_text}]'"
         else:
             # Field extraction from CONTENT array
-            if rpe.align_right:
-                # Right-aligned field
-                if rpe.length > 0:
-                    content_expr = f"SUBSTR(CONTENT[II],{rpe.start_position},{rpe.length}, '')"
-                else:
-                    content_expr = f"CONTENT[II]"
+            dfa_start = max(1, rpe.start_position - 1)
+            if rpe.length > 0:
+                content_expr = f"SUBSTR(CONTENT[II],{dfa_start},{rpe.length}, '')"
             else:
-                # Normal field extraction
-                if rpe.length > 0:
-                    content_expr = f"SUBSTR(CONTENT[II],{rpe.start_position},{rpe.length}, '')"
-                else:
-                    content_expr = f"CONTENT[II]"
+                content_expr = f"CONTENT[II]"
 
         # Generate OUTPUT statement
         self.add_line(f"OUTPUT {content_expr}")
@@ -2981,8 +2998,10 @@ class VIPPToDFAConverter:
 
         self.add_line(f"POSITION ({x_dfa}) ({y_dfa})")
 
-        # Color
+        # Color — map long names to short DFA names
         color_name = rpe.color if rpe.color else "B"
+        color_map = {'BLACK': 'B', 'RED': 'R', 'BLUE': 'BLUE', 'GREEN': 'GREEN'}
+        color_name = color_map.get(color_name.upper(), color_name)
         self.add_line(f"COLOR {color_name};")
 
         self.dedent()
@@ -3019,13 +3038,14 @@ class VIPPToDFAConverter:
             self.add_line("")
 
         # Check for line continuation via channel code
+        # '-' means continuation line — keep looping; anything else stops
         self.add_line("/* Check channel code for continuation */")
-        self.add_line("IF CC[LIN+1]<>'-';")
+        self.add_line("IF CC[LIN+1]=='-';")
         self.add_line("THEN;")
         self.indent()
-        self.add_line("Z = 0;")
         self.add_line("LIN = LIN+1;")
         self.add_line("MEASURE = MEASURE+50;")
+        self.add_line("Z = 0;")
         self.dedent()
         self.add_line("ENDIF;")
         self.add_line("")
@@ -3036,56 +3056,53 @@ class VIPPToDFAConverter:
 
     def _generate_nested_condition_block(self, conditions: List[Tuple[str, List]], depth: int = 0):
         """
-        Generate nested IF/ELSE blocks for conditional RPE arrays.
+        Generate nested IF/ELSE/ENDIF blocks for conditional RPE arrays.
 
-        VPF Point 5: Handles deep nesting (up to 8+ levels) with /ENDIFALL markers.
-
-        Args:
-            conditions: List of (condition_name, rpe_arrays) tuples
-            depth: Current nesting depth (for tracking)
+        VPF Point 5: Handles IF/ELSE IF/ELSE/ENDIF chains from /ENDIFALL markers.
+        Generates:
+            IF cond1; THEN; ...
+            ELSE; IF cond2; THEN; ...
+            ELSE; (default)
+            ENDIF; ENDIF;  (one per IF)
         """
         if not conditions:
             return
 
-        first_cond, first_arrays = conditions[0]
-        remaining = conditions[1:]
+        if_count = 0  # Track how many IFs we open
 
-        if first_cond == "ELSE":
-            # ELSE clause
-            self.add_line("ELSE;")
-            self.indent()
-
-            if remaining:
-                self._generate_nested_condition_block(remaining, depth)
-
-            self.dedent()
-        else:
-            # Conditional clause
-            if depth == 0:
-                self.add_line(f"IF ISTRUE({first_cond}==1);")
-            else:
+        for i, (cond_name, arrays) in enumerate(conditions):
+            if cond_name == "ELSE":
+                # Default ELSE clause (should be last in list)
                 self.add_line("ELSE;")
                 self.indent()
-                self.add_line(f"IF ISTRUE({first_cond}==1);")
+                for rpe in arrays:
+                    self._generate_rpe_output_statement(rpe, use_measure=True, measure_offset=0)
+                    self.add_line("")
                 self.dedent()
+            elif i == 0:
+                # First condition — plain IF
+                self.add_line(f"IF ISTRUE({cond_name}==1);")
+                self.add_line("THEN;")
+                self.indent()
+                for rpe in arrays:
+                    self._generate_rpe_output_statement(rpe, use_measure=True, measure_offset=0)
+                    self.add_line("")
+                self.dedent()
+                if_count += 1
+            else:
+                # Subsequent conditions — ELSE IF
+                self.add_line(f"ELSE; IF ISTRUE({cond_name}==1);")
+                self.add_line("THEN;")
+                self.indent()
+                for rpe in arrays:
+                    self._generate_rpe_output_statement(rpe, use_measure=True, measure_offset=0)
+                    self.add_line("")
+                self.dedent()
+                if_count += 1
 
-            self.add_line("THEN;")
-            self.indent()
-
-            # Output RPE arrays for this condition
-            for rpe in first_arrays:
-                self._generate_rpe_output_statement(rpe, use_measure=True, measure_offset=0)
-                self.add_line("")
-
-            self.dedent()
-
-            # Process remaining conditions
-            if remaining:
-                self._generate_nested_condition_block(remaining, depth + 1)
-
-            # Close ENDIF
-            if depth == 0:
-                self.add_line("ENDIF;")
+        # Close all nested IFs — one ENDIF per IF opened
+        for _ in range(if_count):
+            self.add_line("ENDIF;")
 
     def _generate_conditional_rpe_output(self, line_num: int, conditional_groups: List[Tuple[str, List]]):
         """
@@ -3117,14 +3134,6 @@ class VIPPToDFAConverter:
             return
 
         self.add_line("/* RPE-based output generation */")
-        self.add_line("")
-
-        # Add LIN, MEASURE, Z variables for line tracking
-        self.add_line("/* Line tracking variables */")
-        self.add_line("VARIABLE LIN SCALAR INTEGER;")
-        self.add_line("VARIABLE MEASURE SCALAR INTEGER;")
-        self.add_line("VARIABLE Z SCALAR INTEGER;")
-        self.add_line("VARIABLE II SCALAR INTEGER;")
         self.add_line("")
 
         # Process each FROMLINE
@@ -5589,7 +5598,7 @@ class VIPPToDFAConverter:
                     # GETINTV now pops 4 parameters: /result, source, start, length
                     result_param = cmd.parameters[0]
                     source_var = cmd.parameters[1]
-                    start = int(cmd.parameters[2])
+                    start = int(float(cmd.parameters[2]))
                     length = cmd.parameters[3]
 
                     # Extract result variable name (remove leading / if present)
