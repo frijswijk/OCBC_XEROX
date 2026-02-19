@@ -1796,6 +1796,12 @@ class VIPPToDFAConverter:
         # Generate main document format
         self._generate_docformat_main()
 
+        # Back-pass: verify every COLOR <name> reference has a DEFINE
+        self._backpass_verify_color_definitions()
+
+        # Validation pass: verify IF/ELSE/ENDIF balance
+        self._validate_if_else_balance()
+
         return '\n'.join(self.output_lines)
 
     def generate_frm_dfa_code(self, frm: XeroxFRM, as_include: bool = False) -> str:
@@ -2339,13 +2345,15 @@ class VIPPToDFAConverter:
 
         # Check if SHP has width parameter - use TEXT command for line wrapping
         if shp_width is not None and shp_width > 0:
-            # SHP with width requires TEXT command with WIDTH parameter
+            # SHP with width requires TEXT command with WIDTH parameter and ALIGN JUSTIFY
             if has_vsub and not is_variable:
                 text = self._convert_vsub(text)
                 # After VSUB conversion, if text contains ! concatenation, treat as variable
                 if ' ! ' in text:
                     is_variable = True
-            self._generate_text_with_width(text, x, y, font, shp_width, is_variable, vsub_alignment,
+            # Default SHP alignment to JUSTIFY (3) if not explicitly set
+            shp_alignment = vsub_alignment if vsub_alignment is not None else 3
+            self._generate_text_with_width(text, x, y, font, shp_width, is_variable, shp_alignment,
                                           x_was_set, y_was_set, y_is_next, frm)
         # Check if text contains font switches
         elif '~~' in text and not is_variable:
@@ -2800,12 +2808,6 @@ class VIPPToDFAConverter:
         if len(cmd.parameters) < 4:
             return
 
-        # First box in a group should set anchors
-        if self.should_set_box_anchor:
-            self.add_line("POSY = $SL_CURRY;")
-            self.add_line("POSX = $SL_CURRX;")
-            self.should_set_box_anchor = False
-
         # Parse parameters
         try:
             x = float(cmd.parameters[0])
@@ -2818,46 +2820,64 @@ class VIPPToDFAConverter:
         param4 = cmd.parameters[3]  # height or thickness
         style = cmd.parameters[4] if len(cmd.parameters) > 4 else "R_S1"
 
+        # Classify style into line-only vs fill styles
+        # Line styles: LMED, LTHN, LTHK, LDSH, LDOT — border only, no color, no shade
+        # Fill styles: R_S1, G_S1, B_S1, F_S1, S1-S4 — filled, with color and shade
+        # CLIP: not a box style
+        is_line_style = style in ('LMED', 'LTHN', 'LTHK', 'LDSH', 'LDOT',
+                                  'L_MED', 'L_THN', 'L_THK', 'L_DSH', 'L_DOT')
+        is_clip = style == 'CLIP'
+
+        if is_clip:
+            self.add_line(f"/* CLIP: clipping region — {' '.join(str(p) for p in cmd.parameters)} */")
+            return
+
         # Parse color and shade from style parameter
         color = None
         line_type = "SOLID"
         shade = None
+        thickness_keyword = None
 
-        # Check for color prefix (R=RED, G=GREEN, B=BLUE, F=BLACK)
-        if style.startswith('R'):
-            color = 'R'
-        elif style.startswith('G'):
-            color = 'G'
-        elif style.startswith('B'):
-            color = 'B'
-        elif style.startswith('F'):
-            color = 'F'
-        elif style.startswith('S'):
-            # Style like "S2" without color prefix defaults to BLACK
-            color = 'F'
+        if is_line_style:
+            # Line styles: emit THICKNESS <weight> TYPE <type> only — no COLOR, no SHADE
+            line_thickness_map = {
+                'LTHN': 'THIN', 'L_THN': 'THIN',
+                'LMED': 'MEDIUM', 'L_MED': 'MEDIUM',
+                'LTHK': 'THICK', 'L_THK': 'THICK',
+                'LDSH': 'MEDIUM', 'L_DSH': 'MEDIUM',
+                'LDOT': 'MEDIUM', 'L_DOT': 'MEDIUM',
+            }
+            thickness_keyword = line_thickness_map.get(style, 'MEDIUM')
+            if style in ('LDSH', 'L_DSH'):
+                line_type = 'DASHED'
+            elif style in ('LDOT', 'L_DOT'):
+                line_type = 'DOTTED'
+        else:
+            # Fill styles: parse color prefix and shade suffix
+            if style.startswith('R'):
+                color = 'RED'
+            elif style.startswith('G'):
+                color = 'GREEN'
+            elif style.startswith('B') and not style.startswith('BLACK'):
+                color = 'BLUE'
+            elif style.startswith('F') or style.startswith('S'):
+                color = 'FBLACK'
 
-        # Parse shade suffix (S1=100%, S2=75%, S3=50%, S4=25%)
-        if 'S1' in style or '_S1' in style:
-            shade = 100
-        elif 'S2' in style or '_S2' in style:
-            shade = 75
-        elif 'S3' in style or '_S3' in style:
-            shade = 50
-        elif 'S4' in style or '_S4' in style:
-            shade = 25
+            # Parse shade suffix (S1=100%, S2=75%, S3=50%, S4=25%)
+            if 'S1' in style or '_S1' in style:
+                shade = 100
+            elif 'S2' in style or '_S2' in style:
+                shade = 75
+            elif 'S3' in style or '_S3' in style:
+                shade = 50
+            elif 'S4' in style or '_S4' in style:
+                shade = 25
 
-        # Parse line type
-        if style in ['LDSH', 'L_DSH']:
-            line_type = 'DASHED'
-        elif style in ['LDOT', 'L_DOT']:
-            line_type = 'DOTTED'
-
-        # Handle legacy thickness keywords
+        # Handle legacy thickness keywords for param4
         param4_val = param4
         try:
             param4_float = float(param4)
         except ValueError:
-            # Thickness is a keyword like LMED
             thickness_map = {
                 'LTHN': 0.1,
                 'LMED': 0.2,
@@ -2873,39 +2893,45 @@ class VIPPToDFAConverter:
         width = param3 if param3 >= 0.01 else 0.1
         height = param4_float if param4_float >= 0.01 else 0.1
 
+        # Determine positioning pattern:
+        # Pattern A: Absolute coords (x>0 or y!=0) → margin-relative: (x MM-$MR_LEFT) (y MM-$MR_TOP)
+        # Pattern B: x=0 and y=0 (relative, e.g. inside XGFRESDEF) → use POSX/POSY anchor
+        use_absolute = (x > 0 or y != 0)
+
         # Determine if this is a BOX (rectangle) or RULE (line)
-        # If param4 (height/thickness) > 1.0 mm, it's a BOX
         is_box = param4_float > 1.0
 
         if is_box:
-            # Generate BOX command with anchored position
             self.add_line("BOX")
             self.indent()
 
-            # Position with anchors and inverted Y
-            self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
+            # Position — absolute or anchor-relative
+            if use_absolute:
+                self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_inverted} MM-$MR_TOP)")
+            else:
+                self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
 
-            # Dimensions
             self.add_line(f"WIDTH {width} MM")
             self.add_line(f"HEIGHT {height} MM")
 
-            # Color if specified
-            if color:
-                self.add_line(f"COLOR {color}")
-
-            # Thickness with shade if specified
-            if shade is not None:
-                self.add_line(f"THICKNESS 0 TYPE {line_type} SHADE {shade};")
+            if is_line_style:
+                # Border-only: thickness and type, no color, no shade
+                self.add_line(f"THICKNESS {thickness_keyword} TYPE {line_type};")
             else:
-                self.add_line(f"THICKNESS MEDIUM TYPE {line_type};")
+                # Filled box: color, thickness 0, shade
+                if color:
+                    self.add_line(f"COLOR {color}")
+                if shade is not None:
+                    self.add_line(f"THICKNESS 0 TYPE SOLID SHADE {shade};")
+                else:
+                    self.add_line(f"THICKNESS 0 TYPE SOLID SHADE 100;")
 
             self.dedent()
         else:
-            # Generate RULE command (line) with anchored position
+            # RULE (line)
             length = width
             thickness = param4_val
 
-            # Determine direction based on length vs thickness
             try:
                 length_f = float(length)
                 thickness_f = float(thickness)
@@ -2916,21 +2942,23 @@ class VIPPToDFAConverter:
             self.add_line("RULE")
             self.indent()
 
-            # Position with anchors and inverted Y
-            self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
+            if use_absolute:
+                self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_inverted} MM-$MR_TOP)")
+            else:
+                self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
 
-            # Direction
             self.add_line(f"DIRECTION {direction}")
 
-            # Color (if specified)
-            if color:
-                self.add_line(f"COLOR {color}")
-
-            # Length
-            self.add_line(f"LENGTH {length} MM")
-
-            # Thickness with type
-            self.add_line(f"THICKNESS {thickness} MM TYPE {line_type}")
+            if is_line_style:
+                # Line style: thickness keyword and type only
+                self.add_line(f"LENGTH {length} MM")
+                self.add_line(f"THICKNESS {thickness_keyword} TYPE {line_type}")
+            else:
+                # Fill style on a rule (rare)
+                if color:
+                    self.add_line(f"COLOR {color}")
+                self.add_line(f"LENGTH {length} MM")
+                self.add_line(f"THICKNESS {thickness} MM TYPE {line_type}")
 
             self.add_line(";")
             self.dedent()
@@ -3059,13 +3087,13 @@ class VIPPToDFAConverter:
             self.dedent()
 
         elif file_ext == 'eps':
-            # EPS files: use SEGMENT with vertical position 0 MM
-            # (Xerox measures upward, so we don't have enough info for vertical position)
+            # EPS files: use SEGMENT with position from MOVETO
             self.add_line(f"SEGMENT {resource_name}")
             self.indent()
-            # For EPS, use horizontal position from MOVETO, vertical is always 0 MM with segment correction
-            if x_was_set:
-                self.add_line(f"POSITION ({x} MM-$MR_LEFT) (0 MM-$MR_TOP+&CORSEGMENT);")
+            if x_was_set or y_was_set:
+                x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
+                y_part = f"{y} MM-$MR_TOP+&CORSEGMENT" if y_was_set else "0 MM-$MR_TOP+&CORSEGMENT"
+                self.add_line(f"POSITION ({x_part}) ({y_part});")
             else:
                 self.add_line("POSITION (SAME) (0 MM-$MR_TOP+&CORSEGMENT);")
             self.dedent()
@@ -3452,12 +3480,10 @@ class VIPPToDFAConverter:
         self.add_line("    FOOTEREND")
         # PRINTFOOTER outputs page numbers (called for each page in buffer)
         self.add_line("    PRINTFOOTER")
-
-        # Increment P counter BEFORE form selection
-        self.add_line("        P = P + 1;")
         self.add_line("")
 
         # Add form usage in PRINTFOOTER (moved from main DOCFORMAT)
+        # P increment placement depends on FRM count — handled inside the function
         self.add_line("        /* Cycle through FRM files */")
         self._generate_form_usage_in_printfooter()
         self.add_line("")
@@ -3486,9 +3512,6 @@ class VIPPToDFAConverter:
         self.add_line("        PP = PP + 1;")
         self.add_line("    FOOTEREND")
         self.add_line("    PRINTFOOTER")
-
-        # Increment P counter BEFORE form selection
-        self.add_line("        P = P + 1;")
         self.add_line("")
 
         # Add form usage in PRINTFOOTER for page 2 (same as page 1)
@@ -3617,29 +3640,103 @@ class VIPPToDFAConverter:
             # Use correct DEFINE COLOR syntax
             self.add_line(f"DEFINE {dfa_alias} COLOR RGB RVAL {r_str} GVAL {g_str} BVAL {b_str};")
 
-        # Always add standard OCBC colors if not already defined
-        standard_ocbc_colors = {
+        # Note: Only colors collected from source (DBM + FRM) are defined above.
+        # No hardcoded OCBC colors are added — source-derived only.
+
+        self.add_line("")
+
+    def _backpass_verify_color_definitions(self):
+        """Back-pass: find COLOR <name> references in output and ensure each has a DEFINE.
+
+        If a color is referenced but not defined, insert a DEFINE at the top of output
+        with a traceability comment.
+        """
+        # Standard color RGB map for fallback definitions
+        color_rgb_map = {
+            'BLACK': (0, 0, 0),
             'FBLACK': (0, 0, 0),
+            'WHITE': (255, 255, 255),
+            'RED': (255, 0, 0),
+            'GREEN': (0, 255, 0),
+            'BLUE': (0, 0, 255),
             'LMED': (217, 217, 217),
             'MED': (217, 217, 217),
             'XDRK': (166, 166, 166),
         }
 
-        for color_name, (r, g, b) in standard_ocbc_colors.items():
-            if color_name not in self.color_mappings.values():
-                self.color_mappings[color_name] = color_name
-                # Convert RGB from 0-255 to 0-100 percentage scale
+        full_output = '\n'.join(self.output_lines)
+
+        # Find all COLOR <name> references (not inside DEFINE lines)
+        referenced_colors = set()
+        for line in self.output_lines:
+            stripped = line.strip()
+            if stripped.startswith('DEFINE ') and ' COLOR ' in stripped:
+                continue  # Skip DEFINE lines
+            # Match COLOR <NAME> patterns
+            for m in re.finditer(r'\bCOLOR\s+([A-Z][A-Z0-9_]*)', stripped):
+                referenced_colors.add(m.group(1))
+
+        # Find all defined colors
+        defined_colors = set()
+        for line in self.output_lines:
+            stripped = line.strip()
+            m = re.match(r'DEFINE\s+([A-Z][A-Z0-9_]*)\s+COLOR\b', stripped)
+            if m:
+                defined_colors.add(m.group(1))
+
+        # Add missing definitions
+        missing = referenced_colors - defined_colors
+        if missing:
+            # Find insertion point: after last DEFINE COLOR line
+            insert_idx = 0
+            for i, line in enumerate(self.output_lines):
+                if 'DEFINE' in line and 'COLOR' in line:
+                    insert_idx = i + 1
+
+            new_lines = []
+            for color_name in sorted(missing):
+                r, g, b = color_rgb_map.get(color_name, (0, 0, 0))
                 r_pct = round(r * 100 / 255, 1)
                 g_pct = round(g * 100 / 255, 1)
                 b_pct = round(b * 100 / 255, 1)
-                # Format as integer if whole number, otherwise keep decimal
                 r_str = str(int(r_pct)) if r_pct == int(r_pct) else str(r_pct)
                 g_str = str(int(g_pct)) if g_pct == int(g_pct) else str(g_pct)
                 b_str = str(int(b_pct)) if b_pct == int(b_pct) else str(b_pct)
-                # Use correct DEFINE COLOR syntax
-                self.add_line(f"DEFINE {color_name} COLOR RGB RVAL {r_str} GVAL {g_str} BVAL {b_str};")
+                new_lines.append(f"DEFINE {color_name} COLOR RGB RVAL {r_str} GVAL {g_str} BVAL {b_str}; /* Added: referenced but not in source */")
 
-        self.add_line("")
+            # Insert missing color definitions
+            for j, new_line in enumerate(new_lines):
+                self.output_lines.insert(insert_idx + j, new_line)
+
+    def _validate_if_else_balance(self):
+        """Validation pass: verify IF/ELSE/ENDIF balance in generated DFA output.
+
+        Counts IF, ELSE, ENDIF tokens and logs warnings for mismatches.
+        Does not modify output — diagnostic only.
+        """
+        if_count = 0
+        else_count = 0
+        endif_count = 0
+
+        for line in self.output_lines:
+            stripped = line.strip()
+            # Skip comments
+            if stripped.startswith('/*'):
+                continue
+            # Count IF statements (but not ENDIF)
+            if re.match(r'\bIF\b', stripped) and not stripped.startswith('ENDIF'):
+                if_count += 1
+            if re.match(r'\bELSE\b', stripped) or stripped == 'ELSE;':
+                else_count += 1
+            if stripped.startswith('ENDIF') or stripped == 'ENDIF;':
+                endif_count += 1
+
+        if if_count != endif_count:
+            logger.warning(f"IF/ENDIF mismatch: {if_count} IF vs {endif_count} ENDIF")
+        if else_count > if_count:
+            logger.warning(f"Orphan ELSE detected: {else_count} ELSE with only {if_count} IF")
+
+        logger.info(f"IF/ELSE/ENDIF validation: IF={if_count}, ELSE={else_count}, ENDIF={endif_count}")
 
     def _get_font_correction(self, font_name: str) -> str:
         """
@@ -4571,10 +4668,11 @@ class VIPPToDFAConverter:
                 continue
 
             # Handle SETVAR -> direct assignment (DFA uses var = value; not ASSIGN)
+            # Fix 6: Variable name (param[0]) is ALWAYS LHS, value (param[1]) ALWAYS RHS
             if cmd.name == 'SETVAR':
                 if len(cmd.parameters) >= 2:
-                    var_name = cmd.parameters[0].lstrip('/')
-                    var_value = cmd.parameters[1]
+                    var_name = cmd.parameters[0].lstrip('/')  # LHS: always the variable name
+                    var_value = cmd.parameters[1]              # RHS: always the value/expression
 
                     # Fix parameter order if they're swapped (parsing artifact)
                     # If var_name is an operator, parameters are in wrong order
@@ -4826,8 +4924,9 @@ class VIPPToDFAConverter:
 
             # Handle page break commands
             if cmd.name == 'PAGEBRK':
-                # PAGEBRK → PAGEBREAK
-                self.add_line("PAGEBREAK;")
+                # PAGEBRK is not valid DFA — emit comment stub
+                # Exception: inside FRLEFT overflow check, handled by _convert_frleft_condition
+                self.add_line("/* VIPP command not supported: PAGEBRK */")
                 i += 1
                 continue
 
@@ -4844,8 +4943,8 @@ class VIPPToDFAConverter:
                 continue
 
             if cmd.name == 'NEWFRAME':
-                # NEWFRAME → PAGEBREAK (automatic page break)
-                self.add_line("PAGEBREAK;")
+                # NEWFRAME is not valid DFA — emit comment stub
+                self.add_line("/* VIPP command not supported: NEWFRAME */")
                 i += 1
                 continue
 
@@ -5452,21 +5551,16 @@ class VIPPToDFAConverter:
             self.last_command_type = 'OUTPUT'
 
     def _convert_box_command_dfa(self, cmd: XeroxCommand):
-        """Convert a box drawing command to proper DFA BOX with anchoring.
+        """Convert a box drawing command to proper DFA BOX.
 
-        Uses POSX/POSY anchors for relative positioning and inverts Y coordinates.
+        Uses absolute margin-relative positioning for non-zero coords,
+        POSX/POSY anchors only for zero-offset (inside XGFRESDEF) patterns.
 
-        VIPP: 00 -13.5 193 0.001 XDRK DRAWB (Y = -13.5)
-        DFA:  POSITION (POSX+0 MM) (POSY+13.5 MM) (Y = +13.5)
+        VIPP: 00 -13.5 193 0.001 XDRK DRAWB
+        DFA:  POSITION (0 MM-$MR_LEFT) (13.5 MM-$MR_TOP)
         """
         if len(cmd.parameters) < 4:
             return
-
-        # First box in a group should set anchors
-        if self.should_set_box_anchor:
-            self.add_line("POSY = $SL_CURRY;")
-            self.add_line("POSX = $SL_CURRX;")
-            self.should_set_box_anchor = False
 
         # Parse parameters
         try:
@@ -5486,25 +5580,58 @@ class VIPPToDFAConverter:
         if height < 0.01:
             height = 0.1
 
-        # Parse color parameter if present
-        color = None
-        if len(cmd.parameters) >= 5:
-            color_param = str(cmd.parameters[4]).upper()
-            if color_param in ['LMED', 'MED', 'XDRK', 'FBLACK', 'LTHN', 'LTHK']:
-                color = color_param
+        # Parse style parameter if present
+        style = str(cmd.parameters[4]).upper() if len(cmd.parameters) >= 5 else None
+        is_line_style = style in ('LMED', 'LTHN', 'LTHK', 'LDSH', 'LDOT',
+                                  'L_MED', 'L_THN', 'L_THK', 'L_DSH', 'L_DOT') if style else False
 
-        # Generate BOX with anchored position
+        # Determine positioning pattern
+        use_absolute = (x > 0 or y != 0)
+
+        # Generate BOX
         self.add_line("BOX")
         self.indent()
-        self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
+
+        if use_absolute:
+            self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_inverted} MM-$MR_TOP)")
+        else:
+            self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
+
         self.add_line(f"WIDTH {width} MM HEIGHT {height} MM")
 
-        # Add color if specified
-        if color:
-            self.add_line(f"COLOR {color}")
+        if is_line_style:
+            line_thickness_map = {
+                'LTHN': 'THIN', 'L_THN': 'THIN',
+                'LMED': 'MEDIUM', 'L_MED': 'MEDIUM',
+                'LTHK': 'THICK', 'L_THK': 'THICK',
+            }
+            tk = line_thickness_map.get(style, 'MEDIUM')
+            self.add_line(f"THICKNESS {tk} TYPE SOLID;")
+        elif style:
+            # Fill style — determine color and shade
+            color = 'FBLACK'
+            if style.startswith('R'):
+                color = 'RED'
+            elif style.startswith('G'):
+                color = 'GREEN'
+            elif style.startswith('B') and style != 'BLACK':
+                color = 'BLUE'
+            elif style in ('XDRK', 'MED', 'LMED', 'FBLACK'):
+                color = style
 
-        # Use THICKNESS 0 for filled boxes (SHADE 100)
-        self.add_line("THICKNESS 0 TYPE SOLID SHADE 100;")
+            shade = 100
+            if 'S2' in style or '_S2' in style:
+                shade = 75
+            elif 'S3' in style or '_S3' in style:
+                shade = 50
+            elif 'S4' in style or '_S4' in style:
+                shade = 25
+
+            self.add_line(f"COLOR {color}")
+            self.add_line(f"THICKNESS 0 TYPE SOLID SHADE {shade};")
+        else:
+            self.add_line("THICKNESS 0 TYPE SOLID SHADE 100;")
+
         self.dedent()
 
     def _convert_resource_command_dfa(self, cmd: XeroxCommand, x_pos: float, y_pos: float):
@@ -5632,16 +5759,16 @@ class VIPPToDFAConverter:
         """
         Convert a VIPP NEWFRAME command to DFA.
 
-        NEWFRAME triggers frame overflow handling.
+        NEWFRAME is not valid DFA — emit comment stub.
         """
         frame_name = ""
         if cmd.parameters:
             frame_name = cmd.parameters[0].strip('()/')
 
         if frame_name:
-            self.add_line(f"NEWFRAME '{frame_name}';")
+            self.add_line(f"/* VIPP command not supported: NEWFRAME '{frame_name}' */")
         else:
-            self.add_line("NEWFRAME;")
+            self.add_line("/* VIPP command not supported: NEWFRAME */")
 
     def _convert_setlkf_command(self, cmd: XeroxCommand):
         """
@@ -5733,7 +5860,13 @@ class VIPPToDFAConverter:
         return dfa_params
 
     def _generate_form_usage_info(self):
-        """Generate form selection code for first page vs subsequent pages."""
+        """Generate form selection code for first page vs subsequent pages.
+
+        NOTE: This is the legacy function. PRINTFOOTER routing is now handled
+        by _generate_form_usage_in_printfooter() which uses the P counter.
+        This function is kept for backward compatibility but delegates to
+        the PRINTFOOTER function pattern.
+        """
         # List available forms
         frm_names = []
         for frm_filename in sorted(self.frm_files.keys()):
@@ -5741,26 +5874,20 @@ class VIPPToDFAConverter:
             frm_name = ''.join(c for c in frm_name if c.isalnum() or c == '_')
             frm_names.append(frm_name)
 
-        self.add_line("IF PP < 1; THEN;")
-        self.indent()
-
         if len(frm_names) > 0:
-            # Find first page form (ending in F)
             first_form = next((f for f in frm_names if f.endswith('F')), frm_names[0])
             subseq_form = next((f for f in frm_names if f.endswith('S')), frm_names[-1] if len(frm_names) > 1 else frm_names[0])
-            self.add_line(f"USE FORMAT {first_form} EXTERNAL;")
         else:
-            self.add_line("USE FORMAT FIRSTPAGE EXTERNAL;")
+            first_form = "FIRSTPAGE"
+            subseq_form = "NEXTPAGE"
 
+        self.add_line("IF P < 1; THEN;")
+        self.indent()
+        self.add_line(f"USE FORMAT {first_form} EXTERNAL;")
         self.dedent()
         self.add_line("ELSE;")
         self.indent()
-
-        if len(frm_names) > 0:
-            self.add_line(f"USE FORMAT {subseq_form} EXTERNAL;")
-        else:
-            self.add_line("USE FORMAT NEXTPAGE EXTERNAL;")
-
+        self.add_line(f"USE FORMAT {subseq_form} EXTERNAL;")
         self.dedent()
         self.add_line("ENDIF;")
         self.add_line("")
@@ -5768,9 +5895,20 @@ class VIPPToDFAConverter:
     def _generate_form_usage_in_printfooter(self):
         """
         Generate form selection code in PRINTFOOTER.
-        Cycles through all FRM files using P counter pattern.
 
-        Order priority: S (subsequent) → F (first) → TNC → F3 → B (back) → others
+        2-FRM pattern (e.g. SIBS_CAST):
+            IF P<1; THEN; USE FORMAT <first_F> EXTERNAL; ELSE; USE FORMAT <subseq_S> EXTERNAL; ENDIF;
+            P = P + 1;
+        Multi-FRM pattern (3+ FRMs, e.g. CASIO):
+            P = P + 1;
+            IF P==1; THEN; USE FORMAT <frm1> EXTERNAL; ENDIF;
+            IF P==2; THEN; USE FORMAT <frm2> EXTERNAL; ENDIF;
+            ...
+            IF P>N; THEN; P=1; USE FORMAT <frm1> EXTERNAL; ENDIF;
+
+        The critical difference: 2-FRM increments P AFTER routing so P=0 on first call
+        gets the first-page form (F suffix), and P>=1 on subsequent calls gets the
+        subsequent-page form (S suffix).
         """
         # List available forms
         frm_names = []
@@ -5782,48 +5920,46 @@ class VIPPToDFAConverter:
         if len(frm_names) == 0:
             return  # No forms to use
 
-        # Custom sorting based on FRM naming conventions
-        # Priority: S (subsequent) → F (first) → TNC → F3 → B (back) → B2 → others
-        def frm_sort_key(name):
-            base_name = name.rsplit('_', 1)[0] if '_' in name else name
-            # Extract suffix (last character or _TNC)
-            if name.endswith('_TNC'):
-                suffix = '_TNC'
-            elif name.endswith('S'):
-                suffix = 'S'
-            elif name.endswith('F3'):
-                suffix = 'F3'
-            elif name.endswith('F'):
-                suffix = 'F'
-            elif name.endswith('B2'):
-                suffix = 'B2'
-            elif name.endswith('B'):
-                suffix = 'B'
-            else:
-                suffix = 'Z'  # Others at the end
+        if len(frm_names) <= 2:
+            # 2-FRM pattern: IF P<1 → first page form; ELSE → subsequent page form
+            # P starts at 0 (reset in $_BEFOREDOC), so first call gets F form
+            first_form = next((f for f in frm_names if f.endswith('F')), frm_names[0])
+            subseq_form = next((f for f in frm_names if f.endswith('S')), frm_names[-1] if len(frm_names) > 1 else frm_names[0])
 
-            # Priority order
-            priority = {
-                'S': 0,     # Subsequent pages (CASIOS, SIBS_CASTS)
-                'F': 1,     # First page (CASIOF, SIBS_CASTF)
-                '_TNC': 2,  # Terms & Conditions (CASIO_TNC)
-                'F3': 3,    # First page variant 3 (CASIOF3)
-                'B': 4,     # Back page (CASIOB)
-                'B2': 5,    # Back page variant 2 (CASIOB2)
-                'Z': 99     # Others
-            }
+            self.add_line(f"      IF P<1; THEN; USE FORMAT {first_form} EXTERNAL; ELSE; USE FORMAT {subseq_form} EXTERNAL; ENDIF;")
+            self.add_line(f"      P = P + 1;")
+        else:
+            # Multi-FRM pattern (3+): increment BEFORE, then sequential IF P==N checks
+            # Custom sorting based on FRM naming conventions
+            def frm_sort_key(name):
+                base_name = name.rsplit('_', 1)[0] if '_' in name else name
+                if name.endswith('_TNC'):
+                    suffix = '_TNC'
+                elif name.endswith('S'):
+                    suffix = 'S'
+                elif name.endswith('F3'):
+                    suffix = 'F3'
+                elif name.endswith('F'):
+                    suffix = 'F'
+                elif name.endswith('B2'):
+                    suffix = 'B2'
+                elif name.endswith('B'):
+                    suffix = 'B'
+                else:
+                    suffix = 'Z'
 
-            return (priority.get(suffix, 99), base_name, name)
+                priority = {
+                    'S': 0, 'F': 1, '_TNC': 2, 'F3': 3,
+                    'B': 4, 'B2': 5, 'Z': 99
+                }
+                return (priority.get(suffix, 99), base_name, name)
 
-        frm_names = sorted(frm_names, key=frm_sort_key)
+            frm_names = sorted(frm_names, key=frm_sort_key)
 
-        # Generate cycling logic through all FRM files
-        # Pattern: P counter cycles through FRM files (1, 2, 3, ..., N, then back to 1)
-        for idx, frm_name in enumerate(frm_names, start=1):
-            self.add_line(f"      IF P=={idx}; THEN; USE FORMAT {frm_name} EXTERNAL; ENDIF;")
+            self.add_line(f"      P = P + 1;")
+            for idx, frm_name in enumerate(frm_names, start=1):
+                self.add_line(f"      IF P=={idx}; THEN; USE FORMAT {frm_name} EXTERNAL; ENDIF;")
 
-        # Reset P if it exceeds the number of FRMs
-        if frm_names:
             first_frm = frm_names[0]
             self.add_line(f"      IF P>{len(frm_names)}; THEN; P=1; USE FORMAT {first_frm} EXTERNAL; ENDIF;")
 
@@ -6050,14 +6186,6 @@ class VIPPToDFAConverter:
         self.indent()
         self.add_line("P = 0;     /* Reset page counter for new document */")
         self.add_line("PP = 0;    /* Reset total page counter */")
-        self.add_line("")
-        self.add_line("/* Transaction description counter (undeclared variable) */")
-        self.add_line("VAR_COUNTTD = 0;")
-        self.add_line("")
-        self.add_line("/* Undeclared variables - incorrect values for BOXes */")
-        self.add_line("VAR = MM(40);")
-        self.add_line("Y5 = MM(40);")
-        self.add_line("Y3 = MM(40);")
         self.dedent()
         self.add_line("")
 
@@ -6190,10 +6318,61 @@ def main():
 
                     logger.info(f"Converted {dbm_file} to {output_path}")
 
-                    # Generate separate DFA files for each FRM
+                    # Generate separate DFA files for each FRM and collect referenced colors
+                    frm_referenced_colors = set()
+                    frm_dfa_outputs = {}
                     for frm_filename, frm in frm_files.items():
                         try:
                             frm_dfa_code = converter.generate_frm_dfa_code(frm, as_include=True)
+                            frm_dfa_outputs[frm_filename] = frm_dfa_code
+                            # Collect COLOR references from FRM DFA
+                            for m in re.finditer(r'\bCOLOR\s+([A-Z][A-Z0-9_]*)', frm_dfa_code):
+                                frm_referenced_colors.add(m.group(1))
+                        except Exception as e:
+                            logger.error(f"Error generating FRM DFA for {frm_filename}: {e}")
+
+                    # Patch main DFA: add any FRM-referenced colors not already defined
+                    if frm_referenced_colors:
+                        defined_in_main = set(re.findall(r'DEFINE\s+([A-Z][A-Z0-9_]*)\s+COLOR\b', dfa_code))
+                        missing_frm_colors = frm_referenced_colors - defined_in_main
+                        if missing_frm_colors:
+                            color_rgb_fallback = {
+                                'BLACK': (0, 0, 0), 'FBLACK': (0, 0, 0),
+                                'WHITE': (255, 255, 255), 'RED': (255, 0, 0),
+                                'GREEN': (0, 255, 0), 'BLUE': (0, 0, 255),
+                                'LMED': (217, 217, 217), 'MED': (217, 217, 217),
+                                'XDRK': (166, 166, 166),
+                            }
+                            insert_lines = []
+                            for cn in sorted(missing_frm_colors):
+                                r, g, b = color_rgb_fallback.get(cn, (0, 0, 0))
+                                r_pct = round(r * 100 / 255, 1)
+                                g_pct = round(g * 100 / 255, 1)
+                                b_pct = round(b * 100 / 255, 1)
+                                r_s = str(int(r_pct)) if r_pct == int(r_pct) else str(r_pct)
+                                g_s = str(int(g_pct)) if g_pct == int(g_pct) else str(g_pct)
+                                b_s = str(int(b_pct)) if b_pct == int(b_pct) else str(b_pct)
+                                insert_lines.append(f"DEFINE {cn} COLOR RGB RVAL {r_s} GVAL {g_s} BVAL {b_s}; /* Added: referenced in FRM */")
+                            # Find last DEFINE COLOR line and insert after it
+                            lines = dfa_code.split('\n')
+                            insert_idx = 0
+                            for idx_l, line in enumerate(lines):
+                                if 'DEFINE' in line and 'COLOR' in line:
+                                    insert_idx = idx_l + 1
+                            for j, il in enumerate(insert_lines):
+                                lines.insert(insert_idx + j, il)
+                            dfa_code = '\n'.join(lines)
+                            # Rewrite main DFA with patched colors
+                            with open(output_path, 'w', encoding='utf-8') as f:
+                                f.write(dfa_code)
+                            logger.info(f"Added {len(missing_frm_colors)} FRM-referenced colors to main DFA: {', '.join(sorted(missing_frm_colors))}")
+
+                    # Write FRM DFA files
+                    for frm_filename, frm in frm_files.items():
+                        try:
+                            frm_dfa_code = frm_dfa_outputs.get(frm_filename, '')
+                            if not frm_dfa_code:
+                                continue
                             frm_output_filename = os.path.splitext(frm_filename)[0] + '.dfa'
                             frm_output_path = os.path.join(args.output_dir, frm_output_filename)
 

@@ -55,7 +55,7 @@ VIPP_TO_DFA_COMMANDS = {
     'SETLKF': 'SETLKF',       # Link frame definition
     'BEGINPAGE': 'BEGINPAGE',
     'ENDPAGE': 'ENDPAGE',
-    'PAGEBRK': 'PAGEBREAK',   # Page break trigger
+    'PAGEBRK': '/* VIPP command not supported: PAGEBRK */',   # Page break trigger - not valid DFA
     'NEWFRAME': 'NEWFRAME',   # Frame overflow
     'SKIPPAGE': 'SKIPPAGE',   # Skip page logic
 
