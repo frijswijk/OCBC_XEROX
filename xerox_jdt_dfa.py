@@ -2459,8 +2459,7 @@ class VIPPToDFAConverter:
         # Generate main document format with line mode processing
         self._generate_jdt_docformat_main()
 
-        # Close DOCDEF
-        self.add_line("ENDDOCDEF;")
+        # End of document definition (no ENDDOCDEF in DFA — not a valid command)
 
         return '\n'.join(self.output_lines)
 
@@ -6475,36 +6474,64 @@ def main():
                 logger.error(f"Directory not found: {args.input_path}")
                 return
             
-            # First pass: identify projects and files
+            # First pass: identify projects and files.
+            # FRM files are collected into a shared pool so they can be
+            # associated with every JDT project found in the directory.
+            frm_pool: Dict[str, Any] = {}
+
             for root, dirs, files in os.walk(args.input_path):
                 for file in files:
-                    if file.lower().endswith('.dbm') or file.lower().endswith('.frm'):
-                        file_path = os.path.join(root, file)
-                        logger.info(f"Found Xerox file: {file_path}")
+                    if not (file.lower().endswith('.dbm') or
+                            file.lower().endswith('.frm') or
+                            file.lower().endswith('.jdt')):
+                        continue
 
-                        # Try to determine project name from file content
+                    file_path = os.path.join(root, file)
+                    logger.info(f"Found Xerox file: {file_path}")
+
+                    if file.lower().endswith('.dbm'):
                         project_name = "DEFAULT"
-
-                        # Add file to the appropriate project
                         if project_name not in projects:
                             projects[project_name] = XeroxProject(name=project_name)
+                        try:
+                            dbm = xerox_parser.parse_file(file_path)
+                            projects[project_name].dbm_files[file] = dbm
+                        except Exception as e:
+                            logger.error(f"Error parsing DBM file {file}: {e}")
+                            if args.verbose:
+                                logger.error(traceback.format_exc())
 
-                        if file.lower().endswith('.dbm'):
-                            try:
-                                dbm = xerox_parser.parse_file(file_path)
-                                projects[project_name].dbm_files[file] = dbm
-                            except Exception as e:
-                                logger.error(f"Error parsing DBM file {file}: {e}")
-                                if args.verbose:
-                                    logger.error(traceback.format_exc())
-                        elif file.lower().endswith('.frm'):
-                            try:
-                                frm = xerox_parser.parse_file(file_path)
-                                projects[project_name].frm_files[file] = frm
-                            except Exception as e:
-                                logger.error(f"Error parsing FRM file {file}: {e}")
-                                if args.verbose:
-                                    logger.error(traceback.format_exc())
+                    elif file.lower().endswith('.frm'):
+                        try:
+                            frm = xerox_parser.parse_file(file_path)
+                            frm_pool[file] = frm
+                            # Also attach to DEFAULT project for DBM+FRM projects
+                            if "DEFAULT" not in projects:
+                                projects["DEFAULT"] = XeroxProject(name="DEFAULT")
+                            projects["DEFAULT"].frm_files[file] = frm
+                        except Exception as e:
+                            logger.error(f"Error parsing FRM file {file}: {e}")
+                            if args.verbose:
+                                logger.error(traceback.format_exc())
+
+                    elif file.lower().endswith('.jdt'):
+                        # Each JDT file is its own project, named after the file stem
+                        project_name = os.path.splitext(file)[0].upper()
+                        if project_name not in projects:
+                            projects[project_name] = XeroxProject(name=project_name)
+                        try:
+                            jdt = xerox_parser.parse_file(file_path)
+                            projects[project_name].jdt = jdt
+                        except Exception as e:
+                            logger.error(f"Error parsing JDT file {file}: {e}")
+                            if args.verbose:
+                                logger.error(traceback.format_exc())
+
+            # Distribute the FRM pool to every JDT project so each one
+            # has access to the shared form definitions.
+            for project in projects.values():
+                if project.jdt and not project.frm_files:
+                    project.frm_files.update(frm_pool)
         
         # Second pass: convert each project
         for project_name, project in projects.items():
