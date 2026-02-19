@@ -4594,7 +4594,13 @@ class VIPPToDFAConverter:
                         next_param = params[i + 1]
 
                         # If comparing to a string literal and prev is a variable
-                        if (next_param.startswith("'") or next_param.upper() == next_param) and \
+                        # Include VIPP (paren) string literals as well as already-quoted strings
+                        is_string_rhs = (
+                            next_param.startswith("'") or
+                            next_param.upper() == next_param or
+                            (next_param.startswith('(') and next_param.endswith(')'))
+                        )
+                        if is_string_rhs and \
                            not prev_param.startswith("NOSPACE(") and \
                            (prev_param.startswith("VAR_") or prev_param.startswith("FLD[") or prev_param.startswith("&")):
                             # Wrap the variable in NOSPACE()
@@ -5347,12 +5353,13 @@ class VIPPToDFAConverter:
         Returns:
             Number of commands consumed (including IF, ELSE, ENDIF, and their bodies)
         """
-        # Split parameters if they're combined into a single string
+        # Split parameters if they're combined into a single string.
+        # Use _split_respecting_parens so that multi-word VIPP string literals like
+        # (monthly investment plan) are kept intact as one token.
         split_params = []
         for param in cmd.parameters:
-            # If param contains spaces, split it into individual tokens
             if ' ' in param:
-                split_params.extend(param.split())
+                split_params.extend(self._split_respecting_parens(param))
             else:
                 split_params.append(param)
 
