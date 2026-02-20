@@ -82,8 +82,12 @@ SHARED_RESOURCE_FOLDERS = {
     "fdf_pdf", "object", "pdf",
 }
 
-# Where Windows stores its TrueType fonts — primary search location.
+# Windows font directories.
+# System-wide fonts (requires admin to install):
 WINDOWS_FONTS_DIR = Path("C:/Windows/Fonts")
+# Per-user fonts (Windows 10/11 — no admin needed, used when fonts are
+# installed via Settings > Fonts > "Install for me only"):
+WINDOWS_USER_FONTS_DIR = Path.home() / "AppData" / "Local" / "Microsoft" / "Windows" / "Fonts"
 
 # Mapping from the font face name used in DFA  FONT ... AS '<face>'
 # to the standard Windows TTF filename(s) for that face.
@@ -1155,6 +1159,8 @@ def migrate(args: argparse.Namespace) -> int:
     _script_dir = Path(__file__).parent.resolve()
     font_search_dirs.append(_script_dir)
     font_search_dirs.append(_script_dir / "fonts")
+    if WINDOWS_USER_FONTS_DIR.is_dir():
+        font_search_dirs.append(WINDOWS_USER_FONTS_DIR)
     if WINDOWS_FONTS_DIR.is_dir():
         font_search_dirs.append(WINDOWS_FONTS_DIR)
 
