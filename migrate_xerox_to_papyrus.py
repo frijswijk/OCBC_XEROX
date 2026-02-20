@@ -146,12 +146,29 @@ FONT_FACE_TO_TTF: dict[str, list[str]] = {
     "comic sans ms bold":        ["comicbd.ttf"],
     "impact":                    ["impact.ttf"],
     # Helvetica family — used by Xerox printer-resident aliases NHE/NHEB/NHEBO.
-    # These TTF files ship with some Xerox projects (e.g. FIN886); they are not
-    # part of the standard Windows font set.  The migrate tool will find them
-    # when they are present in the codes folder or --fonts-source-dir.
-    "helvetica":                 ["helvetica.ttf"],
-    "helvetica bold":            ["helvetica-bold.ttf", "helveticab.ttf"],
-    "helvetica bold italic":     ["helveticabo.ttf", "arialbi.ttf"],
+    # Helvetica is not a standard Windows system font but may be present when
+    # Adobe Acrobat / Creative Suite is installed, or shipped with the project.
+    # Candidates are tried in order: project-supplied → Adobe install → fallback.
+    "helvetica": [
+        "helvetica.ttf",          # project-supplied (e.g. FIN886 codes folder)
+        "Helvetica.ttf",          # Adobe Acrobat install
+        "HelveticaNeue.ttf",      # Helvetica Neue (common Adobe variant)
+        "HelveticaNeueLTStd-Roman.ttf",
+        "Helvetica-Regular.ttf",
+    ],
+    "helvetica bold": [
+        "helvetica-bold.ttf",     # project-supplied
+        "helveticab.ttf",
+        "Helvetica-Bold.ttf",     # Adobe Acrobat install
+        "HelveticaNeue-Bold.ttf",
+        "HelveticaNeueLTStd-Bold.ttf",
+    ],
+    "helvetica bold italic": [
+        "helveticabo.ttf",        # project-supplied
+        "Helvetica-BoldOblique.ttf",   # Adobe naming convention
+        "HelveticaNeue-BoldItalic.ttf",
+        "arialbi.ttf",            # last-resort Windows fallback
+    ],
     # Stone Sans Bold — Xerox proprietary printer-resident font (alias SBT).
     # No standard TTF substitute is known; place the font file manually in \ttf\.
     # Listed here so the migrate report names it explicitly rather than
@@ -1107,7 +1124,11 @@ def migrate(args: argparse.Namespace) -> int:
         report.item(f"  '{face}'")
 
     # Build the list of directories to search for TTF files.
-    # Search order: (1) user-supplied --fonts-source-dir, (2) Windows Fonts.
+    # Search order:
+    #   (1) user-supplied --fonts-source-dir
+    #   (2) codes subfolder (project-shipped TTFs, e.g. helvetica.ttf in FIN886)
+    #   (3) project \ttf\ folder (already populated by step 7 resource copy)
+    #   (4) Windows system fonts
     font_search_dirs: list[Path] = []
     if args.fonts_source_dir:
         fsd = Path(args.fonts_source_dir).resolve()
@@ -1115,6 +1136,9 @@ def migrate(args: argparse.Namespace) -> int:
             font_search_dirs.append(fsd)
         else:
             report.warn(f"--fonts-source-dir not found: {fsd}")
+    # Project-shipped fonts: codes subfolder and the already-populated \ttf\ dir
+    font_search_dirs.append(codes_dir)
+    font_search_dirs.append(resource_root / "ttf")
     if WINDOWS_FONTS_DIR.is_dir():
         font_search_dirs.append(WINDOWS_FONTS_DIR)
 
