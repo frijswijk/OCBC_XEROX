@@ -43,6 +43,63 @@ from pathlib import Path
 
 
 # ---------------------------------------------------------------------------
+# Ghostscript integration — PS→PDF and EPS→JPG conversion
+# ---------------------------------------------------------------------------
+
+# Candidate Ghostscript executables tried in order.
+_GS_CANDIDATES = [
+    r"C:\Program Files\gs\gs*\bin\gswin64c.exe",
+    r"C:\Program Files (x86)\gs\gs*\bin\gswin32c.exe",
+    "gswin64c",
+    "gswin32c",
+    "gs",
+]
+
+
+def _find_ghostscript() -> "str | None":
+    """Return the first usable Ghostscript executable, or None if not found."""
+    import glob as _glob
+    for candidate in _GS_CANDIDATES:
+        if "*" in candidate:
+            for match in sorted(_glob.glob(candidate), reverse=True):
+                p = Path(match)
+                if p.exists():
+                    return str(p)
+        else:
+            try:
+                r = subprocess.run(
+                    [candidate, "--version"],
+                    capture_output=True, text=True, timeout=10,
+                )
+                if r.returncode == 0:
+                    return candidate
+            except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+                continue
+    return None
+
+
+def _gs_convert(
+    gs_cmd: str,
+    device: str,
+    extra_args: "list[str]",
+    input_path: Path,
+    output_path: Path,
+) -> bool:
+    """Run Ghostscript conversion. Returns True on success."""
+    cmd = [
+        gs_cmd,
+        "-dNOPAUSE", "-dBATCH", "-dSAFER",
+        f"-sDEVICE={device}",
+        f"-sOutputFile={output_path}",
+    ] + extra_args + [str(input_path)]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        return r.returncode == 0 and output_path.exists()
+    except (subprocess.TimeoutExpired, OSError):
+        return False
+
+
+# ---------------------------------------------------------------------------
 # Constants — sub-folder names that make up a Papyrus Designer project
 # ---------------------------------------------------------------------------
 
@@ -1086,7 +1143,7 @@ def migrate(args: argparse.Namespace) -> int:
     # ------------------------------------------------------------------
     report.section("Step 7: Copy resource files")
 
-    skip_extensions = XEROX_SOURCE_EXTENSIONS | {".db", ".bak", ".tmp"}
+    skip_extensions = XEROX_SOURCE_EXTENSIONS | {".db", ".bak", ".tmp", ".ps"}
 
     for resource_file in codes_dir.iterdir():
         if not resource_file.is_file():
@@ -1113,6 +1170,60 @@ def migrate(args: argparse.Namespace) -> int:
                 f"Unknown resource type '{resource_file.name}' (ext={ext}) — not copied. "
                 f"Place manually into the appropriate sub-folder."
             )
+
+    # ------------------------------------------------------------------
+    # Step 7b — Convert PS→PDF and EPS→JPG using Ghostscript
+    # ------------------------------------------------------------------
+    report.section("Step 7b: Convert PS/EPS resources")
+
+    gs_cmd = _find_ghostscript()
+    if gs_cmd:
+        report.item(f"Ghostscript: {gs_cmd}")
+        pdf_out_dir  = output_root / "pdf"
+        jpeg_out_dir = resource_root / "jpeg"
+
+        for resource_file in sorted(codes_dir.iterdir()):
+            if not resource_file.is_file():
+                continue
+            ext = resource_file.suffix.lower()
+
+            if ext == ".ps":
+                dest = pdf_out_dir / (resource_file.stem + ".pdf")
+                ok = _gs_convert(
+                    gs_cmd, "pdfwrite", [], resource_file, dest
+                )
+                if ok:
+                    report.item(
+                        f"Converted {resource_file.name}  ->  \\pdf\\{dest.name}"
+                    )
+                else:
+                    report.warn(
+                        f"PS→PDF conversion failed for {resource_file.name}  "
+                        "(place {resource_file.stem}.pdf manually in \\pdf\\)"
+                    )
+
+            elif ext == ".eps":
+                dest = jpeg_out_dir / (resource_file.stem + ".jpg")
+                ok = _gs_convert(
+                    gs_cmd, "jpeg",
+                    ["-r150", "-dJPEGQ=90"],
+                    resource_file, dest,
+                )
+                if ok:
+                    report.item(
+                        f"Converted {resource_file.name}  ->  \\jpeg\\{dest.name}"
+                    )
+                else:
+                    report.warn(
+                        f"EPS→JPG conversion failed for {resource_file.name}  "
+                        f"(place {resource_file.stem}.jpg manually in \\jpeg\\)"
+                    )
+    else:
+        report.warn(
+            "Ghostscript not found — PS and EPS files not converted. "
+            "Install from https://www.ghostscript.com (gswin64c) and re-run, "
+            "or manually convert: .ps→.pdf into \\pdf\\ and .eps→.jpg into \\jpeg\\"
+        )
 
     # ------------------------------------------------------------------
     # Step 8 — Copy reference PDF into \reference\

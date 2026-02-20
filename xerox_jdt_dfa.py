@@ -2568,12 +2568,28 @@ class VIPPToDFAConverter:
         self.add_line("PRINTFOOTER")
         self.indent()
 
-        # Referenced forms
+        # Referenced forms: .ps forms → CREATEOBJECT PDF; .frm forms → USE FORMAT EXTERNAL
         if self.jdt.forms:
             for form in self.jdt.forms:
-                form_name = ''.join(c for c in os.path.splitext(form)[0] if c.isalnum())
-                self.add_line(f"USE FORMAT {form_name} EXTERNAL;")
-                self.add_line("")
+                form_raw = form.strip('()')
+                form_ext = os.path.splitext(form_raw)[1].lower()
+                if form_ext == '.ps':
+                    pdf_name = os.path.splitext(form_raw)[0] + '.pdf'
+                    self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+                    self.indent()
+                    self.add_line("POSITION 0 0")
+                    self.add_line("PARAMETERS")
+                    self.indent()
+                    self.add_line(f"('FILENAME'='{pdf_name}')")
+                    self.add_line("('OBJECTTYPE'='1')")
+                    self.add_line("('OTHERTYPES'='PDF');")
+                    self.dedent()
+                    self.dedent()
+                    self.add_line("")
+                else:
+                    form_name = ''.join(c for c in os.path.splitext(form_raw)[0] if c.isalnum())
+                    self.add_line(f"USE FORMAT {form_name} EXTERNAL;")
+                    self.add_line("")
 
         # Page layout position from SETMARGIN
         if self.jdt.margins:

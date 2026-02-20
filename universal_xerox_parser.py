@@ -3443,16 +3443,20 @@ class VIPPToDFAConverter:
             self.dedent()
 
         elif file_ext == 'eps':
-            # EPS files: use SEGMENT with absolute position from MOVETO
-            # EPS images are placed at exact page coordinates — no &CORSEGMENT offset
-            self.add_line(f"SEGMENT {resource_name}")
+            # EPS converted to JPG by migrate script → generate CREATEOBJECT with JPG type
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
             self.indent()
-            if x_was_set or y_was_set:
-                x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
-                y_part = f"{y} MM-$MR_TOP" if y_was_set else "0 MM-$MR_TOP"
-                self.add_line(f"POSITION ({x_part}) ({y_part});")
-            else:
-                self.add_line("POSITION (SAME) (0 MM-$MR_TOP);")
+            self.add_line("POSITION (SAME) (SAME)")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line("('OTHERTYPES'='JPG')")
+            if cache_width is not None and cache_height is not None:
+                self.add_line(f"('XOBJECTAREASIZE'='{cache_width}')")
+                self.add_line(f"('YOBJECTAREASIZE'='{cache_height}')")
+            self.add_line("('OBJECTMAPPING'='2');")
+            self.dedent()
             self.dedent()
 
         else:
@@ -5162,6 +5166,33 @@ class VIPPToDFAConverter:
                 y_was_explicitly_set = False
                 y_is_next_line = True
                 self.last_command_type = 'NL'
+                i += 1
+                continue
+
+            # Handle SETFORM: .ps form files → CREATEOBJECT PDF; .frm → USE FORMAT EXTERNAL
+            if cmd.name == 'SETFORM':
+                if cmd.parameters:
+                    import os as _os
+                    form_raw = cmd.parameters[0].strip('()')
+                    form_ext = _os.path.splitext(form_raw)[1].lower()
+                    if form_ext == '.ps':
+                        pdf_name = _os.path.splitext(form_raw)[0] + '.pdf'
+                        self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+                        self.indent()
+                        self.add_line("POSITION 0 0")
+                        self.add_line("PARAMETERS")
+                        self.indent()
+                        self.add_line(f"('FILENAME'='{pdf_name}')")
+                        self.add_line("('OBJECTTYPE'='1')")
+                        self.add_line("('OTHERTYPES'='PDF');")
+                        self.dedent()
+                        self.dedent()
+                    else:
+                        form_stem = ''.join(
+                            c for c in _os.path.splitext(form_raw)[0].upper()
+                            if c.isalnum() or c == '_'
+                        )
+                        self.add_line(f"USE FORMAT {form_stem} EXTERNAL;")
                 i += 1
                 continue
 
