@@ -47,6 +47,26 @@ nul
 *.temp
 *.bak
 
+# Debug/test scripts (generated during development)
+debug_*.py
+test_*.py
+check_*.py
+trace_*.py
+search_*.py
+
+# Backup/copy files
+*- Copy.py
+*.py.backup
+*- *Copy.py
+*.py.md
+
+# ISIS journal files
+*.JNL
+ISISDISP.JNL
+
+# One-off test output folders
+output_fin886/
+
 # OS
 Thumbs.db
 Desktop.ini
