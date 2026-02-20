@@ -149,25 +149,31 @@ FONT_FACE_TO_TTF: dict[str, list[str]] = {
     # Helvetica is not a standard Windows system font but may be present when
     # Adobe Acrobat / Creative Suite is installed, or shipped with the project.
     # Candidates are tried in order: project-supplied → Adobe install → fallback.
+    # Helvetica is a commercial font — not in standard Windows Fonts.
+    # Candidates tried in order: project-supplied → Adobe install → Arial fallback.
+    # Arial ships with every Windows installation and is metrically very close
+    # to Helvetica, so it is used as a guaranteed last-resort substitute.
     "helvetica": [
-        "helvetica.ttf",          # project-supplied (e.g. FIN886 codes folder)
-        "Helvetica.ttf",          # Adobe Acrobat install
-        "HelveticaNeue.ttf",      # Helvetica Neue (common Adobe variant)
+        "helvetica.ttf",               # project-supplied (e.g. FIN886 codes folder)
+        "Helvetica.ttf",               # Adobe Acrobat / Creative Suite install
+        "HelveticaNeue.ttf",           # Helvetica Neue variant
         "HelveticaNeueLTStd-Roman.ttf",
         "Helvetica-Regular.ttf",
+        "arial.ttf",                   # Windows fallback (metrically equivalent)
     ],
     "helvetica bold": [
-        "helvetica-bold.ttf",     # project-supplied
+        "helvetica-bold.ttf",          # project-supplied
         "helveticab.ttf",
-        "Helvetica-Bold.ttf",     # Adobe Acrobat install
+        "Helvetica-Bold.ttf",          # Adobe install
         "HelveticaNeue-Bold.ttf",
         "HelveticaNeueLTStd-Bold.ttf",
+        "arialbd.ttf",                 # Windows fallback
     ],
     "helvetica bold italic": [
-        "helveticabo.ttf",        # project-supplied
-        "Helvetica-BoldOblique.ttf",   # Adobe naming convention
+        "helveticabo.ttf",             # project-supplied
+        "Helvetica-BoldOblique.ttf",   # Adobe naming
         "HelveticaNeue-BoldItalic.ttf",
-        "arialbi.ttf",            # last-resort Windows fallback
+        "arialbi.ttf",                 # Windows fallback
     ],
     # Stone Sans Bold — Xerox proprietary printer-resident font (alias SBT).
     # No standard TTF substitute is known; place the font file manually in \ttf\.
@@ -493,16 +499,21 @@ def resolve_ttf_files(
 
         resolved: Path | None = None
         for search_dir in search_dirs:
+            if not search_dir.is_dir():
+                continue  # skip dirs that don't exist yet (e.g. empty \ttf\)
             for candidate in candidates:
                 probe = search_dir / candidate
                 if probe.exists():
                     resolved = probe
                     break
-                # Try case-insensitive match (important on Linux)
-                for existing in search_dir.iterdir():
-                    if existing.name.lower() == candidate.lower():
-                        resolved = existing
-                        break
+                # Try case-insensitive match (important on Windows/Linux)
+                try:
+                    for existing in search_dir.iterdir():
+                        if existing.name.lower() == candidate.lower():
+                            resolved = existing
+                            break
+                except OSError:
+                    pass  # permission error or race — skip this dir
                 if resolved:
                     break
             if resolved:
@@ -1128,7 +1139,8 @@ def migrate(args: argparse.Namespace) -> int:
     #   (1) user-supplied --fonts-source-dir
     #   (2) codes subfolder (project-shipped TTFs, e.g. helvetica.ttf in FIN886)
     #   (3) project \ttf\ folder (already populated by step 7 resource copy)
-    #   (4) Windows system fonts
+    #   (4) converter's own directory + fonts/ subdirectory (drop TTFs here)
+    #   (5) Windows system fonts  (Arial is used as Helvetica fallback)
     font_search_dirs: list[Path] = []
     if args.fonts_source_dir:
         fsd = Path(args.fonts_source_dir).resolve()
@@ -1139,6 +1151,10 @@ def migrate(args: argparse.Namespace) -> int:
     # Project-shipped fonts: codes subfolder and the already-populated \ttf\ dir
     font_search_dirs.append(codes_dir)
     font_search_dirs.append(resource_root / "ttf")
+    # Converter directory: place any TTF substitutes (e.g. helvetica.ttf) here
+    _script_dir = Path(__file__).parent.resolve()
+    font_search_dirs.append(_script_dir)
+    font_search_dirs.append(_script_dir / "fonts")
     if WINDOWS_FONTS_DIR.is_dir():
         font_search_dirs.append(WINDOWS_FONTS_DIR)
 
