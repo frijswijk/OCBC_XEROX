@@ -2713,18 +2713,30 @@ class VIPPToDFAConverter:
         """
         Convert Xerox positions (0-2440 internal resolution) to DFA expressions.
 
-        VPF Point 1: Xerox uses internal resolution of 2440 units.
-        Formula: POSITION (UNIH*#xpos) (MTOP+UNIH*#ypos)
+        Xerox JDT uses 2440 internal units = page width.  Y coordinates are
+        ABSOLUTE from the physical top of the page in the same unit space.
+        For portrait A4 (210mm wide): UNIH = 210mm/2440.
+        The maximum Y value (bottom of page) = 297mm / UNIH = 2440*(297/210) ≈ 3450.
+
+        IMPORTANT: Do NOT add MTOP (SETMARGIN top offset) to the Y expression.
+        The SETMARGIN values define printing-area boundaries inside the JDT but
+        the RPE Y coordinates are already absolute page coordinates.  Adding MTOP
+        shifts all content down by ~12mm and pushes bottom-of-page items past the
+        297mm page boundary, causing DocEXEC to generate extra physical pages.
+
+        Formula:
+            X DFA = UNIH * x_xerox
+            Y DFA = UNIH * y_xerox   (no MTOP offset)
 
         Args:
-            x_xerox: Horizontal position in Xerox units (0-2440)
-            y_xerox: Vertical position in Xerox units
+            x_xerox: Horizontal position in Xerox units (0-2440 = full width)
+            y_xerox: Vertical position in Xerox units (0 = page top, ~3450 = page bottom)
 
         Returns:
             Tuple of (x_dfa_expr, y_dfa_expr) as strings
         """
         x_dfa = f"UNIH*#{x_xerox}"
-        y_dfa = f"MTOP+UNIH*#{y_xerox}"
+        y_dfa = f"UNIH*#{y_xerox}"
         return (x_dfa, y_dfa)
 
     def _generate_jdt_docformat_main(self):
@@ -2805,28 +2817,68 @@ class VIPPToDFAConverter:
         self.add_line("THEN;")
         self.indent()
 
+        # Guard on ENDGROUP only: only render a page when C > 1 (real data lines
+        # accumulated beyond the sentinel CONTENT[1]='1').
+        #
+        # Context: when DocEXEC processes a data file whose last record is an EOF
+        # (not a '1' form-feed), the FOR N loop exits after the final THEN branch.
+        # DocEXEC then starts document N+1 and re-enters DOCFORMAT THEMAIN.  On the
+        # first RECORD read of that new (empty) document, $EOF is immediately TRUE,
+        # THEN fires again, but C==1 (only the sentinel).  Without the guard, a
+        # blank ENDGROUP/page would be produced.
+        #
+        # ENDDOCUMENT is always called (even for empty doc-N+1) so that DocEXEC
+        # closes the open document cycle cleanly without auto-generating a blank page.
+        self.add_line("/* Only render a page if content was accumulated (C>1) */")
+        self.add_line("IF ISTRUE(C>1);")
+        self.add_line("THEN;")
+        self.indent()
+
         # 1. Evaluate SETRCD conditions across accumulated CONTENT[]
         self._generate_inline_condition_evaluation()
 
         # 2. Output all FROMLINE blocks (inside the THEN branch, before ENDGROUP)
         self._generate_jdt_fromline_output_section()
 
-        # 3. Close document (causes LOGICALPAGE/PRINTFOOTER to render)
+        # 3. Render the current logical page (triggers PRINTFOOTER)
         self.add_line("ENDGROUP;")
-        self.add_line("ENDDOCUMENT;")
 
-        # 4. Reset arrays and condition flags for next page
+        self.dedent()
+        self.add_line("ENDIF;")
+        self.add_line("")
+
+        # 4. Close the document unconditionally so DocEXEC does not auto-generate
+        # a blank page for the empty trailing document cycle started after EOF.
+        self.add_line("ENDDOCUMENT;")
+        self.add_line("")
+
+        # 4. Reset arrays and condition flags for next page.
+        # /HOLD conditions latch for the entire document run — they must NOT be
+        # reset between pages.  Only primitive (non-compound) conditions whose
+        # operator is NOT 'HOLD' are reset here.  Compound conditions that are
+        # purely derived from /HOLD sub-conditions are also excluded: once their
+        # sub-conditions latch they will be re-derived immediately on the next
+        # FOR C iteration anyway.
         self.add_line("/* Reset for next page */")
         self.add_line("C = 1;")
         self.add_line("CONTENT[C] = '1';")
         if self.jdt.conditions:
+            # Build the set of /HOLD condition names (never reset between pages)
+            hold_cond_names = {
+                name for name, cond in self.jdt.conditions.items()
+                if not cond.is_compound and cond.operator == 'HOLD'
+            }
+            # Collect all condition names (direct + sub-condition references)
             all_cond_names = set(self.jdt.conditions.keys())
             for cond in self.jdt.conditions.values():
                 if cond.is_compound and cond.sub_conditions:
                     for sub in cond.sub_conditions:
                         all_cond_names.add(sub)
-            for cond_name in sorted(all_cond_names):
-                self.add_line(f"{cond_name} = 0;")
+            # Emit resets only for non-HOLD conditions
+            resettable = sorted(n for n in all_cond_names if n not in hold_cond_names)
+            if resettable:
+                for cond_name in resettable:
+                    self.add_line(f"{cond_name} = 0;")
 
         self.dedent()
         self.add_line("ELSE;")
@@ -2883,7 +2935,8 @@ class VIPPToDFAConverter:
         self.add_line(f"UNIH = $LP_WIDTH/2440;")
         self.add_line("")
 
-        # Margin variables from SETMARGIN
+        # Margin reference variables from SETMARGIN (kept for reference/debugging;
+        # RPE Y coordinates are absolute page positions so MTOP is NOT added to them)
         self.add_line(f"MTOP   = UNIH*{mtop};")
         self.add_line(f"MLEFT  = UNIH*{mleft};")
         self.add_line(f"MRIGHT = UNIH*{mright};")
@@ -3065,16 +3118,51 @@ class VIPPToDFAConverter:
         """
         Emit all FROMLINE output blocks inside the page-output THEN branch.
 
+        ALL FROMLINE blocks are wrapped in a SINGLE outer OUTLINE at (0 MM)(0 MM).
+        This is critical: each OUTLINE block advances the DFA page cursor by its
+        content height.  With 19 FROMLINE blocks previously each in their own
+        OUTLINE at (0 MM)(0 MM), the cumulative cursor advance exceeded the page
+        height (297 mm), causing DocEXEC to overflow to extra physical pages.
+
+        Structure:
+            OUTLINE
+                POSITION (0 MM) (0 MM)
+                DIRECTION ACROSS;
+                /* --- FROMLINE N --- */
+                LIN = N;
+                OUTPUT ...;           <- unconditional: valid directly in outer OUTLINE
+                IF ISTRUE(...);
+                THEN;
+                    OUTLINE           <- conditional: nested OUTLINE required for OUTPUT
+                        POSITION (SAME) (SAME)
+                        DIRECTION ACROSS;
+                        OUTPUT ...;
+                    ENDIO;
+                ENDIF;
+                /* --- FROMLINE M --- */
+                LIN = M;
+                ...
+            ENDIO;
+
         Each FROMLINE block:
         1. Sets LIN = line_number
         2. Outputs unconditional fields from that line using SUBSTR(CONTENT[LIN],...)
-        3. If the line has /IF_CND.../ELSE.../ENDIFALL chains, wraps them in nested IFs
+        3. If the line has /IF_CND.../ELSE.../ENDIFALL chains, wraps the branch
+           outputs in nested OUTLINE POSITION (SAME)(SAME) blocks (DFA rule: OUTPUT
+           inside IF/THEN/ELSE inside an OUTLINE still needs its own nested OUTLINE).
         """
         if not self.jdt.rpe_lines:
             self.add_line("/* No FROMLINE data to output */")
             return
 
-        self.add_line("/* ===== FROMLINE output blocks ===== */")
+        self.add_line("/* ===== FROMLINE output blocks — single outer OUTLINE ===== */")
+        self.add_line("")
+
+        # Single outer OUTLINE: page cursor advances only ONCE for all FROMLINE content.
+        self.add_line("OUTLINE")
+        self.indent()
+        self.add_line("POSITION (0 MM) (0 MM)")
+        self.add_line("DIRECTION ACROSS;")
         self.add_line("")
 
         for line_num in sorted(self.jdt.rpe_lines.keys()):
@@ -3092,30 +3180,23 @@ class VIPPToDFAConverter:
             self.add_line(f"LIN = {line_num};")
             self.add_line("")
 
-            # Wrap all output content in an OUTLINE block.
-            # OUTPUT is only valid directly inside an OUTLINE; unconditional
-            # OUTPUTs sit directly in this outer OUTLINE, while conditional
-            # OUTPUTs get nested OUTLINE wrappers inside each IF/THEN/ELSE branch.
-            self.add_line("OUTLINE")
-            self.indent()
-            self.add_line("POSITION (0 MM) (0 MM)")
-            self.add_line("DIRECTION ACROSS;")
-            self.add_line("")
-
-            # Unconditional outputs for this line — valid directly in OUTLINE
+            # Unconditional outputs for this line — valid directly in outer OUTLINE
             for rpe in unconditional:
                 self._emit_rpe_output(rpe, line_var="LIN")
                 self.add_line("")
 
             # Conditional chain (/IF_CND.../ELSE/IF_CND.../ELSE.../ENDIFALL)
-            # Each branch's OUTPUTs are wrapped in nested OUTLINE blocks.
+            # Each branch's OUTPUTs are still wrapped in nested OUTLINE blocks
+            # (DFA rule: OUTPUT inside IF/THEN/ELSE needs nested OUTLINE wrapper
+            # even when the IF block is itself inside an outer OUTLINE).
             if cond_chain:
                 self._emit_condition_chain(cond_chain, line_var="LIN")
                 self.add_line("")
 
-            self.dedent()
-            self.add_line("ENDIO;")
-            self.add_line("")
+        # Close the single outer OUTLINE
+        self.dedent()
+        self.add_line("ENDIO;")
+        self.add_line("")
 
     def _build_condition_chain(self, rpe_list) -> list:
         """
@@ -3255,6 +3336,10 @@ class VIPPToDFAConverter:
 
         X (field 2): horizontal position in 2440-unit space
         Y (field 4) + DY (field 5): vertical position. Effective Y = Y + DY.
+            Y coordinates are ABSOLUTE from the physical page top.
+            For portrait A4: UNIH=210/2440, Y=3450 units = 297mm = page bottom.
+            Do NOT add MTOP (top-margin offset) — it would shift all content down
+            by 12mm and push bottom-of-page items beyond the 297mm boundary.
         start (field 6): 0 = literal text in parentheses; else 1-based start in CONTENT
         len (field 7): length of substring (0 = full field if start>0 or literal)
 
@@ -3297,10 +3382,18 @@ class VIPPToDFAConverter:
         y_pos = rpe.horizontal_position   # field[4]  (confusingly named in dataclass)
         dy    = rpe.vertical_position     # field[5]  (DY from spec)
 
+        # JDT RPE Y coordinates are ABSOLUTE from the physical top of the page,
+        # in the same 2440-unit-per-page-width space.  For portrait A4:
+        #   UNIH = 210mm/2440  →  Y=3450 units ≈ 297mm = exactly the page bottom.
+        # The SETMARGIN top value (140 units) is a printing-area boundary, NOT an
+        # extra DFA offset.  Adding MTOP to the Y expression shifts all content
+        # 12mm too far down and pushes the bottom-of-page content past 297mm,
+        # causing DocEXEC to overflow to an extra physical page.
+        # Correct formula: DFA Y = UNIH * (Y + DY)   [no MTOP term].
         if dy != 0:
-            y_expr = f"MTOP+UNIH*(#{y_pos}+#{dy})"
+            y_expr = f"UNIH*(#{y_pos}+#{dy})"
         else:
-            y_expr = f"MTOP+UNIH*#{y_pos}"
+            y_expr = f"UNIH*#{y_pos}"
 
         x_expr = f"UNIH*#{x_pos}"
 
