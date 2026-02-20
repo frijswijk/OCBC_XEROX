@@ -1383,6 +1383,7 @@ def migrate(args: argparse.Namespace) -> int:
                 capture_output=True,
                 text=True,
                 timeout=300,
+                cwd=str(output_root),
             )
         except subprocess.TimeoutExpired:
             report.warn("DocEXEC timed out after 300 seconds.")

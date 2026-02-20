@@ -1653,21 +1653,47 @@ class XeroxParser:
                 continue
             
             # Handle variable definitions with SETVAR
-            if (token.type == 'variable' and 
+            if (token.type == 'variable' and
                 self.pos + 2 < len(self.tokens) and
                 self.tokens[self.pos + 2].value == 'SETVAR'):
-                
+
                 var_name = token.value
                 var_value = self.tokens[self.pos + 1].value
-                
+
                 dbm.variables[var_name.lstrip('/')] = XeroxVariable(
                     name=var_name.lstrip('/'),
                     default_value=var_value
                 )
-                
+
                 self.pos += 3
                 continue
-            
+
+            # Handle top-level XGFRESDEF subroutine definitions: /NAME { ... } XGFRESDEF
+            # These appear in the DBM preamble outside any CASE block.
+            # Pattern: variable starting with '/' immediately followed by a '{' block,
+            # with 'XGFRESDEF' as the next keyword after the closing '}'.
+            if (token.type == 'variable' and token.value.startswith('/') and
+                    self.pos + 1 < len(self.tokens) and
+                    self.tokens[self.pos + 1].value == '{'):
+                # Peek ahead: find the matching '}' and check if XGFRESDEF follows
+                brace_pos = self.pos + 1
+                block_tokens, end_idx = self._collect_case_block_tokens(brace_pos)
+                next_pos = end_idx + 1
+                if (next_pos < len(self.tokens) and
+                        self.tokens[next_pos].value == 'XGFRESDEF'):
+                    resource_name = token.value.lstrip('/')
+                    resource_commands = self._parse_vipp_block(block_tokens, token.line_number)
+                    xgf_cmd = XeroxCommand(
+                        name='XGFRESDEF',
+                        line_number=token.line_number,
+                        column=token.column
+                    )
+                    xgf_cmd.parameters = [resource_name]
+                    xgf_cmd.children = resource_commands
+                    dbm.commands.append(xgf_cmd)
+                    self.pos = next_pos + 1  # skip past XGFRESDEF keyword
+                    continue
+
             # Handle CASE PREFIX
             if token.value == 'CASE' and self.pos + 1 < len(self.tokens) and self.tokens[self.pos + 1].value == 'PREFIX':
                 in_case_block = True
@@ -1989,7 +2015,9 @@ class VIPPToDFAConverter:
         'SETFORM': 'SETFORM',
         'SETLKF': 'SETLKF',
         'SETPAGEDEF': 'SETPAGEDEF',
-        'PAGEBRK': '/* VIPP command not supported: PAGEBRK */',
+        # 'PAGEBRK' intentionally NOT mapped here — its handler at _convert_case_commands
+        # line 5604 emits USE LOGICALPAGE NEXT SIDE FRONT; (mapping to a /* comment */ string
+        # that starts with '/' would cause the early-skip guard at line 5286 to swallow it).
         'NEWFRAME': '/* VIPP command not supported: NEWFRAME */',
         'SKIPPAGE': '/* VIPP command not supported: SKIPPAGE */',
         'BOOKMARK': 'BOOKMARK',
@@ -2633,45 +2661,65 @@ class VIPPToDFAConverter:
 
         # Extract text and parameters
         # For SHP, parameters can be: [var, width, align] or [text, width, align]
-        for i, param in enumerate(cmd.parameters):
-            if param == 'VSUB':
-                has_vsub = True
-                # Next parameter might be alignment (0=left, 1=right)
-                if i + 1 < len(cmd.parameters):
-                    try:
-                        vsub_alignment = int(cmd.parameters[i + 1])
-                    except (ValueError, IndexError):
-                        pass
-                continue
-            elif param.startswith('(') and param.endswith(')'):
-                text = param[1:-1]
-            elif param.startswith('VAR_') or param.startswith('FLD'):
-                text = param
-                is_variable = True
-            elif cmd.name in ('SHP', 'SHp'):
-                # SHP/SHp has 3 parameters: [var/text, width, align]
-                if i == 0 and not text:
-                    # First parameter - could be variable or text
-                    if param.startswith('VAR_') or param.startswith('FLD'):
-                        text = param
-                        is_variable = True
-                    elif param.startswith('(') and param.endswith(')'):
-                        text = param[1:-1]
-                    else:
-                        text = param
-                        is_variable = True
-                elif i == 1:
-                    # Second parameter is width
-                    try:
-                        shp_width = float(param)
-                    except (ValueError, TypeError):
-                        pass
-                elif i == 2:
-                    # Third parameter is alignment
-                    try:
-                        vsub_alignment = int(param)
-                    except (ValueError, TypeError):
-                        pass
+        # Detect FORMAT pattern: params like [VAR_X, 'FORMAT', '(pattern)']
+        # Xerox FORMAT: value (pattern) FORMAT — applies numeric format mask to variable.
+        # Convert to NUMPICTURE(VAR_X, 'pattern') expression in DFA.
+        _has_format = 'FORMAT' in cmd.parameters
+        if _has_format:
+            fmt_idx = cmd.parameters.index('FORMAT')
+            if fmt_idx > 0 and fmt_idx + 1 < len(cmd.parameters):
+                fmt_var = cmd.parameters[fmt_idx - 1]
+                fmt_pat_raw = cmd.parameters[fmt_idx + 1]
+                # Strip surrounding parens from pattern if present
+                if fmt_pat_raw.startswith('(') and fmt_pat_raw.endswith(')'):
+                    fmt_pat_raw = fmt_pat_raw[1:-1]
+                # Build NUMPICTURE expression - treated as expression (not a plain string literal)
+                text = f"NUMPICTURE({fmt_var}, '{fmt_pat_raw}')"
+                is_variable = True  # Emit without surrounding quotes
+                _has_format = True
+            else:
+                _has_format = False
+
+        if not _has_format:
+            for i, param in enumerate(cmd.parameters):
+                if param == 'VSUB':
+                    has_vsub = True
+                    # Next parameter might be alignment (0=left, 1=right)
+                    if i + 1 < len(cmd.parameters):
+                        try:
+                            vsub_alignment = int(cmd.parameters[i + 1])
+                        except (ValueError, IndexError):
+                            pass
+                    continue
+                elif param.startswith('(') and param.endswith(')'):
+                    text = param[1:-1]
+                elif param.startswith('VAR_') or param.startswith('FLD'):
+                    text = param
+                    is_variable = True
+                elif cmd.name in ('SHP', 'SHp'):
+                    # SHP/SHp has 3 parameters: [var/text, width, align]
+                    if i == 0 and not text:
+                        # First parameter - could be variable or text
+                        if param.startswith('VAR_') or param.startswith('FLD'):
+                            text = param
+                            is_variable = True
+                        elif param.startswith('(') and param.endswith(')'):
+                            text = param[1:-1]
+                        else:
+                            text = param
+                            is_variable = True
+                    elif i == 1:
+                        # Second parameter is width
+                        try:
+                            shp_width = float(param)
+                        except (ValueError, TypeError):
+                            pass
+                    elif i == 2:
+                        # Third parameter is alignment
+                        try:
+                            vsub_alignment = int(param)
+                        except (ValueError, TypeError):
+                            pass
 
         # Determine alignment from command type if not from VSUB
         if vsub_alignment is None:
@@ -2689,9 +2737,13 @@ class VIPPToDFAConverter:
         if shp_width is not None and shp_width > 0:
             # SHP with width requires TEXT command with WIDTH parameter and ALIGN JUSTIFY
             if has_vsub and not is_variable:
+                _orig_had_vsub = '$$' in text or '$' in text
                 text = self._convert_vsub(text)
                 # After VSUB conversion, if text contains ! concatenation, treat as variable
                 if ' ! ' in text:
+                    is_variable = True
+                elif _orig_had_vsub and "'" not in text and ' ' not in text.strip():
+                    # Pure variable: ($$VAR_NAME.) → VAR_NAME — must not be quoted
                     is_variable = True
             # Default SHP alignment to JUSTIFY (3) if not explicitly set
             shp_alignment = vsub_alignment if vsub_alignment is not None else 3
@@ -2705,9 +2757,13 @@ class VIPPToDFAConverter:
         else:
             # Use simple OUTPUT command
             if has_vsub and not is_variable:
+                _orig_had_vsub = '$$' in text or '$' in text
                 text = self._convert_vsub(text)
                 # After VSUB conversion, if text contains ! concatenation, treat as variable
                 if ' ! ' in text:
+                    is_variable = True
+                elif _orig_had_vsub and "'" not in text and ' ' not in text.strip():
+                    # Pure variable: ($$VAR_NAME.) → VAR_NAME — must not be quoted
                     is_variable = True
             self._generate_simple_output(text, x, y, font, is_variable, vsub_alignment,
                                         x_was_set, y_was_set, y_is_next, frm, color)
@@ -2944,7 +3000,29 @@ class VIPPToDFAConverter:
                                default_font: str, is_variable: bool, alignment: int = None,
                                x_was_set: bool = True, y_was_set: bool = True, y_is_next: bool = False,
                                frm: XeroxFRM = None, color: str = None):
-        """Generate simple OUTPUT command with proper alignment."""
+        """Generate simple OUTPUT command with proper alignment.
+
+        IMPORTANT: ALIGN JUSTIFY is NOT valid on OUTPUT — only LEFT/RIGHT/CENTER are.
+        If alignment==3 (JUSTIFY), redirect to TEXT block with a reasonable default width.
+        """
+        # JUSTIFY is only valid inside TEXT blocks, not on OUTPUT.
+        # Redirect to _generate_text_with_width with a default page-width estimate.
+        if alignment == 3:
+            # Estimate a reasonable width: if we have an x position, use remaining page width.
+            # Default to 175 MM which is a common text column width for A4.
+            justify_width = 175.0
+            if x_was_set and isinstance(x, (int, float)):
+                # Remaining width from x to right margin (~201 MM for A4)
+                remaining = 201.0 - float(x)
+                if remaining > 10.0:
+                    justify_width = remaining
+            self._generate_text_with_width(
+                text, x, y, default_font, justify_width, is_variable,
+                alignment=3, x_was_set=x_was_set, y_was_set=y_was_set,
+                y_is_next=y_is_next, frm=frm
+            )
+            return
+
         # Generate OUTPUT
         if is_variable:
             self.add_line(f"OUTPUT {text}")
@@ -2979,15 +3057,13 @@ class VIPPToDFAConverter:
         if color:
             self.add_line(f"COLOR {color}")
 
-        # Add alignment if specified
+        # Add alignment if specified (JUSTIFY is NOT valid on OUTPUT — handled above)
         if alignment == 0:
             self.add_line("ALIGN LEFT NOPAD")
         elif alignment == 1:
             self.add_line("ALIGN RIGHT NOPAD")
         elif alignment == 2:
             self.add_line("ALIGN CENTER NOPAD")
-        elif alignment == 3:
-            self.add_line("ALIGN JUSTIFY NOPAD")
 
         self.add_line(";")
         self.dedent()
@@ -3067,8 +3143,8 @@ class VIPPToDFAConverter:
                 # Simple variable
                 self.add_line(f"({text})")
         else:
-            # Literal text - quote it
-            self.add_line(f"'{text}'")
+            # Literal text - quote it, escaping any embedded apostrophes
+            self.add_line(f"'{self._escape_dfa_quotes(text)}'")
 
         self.add_line(";")
         self.dedent()
@@ -3094,31 +3170,122 @@ class VIPPToDFAConverter:
         self.subroutines[resource_name] = {
             'commands': cmd.children,
             'type': subroutine_type,
-            'command_count': command_count
+            'command_count': command_count,
+            'xgfresdef': True,  # Flag: must be inlined as BOX/RULE at call site
         }
 
-        # Analyze commands to determine resource type (for backward compatibility)
-        if cmd.children and cmd.children[0].name == 'DRAWB':
-            # It's a box drawing resource
-            box_cmd = cmd.children[0]
-            if len(box_cmd.parameters) >= 4:
-                x = box_cmd.parameters[0]
-                y = box_cmd.parameters[1]
-                width = box_cmd.parameters[2]
-                height = box_cmd.parameters[3]
-                style = box_cmd.parameters[4] if len(box_cmd.parameters) > 4 else 'R_S1'
-
-                # Store for later SCALL conversion
-                frm.xgfresdef_resources[resource_name] = {
-                    'type': 'box',
-                    'x': x,
-                    'y': y,
-                    'width': width,
-                    'height': height,
-                    'style': style
-                }
+        # Count DRAWB children for logging
+        drawb_count = sum(1 for c in cmd.children if c.name == 'DRAWB')
+        logger.info(f"Found XGFRESDEF subroutine '{resource_name}' with {command_count} children "
+                    f"({drawb_count} DRAWB) — will inline at SCALL sites")
 
         # Don't generate output for XGFRESDEF definitions themselves
+
+    def _inline_xgfresdef_drawbs(self, resource_name: str, origin_x: float, origin_y: float):
+        """
+        Inline an XGFRESDEF subroutine's DRAWB commands as absolute BOX/RULE at the call site.
+
+        VIPP XGFRESDEF subroutines contain DRAWB commands with coordinates relative to
+        the SCALL origin (the MOVETO position that preceded the SCALL).  Since DFA has no
+        equivalent named drawing subroutine construct, we expand the calls inline with
+        absolute page coordinates = origin + offset.
+
+        VIPP coordinate system: Y increases downward; negative Y offsets go below the origin.
+        DFA coordinate system:  Y increases downward from top margin.
+
+        So:  abs_x = origin_x + drawb_x
+             abs_y = origin_y + |drawb_y|   (drawb_y is usually negative for "below")
+
+        Args:
+            resource_name: The XGFRESDEF name (e.g. 'SABX') — used only for the comment
+            origin_x:      X coordinate from the preceding MOVETO (mm from left edge)
+            origin_y:      Y coordinate from the preceding MOVETO (mm from top edge)
+        """
+        subroutine_info = self.subroutines.get(resource_name)
+        if not subroutine_info:
+            self.add_line(f"/* XGFRESDEF '{resource_name}' not found — skipped */")
+            return
+
+        commands = subroutine_info.get('commands', [])
+        drawb_count = sum(1 for c in commands if c.name == 'DRAWB')
+
+        self.add_line(f"/* Inlined XGFRESDEF '{resource_name}': {drawb_count} DRAWB(s) "
+                      f"at origin ({origin_x}, {origin_y}) mm */")
+
+        for child in commands:
+            if child.name != 'DRAWB':
+                # Non-DRAWB children (text, etc.) are not supported in this inline path
+                self.add_line(f"/* XGFRESDEF '{resource_name}': skipped non-DRAWB child "
+                              f"'{child.name}' */")
+                continue
+
+            # Normalize parameters: merge split negative numbers.
+            # The tokenizer may split '-08' into ['-', '08']. Rejoin these.
+            raw_params = list(child.parameters)
+            params = []
+            i = 0
+            while i < len(raw_params):
+                if raw_params[i] == '-' and i + 1 < len(raw_params):
+                    try:
+                        float(raw_params[i + 1])  # confirm next token is numeric
+                        params.append('-' + raw_params[i + 1])
+                        i += 2
+                        continue
+                    except ValueError:
+                        pass
+                params.append(raw_params[i])
+                i += 1
+
+            # Handle "missing x" case: when VIPP RPN stack has 'x -y w h style DRAWB',
+            # the tokenizer splits '-y' into '-' and 'y', and DRAWB pops 5 items:
+            # [style, h, w, y, '-'] → params stored as ['-y', w, h, style] with x lost.
+            # If after merging we have 4 params and the first is negative, the x was lost.
+            # We cannot recover the exact x, so we default to x_offset=0 (i.e. origin_x).
+            if len(params) == 4:
+                try:
+                    first_val = float(params[0])
+                    if first_val < 0:
+                        # params are [neg_y, width, height_or_thickness, style]
+                        # Insert x_offset=0 at position 0
+                        params.insert(0, '0')
+                except ValueError:
+                    pass
+
+            if len(params) < 4:
+                self.add_line(f"/* XGFRESDEF '{resource_name}': DRAWB with too few params "
+                              f"({raw_params}) — skipped */")
+                continue
+
+            try:
+                rel_x = float(params[0])
+                rel_y = float(params[1])
+                param3 = float(params[2])   # width or length
+            except (ValueError, IndexError):
+                self.add_line(f"/* XGFRESDEF '{resource_name}': DRAWB non-numeric params "
+                              f"({raw_params}) — skipped */")
+                continue
+
+            param4_raw = params[3]           # height or thickness
+            style = params[4] if len(params) > 4 else 'R_S1'
+
+            # Compute absolute page coordinates
+            abs_x = origin_x + rel_x
+            # In VIPP, XGFRESDEF Y offsets are negative for "below" the origin.
+            # DFA Y grows downward, so we add the magnitude of rel_y to origin_y.
+            # For positive rel_y (same row or above), we subtract.
+            abs_y = origin_y - rel_y   # e.g. origin_y=28, rel_y=-8 → abs_y=36
+
+            # Build a synthetic XeroxCommand with the absolute coordinates so we can
+            # reuse the full _convert_frm_rule logic (style mapping, line vs box, etc.)
+            synthetic_params = [str(abs_x), str(abs_y), str(param3), param4_raw, style]
+            synthetic_cmd = XeroxCommand(
+                name='DRAWB',
+                parameters=synthetic_params,
+                children=[]
+            )
+
+            # _convert_frm_rule uses use_absolute=(x>0 or y!=0) — abs coords are always >0
+            self._convert_frm_rule(synthetic_cmd)
 
     def _convert_frm_rule(self, cmd: XeroxCommand):
         """Convert FRM DRAWB command to DFA RULE (line) or BOX (rectangle).
@@ -3163,60 +3330,24 @@ class VIPPToDFAConverter:
         style = cmd.parameters[4] if len(cmd.parameters) > 4 else "R_S1"
 
         # Classify style into line-only vs fill styles
-        # Line styles: LMED, LTHN, LTHK, LDSH, LDOT — border only, no color, no shade
+        # Line weight styles: LTHN, LTHK, LDSH, LDOT — border only, no color, no shade
+        # NOTE: LMED in line context means "medium line weight", BUT when used with
+        # height > 1.0 (box context) it means "light-medium gray fill". We handle this
+        # contextually below based on is_box. MED and XDRK are always fill colors.
         # Standalone shade styles: S1, S2, S3, S4 — border only (no color prefix)
-        # Fill styles: R_S1, G_S1, B_S1, F_S1 — filled, with color and shade
+        # Fill styles: R_S1, G_S1, B_S1, F_S1, LMED, MED, XDRK — filled, with color
         # CLIP: not a box style
-        is_line_style = style in ('LMED', 'LTHN', 'LTHK', 'LDSH', 'LDOT',
-                                  'L_MED', 'L_THN', 'L_THK', 'L_DSH', 'L_DOT',
+        is_line_style = style in ('LTHN', 'LTHK', 'LDSH', 'LDOT',
+                                  'L_THN', 'L_THK', 'L_DSH', 'L_DOT',
                                   'S1', 'S2', 'S3', 'S4')
+        # LMED in a pure line context (height <= 1.0) is a medium-weight line
+        # LMED/MED/XDRK in a box context (height > 1.0) are fill colors — handled below
+        is_lmed_line = style in ('LMED', 'L_MED')  # May be line or fill depending on context
         is_clip = style == 'CLIP'
 
         if is_clip:
             self.add_line(f"/* CLIP: clipping region — {' '.join(str(p) for p in cmd.parameters)} */")
             return
-
-        # Parse color and shade from style parameter
-        color = None
-        line_type = "SOLID"
-        shade = None
-        thickness_keyword = None
-
-        if is_line_style:
-            # Line styles: emit THICKNESS <weight> TYPE <type> only — no COLOR, no SHADE
-            line_thickness_map = {
-                'LTHN': 'THIN', 'L_THN': 'THIN',
-                'LMED': 'MEDIUM', 'L_MED': 'MEDIUM',
-                'LTHK': 'THICK', 'L_THK': 'THICK',
-                'LDSH': 'MEDIUM', 'L_DSH': 'MEDIUM',
-                'LDOT': 'MEDIUM', 'L_DOT': 'MEDIUM',
-                'S1': 'MEDIUM', 'S2': 'MEDIUM', 'S3': 'MEDIUM', 'S4': 'MEDIUM',
-            }
-            thickness_keyword = line_thickness_map.get(style, 'MEDIUM')
-            if style in ('LDSH', 'L_DSH'):
-                line_type = 'DASHED'
-            elif style in ('LDOT', 'L_DOT'):
-                line_type = 'DOTTED'
-        else:
-            # Fill styles: parse color prefix and shade suffix
-            if style.startswith('R'):
-                color = 'R'
-            elif style.startswith('G'):
-                color = 'G'
-            elif style.startswith('B') and not style.startswith('BLACK'):
-                color = 'B'
-            elif style.startswith('F'):
-                color = 'FBLACK'
-
-            # Parse shade suffix (S1=100%, S2=75%, S3=50%, S4=25%)
-            if 'S1' in style or '_S1' in style:
-                shade = 100
-            elif 'S2' in style or '_S2' in style:
-                shade = 75
-            elif 'S3' in style or '_S3' in style:
-                shade = 50
-            elif 'S4' in style or '_S4' in style:
-                shade = 25
 
         # Handle legacy thickness keywords for param4
         param4_val = param4
@@ -3245,6 +3376,64 @@ class VIPPToDFAConverter:
 
         # Determine if this is a BOX (rectangle) or RULE (line)
         is_box = param4_float > 1.0
+
+        # Resolve final is_line_style considering context:
+        # LMED/L_MED in a line context (height <= 1.0) = medium-weight line border
+        # LMED/L_MED in a box context (height > 1.0) = light-medium gray fill color
+        # MED and XDRK are always fill colors regardless of context
+        if is_lmed_line and not is_box:
+            is_line_style = True
+            thickness_keyword = 'MEDIUM'
+        elif is_lmed_line and is_box:
+            # Treat as fill color in box context
+            is_line_style = False
+
+        # Parse color and shade from style parameter
+        color = None
+        line_type = "SOLID"
+        shade = None
+        thickness_keyword = None
+
+        if is_line_style:
+            # Line styles: emit THICKNESS <weight> TYPE <type> only — no COLOR, no SHADE
+            line_thickness_map = {
+                'LTHN': 'THIN', 'L_THN': 'THIN',
+                'LTHK': 'THICK', 'L_THK': 'THICK',
+                'LDSH': 'MEDIUM', 'L_DSH': 'MEDIUM',
+                'LDOT': 'MEDIUM', 'L_DOT': 'MEDIUM',
+                'S1': 'MEDIUM', 'S2': 'MEDIUM', 'S3': 'MEDIUM', 'S4': 'MEDIUM',
+            }
+            thickness_keyword = line_thickness_map.get(style, 'MEDIUM')
+            if style in ('LDSH', 'L_DSH'):
+                line_type = 'DASHED'
+            elif style in ('LDOT', 'L_DOT'):
+                line_type = 'DOTTED'
+        else:
+            # Fill styles: parse color — either a prefix (R/G/B/F) or a named color (LMED/MED/XDRK)
+            if style in ('LMED', 'L_MED', 'MED'):
+                # Light-medium gray fill — defined as DEFINE LMED COLOR RGB ... in output
+                color = 'LMED'
+            elif style == 'XDRK':
+                # Dark gray fill
+                color = 'XDRK'
+            elif style.startswith('R'):
+                color = 'R'
+            elif style.startswith('G'):
+                color = 'G'
+            elif style.startswith('B') and not style.startswith('BLACK'):
+                color = 'B'
+            elif style.startswith('F'):
+                color = 'FBLACK'
+
+            # Parse shade suffix (S1=100%, S2=75%, S3=50%, S4=25%)
+            if 'S1' in style or '_S1' in style:
+                shade = 100
+            elif 'S2' in style or '_S2' in style:
+                shade = 75
+            elif 'S3' in style or '_S3' in style:
+                shade = 50
+            elif 'S4' in style or '_S4' in style:
+                shade = 25
 
         if is_box:
             self.add_line("BOX")
@@ -3358,26 +3547,24 @@ class VIPPToDFAConverter:
         # Sanitize resource name for DFA (no spaces, hyphens, special chars)
         resource_name = self._sanitize_dfa_name(resource_name)
 
-        # Check if this is a subroutine defined via XGFRESDEF
-        # When called via SCALL with explicit MOVETO coordinates, generate a SEGMENT reference
-        # rather than inlining, since POSX/POSY anchors require prior capture
+        # Check if this is an XGFRESDEF graphical subroutine (boxes/lines).
+        # DFA has no equivalent named drawing macro, so we inline the DRAWB commands
+        # as absolute BOX/RULE commands using the MOVETO origin as the anchor.
         if not file_ext and resource_name in self.subroutines:
-            if x_was_set or y_was_set:
-                # Generate SEGMENT reference with MOVETO coordinates
-                self.add_line(f"SEGMENT {resource_name}")
-                self.indent()
-                x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
-                y_part = f"{y} MM-$MR_TOP+&CORSEGMENT" if y_was_set else "SAME"
-                self.add_line(f"POSITION ({x_part}) ({y_part});")
-                self.dedent()
+            sub = self.subroutines[resource_name]
+            if sub.get('xgfresdef'):
+                # Inline all DRAWB children with absolute coordinates origin + offset.
+                # If no explicit MOVETO was captured, default origin is (0,0).
+                origin_x = x if x_was_set else 0.0
+                origin_y = y if y_was_set else 0.0
+                self._inline_xgfresdef_drawbs(resource_name, origin_x, origin_y)
                 return
             else:
-                # No MOVETO — inline the subroutine (POSX/POSY inherited from context)
-                subroutine_info = self.subroutines[resource_name]
-                if subroutine_info['type'] == 'simple':
-                    self.add_line(f"/* Inlined subroutine: {resource_name} ({subroutine_info['command_count']} commands) */")
+                # Legacy non-XGFRESDEF subroutine: inline via command list (unchanged behaviour)
+                if sub['type'] == 'simple':
+                    self.add_line(f"/* Inlined subroutine: {resource_name} ({sub['command_count']} commands) */")
                     self._convert_frm_command_list(
-                        subroutine_info['commands'],
+                        sub['commands'],
                         start_x=x if x_was_set else 0.0,
                         start_y=y if y_was_set else 0.0,
                         start_font='',
@@ -3477,23 +3664,56 @@ class VIPPToDFAConverter:
             self.dedent()
 
     def _convert_frm_image(self, cmd: XeroxCommand, x: float, y: float):
-        """Convert FRM ICALL command to DFA IMAGE."""
+        """Convert FRM ICALL command to DFA CREATEOBJECT IOBDLL(IOBDEFS).
+
+        DFA does not have an IMAGE command. Images are inserted via CREATEOBJECT IOBDLL(IOBDEFS).
+        The FILENAME parameter uses the image file name (without path).
+        OBJECTTYPE '1' = image object; OTHERTYPES indicates the format (JPG, TIF, etc).
+        XOBJECTAREASIZE controls the output width in MM (estimated from ICALL scale).
+        OBJECTMAPPING '2' = scale to fit.
+        """
         resource_name = ""
-        scale = "1.0"
+        scale = 1.0
 
         for i, param in enumerate(cmd.parameters):
             if param.startswith('(') and param.endswith(')'):
                 resource_name = param[1:-1]
-            elif i > 0 and param.replace('.', '', 1).isdigit():
-                scale = param
+            elif i > 0:
+                try:
+                    scale = float(param)
+                except (ValueError, TypeError):
+                    pass
 
-        if resource_name:
-            self.add_line(f"IMAGE '{resource_name}'")
-            self.indent()
-            self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y} MM-$MR_TOP)")
-            self.add_line(f"SCALE {scale}")
-            self.add_line(";")
-            self.dedent()
+        if not resource_name:
+            return
+
+        # Determine file extension for OTHERTYPES
+        import os as _os
+        ext = _os.path.splitext(resource_name)[1].upper().lstrip('.')
+        if not ext:
+            ext = 'JPG'
+
+        # Estimate display width from scale (ICALL scale is relative to line measure).
+        # VIPP line measure is typically the layout frame width, commonly 180-190 MM.
+        # Using 180 MM as the standard line measure: scale 0.06 × 180 = 10.8 MM.
+        # Clamped to a reasonable display range (5–200 MM).
+        LINE_MEASURE_MM = 180.0
+        estimated_width = max(5.0, min(200.0, scale * LINE_MEASURE_MM)) if scale > 0 else 15.0
+
+        # Generate CREATEOBJECT
+        self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+        self.indent()
+        self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y} MM-$MR_TOP)")
+        self.add_line("PARAMETERS")
+        self.indent()
+        self.add_line(f"('FILENAME'='{resource_name}')")
+        self.add_line("('OBJECTTYPE'='1')")
+        self.add_line(f"('OTHERTYPES'='{ext}')")
+        self.add_line(f"('XOBJECTAREASIZE'='{estimated_width:.0f}')")
+        self.add_line("('OBJECTMAPPING'='2')")
+        self.dedent()
+        self.add_line(";")
+        self.dedent()
 
     def add_line(self, line: str):
         """Add a line of output with proper indentation."""
@@ -3718,13 +3938,16 @@ class VIPPToDFAConverter:
                 command_count = len(cmd.children)
                 subroutine_type = 'simple' if command_count <= 5 else 'complex'
 
+                drawb_count = sum(1 for c in cmd.children if c.name == 'DRAWB')
                 self.subroutines[resource_name] = {
                     'commands': cmd.children,
                     'type': subroutine_type,
-                    'command_count': command_count
+                    'command_count': command_count,
+                    'xgfresdef': True,  # Flag: must be inlined as BOX/RULE at call site
                 }
 
-                logger.info(f"Found subroutine '{resource_name}' with {command_count} commands ({subroutine_type})")
+                logger.info(f"Found DBM XGFRESDEF subroutine '{resource_name}' with {command_count} children "
+                            f"({drawb_count} DRAWB) — will inline at SCALL sites")
 
     def set_input_config(self, delimiter: str = None, field_names: List[str] = None, record_length: int = None):
         """
@@ -4110,13 +4333,17 @@ class VIPPToDFAConverter:
             # Skip comments
             if stripped.startswith('/*'):
                 continue
-            # Count IF statements (but not ENDIF)
-            if re.match(r'\bIF\b', stripped) and not stripped.startswith('ENDIF'):
-                if_count += 1
-            if re.match(r'\bELSE\b', stripped) or stripped == 'ELSE;':
-                else_count += 1
-            if stripped.startswith('ENDIF') or stripped == 'ENDIF;':
-                endif_count += 1
+            # Count all keyword occurrences using findall (not startswith/match).
+            # This correctly handles one-liner compound statements such as:
+            #   IF P==1; THEN; USE FORMAT CASIOS EXTERNAL; ENDIF;
+            # A simple startswith('ENDIF') check would miss the ENDIF on such lines.
+            # Use negative lookbehind (?<!END) to match IF only when NOT preceded by "END".
+            n_if = len(re.findall(r'(?<!END)\bIF\b', stripped))
+            n_else = len(re.findall(r'\bELSE\b', stripped))
+            n_endif = len(re.findall(r'\bENDIF\b', stripped))
+            if_count += n_if
+            else_count += n_else
+            endif_count += n_endif
 
         if if_count != endif_count:
             logger.warning(f"IF/ENDIF mismatch: {if_count} IF vs {endif_count} ENDIF")
@@ -4727,14 +4954,18 @@ class VIPPToDFAConverter:
 
         self.add_line("")
 
+        # Generate initialization in $_BEFOREFIRSTDOC
+        # IMPORTANT: Must appear BEFORE individual DOCFORMATs so DocEXEC's static
+        # checker sees variable assignments before first use (avoids PPDE7101W).
+        # Although $_BEFOREFIRSTDOC executes before all DOCFORMATs at runtime,
+        # the static check is order-sensitive in the source file.
+        self._generate_initialization()
+
         # Generate individual DOCFORMATs for each record type
         self._generate_individual_docformats()
 
         # Generate stub DOCFORMATs for undefined PREFIX cases
         self._generate_undefined_prefix_stubs()
-
-        # Generate initialization in $_BEFOREFIRSTDOC
-        self._generate_initialization()
 
         # End of document definition (no ENDDOCDEF in DFA — not a valid command)
 
@@ -5128,7 +5359,12 @@ class VIPPToDFAConverter:
 
             # Open OUTLINE before first output command
             # All OUTPUT, TEXT, and graphics commands must be inside OUTLINE block
-            if has_output and not outline_opened and cmd.name in ('NL', 'SH', 'SHL', 'SHR', 'SHr', 'SHC', 'SHc', 'SHP', 'SHp', 'SETLSP', 'DRAWB', 'SCALL', 'ICALL', 'MOVEHR'):
+            if has_output and not outline_opened and cmd.name in ('NL', 'SH', 'SHL', 'SHR', 'SHr', 'SHC', 'SHc', 'SHP', 'SHp', 'DRAWB', 'SCALL', 'ICALL', 'MOVEHR'):
+                # Note: SETLSP intentionally omitted — it is a global command valid
+                # at DOCFORMAT level and should NOT force an OUTLINE block to open.
+                # Keeping SETLSP outside OUTLINE ensures subsequent SETVAR commands
+                # (from SETFORM, ++ operators etc.) are also emitted at DOCFORMAT level,
+                # not trapped inside the OUTLINE where they are invalid.
                 self.add_line("")
                 self.add_line("OUTLINE")
                 self.indent()
@@ -5194,7 +5430,17 @@ class VIPPToDFAConverter:
                             c for c in _os.path.splitext(form_raw)[0].upper()
                             if c.isalnum() or c == '_'
                         )
-                        self.add_line(f"USE FORMAT {form_stem} EXTERNAL;")
+                        # SETFORM in VIPP marks the page background overlay for the
+                        # current page — it does NOT immediately render content.
+                        # In DFA, running USE FORMAT EXTERNAL in the DOCFORMAT body
+                        # renders the FRM's OUTLINE immediately, causing all FRM content
+                        # (from multiple PREFIX records) to pile up on the same physical page.
+                        #
+                        # Correct approach: store the form name in VAR_CURFORM variable.
+                        # The PRINTFOOTER reads VAR_CURFORM and calls
+                        #   USE FORMAT REFERENCE(VAR_CURFORM) EXTERNAL;
+                        # once per physical page, selecting the right background.
+                        self.add_line(f"VAR_CURFORM = '{form_stem}';")
                 i += 1
                 continue
 
@@ -5211,6 +5457,17 @@ class VIPPToDFAConverter:
 
             # Handle if/else conditions
             if dfa_cmd == 'IF':
+                # FRLEFT IF blocks (page overflow checks) must be emitted at DOCFORMAT
+                # level — not inside an OUTLINE block — because their bodies contain
+                # USE LOGICALPAGE and VAR assignments which are invalid inside OUTLINE.
+                # Detect FRLEFT by checking the IF command's parameters.
+                is_frleft_if = 'FRLEFT' in cmd.parameters
+                if is_frleft_if and outline_opened:
+                    # Close the OUTLINE before emitting the page-break IF block
+                    self.dedent()
+                    self.add_line("ENDIO;")
+                    outline_opened = False
+
                 # Convert the IF command with lookahead for ELSE/ENDIF
                 # Pass current_font so nested NL commands use the active font, not ARIAL08
                 consumed = self._convert_if_command(cmd, commands, i, current_font)
@@ -5347,21 +5604,30 @@ class VIPPToDFAConverter:
 
             # Handle page break commands
             if cmd.name == 'PAGEBRK':
-                # PAGEBRK is not valid DFA — emit comment stub
-                # Exception: inside FRLEFT overflow check, handled by _convert_frleft_condition
-                self.add_line("/* VIPP command not supported: PAGEBRK */")
+                # PAGEBRK → USE LOGICALPAGE NEXT (unconditional page break).
+                # Must be at DOCFORMAT level, not inside an OUTLINE block.
+                # Close any open OUTLINE first so the page break is emitted at the right level.
+                # NOTE: "SIDE FRONT" is NOT valid in USE LOGICALPAGE — it is only valid
+                # inside FORMATGROUP LOGICALPAGE definitions. USE LOGICALPAGE only takes NEXT/SAME/etc.
+                if outline_opened:
+                    self.dedent()
+                    self.add_line("ENDIO;")
+                    outline_opened = False
+                self.add_line("USE LOGICALPAGE NEXT;")
                 i += 1
                 continue
 
             if cmd.name == 'NEWFRONT':
-                # NEWFRONT → USE LOGICALPAGE NEXT SIDE FRONT
-                self.add_line("USE LOGICALPAGE NEXT SIDE FRONT;")
+                # NEWFRONT → USE LOGICALPAGE NEXT
+                # NOTE: "SIDE FRONT" is not a valid qualifier for USE LOGICALPAGE commands.
+                self.add_line("USE LOGICALPAGE NEXT;")
                 i += 1
                 continue
 
             if cmd.name == 'NEWBACK':
-                # NEWBACK → USE LOGICALPAGE NEXT SIDE BACK
-                self.add_line("USE LOGICALPAGE NEXT SIDE BACK;")
+                # NEWBACK → USE LOGICALPAGE NEXT
+                # NOTE: "SIDE BACK" is not a valid qualifier for USE LOGICALPAGE commands.
+                self.add_line("USE LOGICALPAGE NEXT;")
                 i += 1
                 continue
 
@@ -5447,8 +5713,16 @@ class VIPPToDFAConverter:
             # Convert comparison operators (eq -> ==, ne -> <>, etc.)
             converted_ops = self._convert_comparison_operators(clean_params)
             condition = " ".join(self._convert_params(converted_ops))
-            # Check if condition needs ISTRUE() wrapper (has comparison operators)
-            needs_istrue = any(op in condition for op in ['==', '<>', '>', '<', '>=', '<='])
+            # Check if condition needs ISTRUE() wrapper:
+            # - Expressions with comparison operators: IF ISTRUE(X == Y)
+            # - Single bare variable (boolean test): IF ISTRUE(VAR_brkctl)
+            #   DFA requires ISTRUE() for variable truthiness tests; bare IF VAR causes PPDE7006W
+            has_comparison_op = any(op in condition for op in ['==', '<>', '>', '<', '>=', '<='])
+            is_bare_variable = (
+                len(converted_ops) == 1
+                and re.match(r'^[A-Za-z_]\w*$', converted_ops[0])
+            )
+            needs_istrue = has_comparison_op or is_bare_variable
 
         # Don't output empty conditions - just output IF with THEN
         if condition.strip():
@@ -5463,6 +5737,18 @@ class VIPPToDFAConverter:
 
         # Initialize consumed commands counter (starts at 1 for the IF itself)
         consumed = 1
+
+        # FRLEFT page-break IF blocks:
+        # In VIPP, `IF FRLEFT N lt { PAGEBRK NEWFRONT (FRM.FRM) SETFORM }` means
+        # "if less than N mm left on page, break to new front page and set FRM background."
+        # The parser often loses NEWFRONT (it's a VIPP modifier for PAGEBRK, not a standalone
+        # command in this context). We always emit USE LOGICALPAGE NEXT explicitly.
+        # NOTE: "SIDE FRONT" is NOT valid in USE LOGICALPAGE commands — only in definitions.
+        if is_frleft:
+            self.indent()
+            self.add_line("/* Page overflow: force new page */")
+            self.add_line("USE LOGICALPAGE NEXT;")
+            self.dedent()
 
         # Process children (IF body) if present
         if cmd.children:
@@ -5950,9 +6236,14 @@ class VIPPToDFAConverter:
 
         # Process VSUB patterns
         if not is_variable and ('$$' in text or '$' in text):
+            original_text_had_vsub = '$$' in text or '$' in text
             text = self._convert_vsub(text)
             # After VSUB conversion, if text contains ! concatenation, treat as variable
             if ' ! ' in text:
+                is_variable = True
+            elif original_text_had_vsub and "'" not in text and ' ' not in text.strip():
+                # Pure variable substitution: ($$VAR_SCCL.) → VAR_SCCL (no literals, no concat)
+                # The converted text is just a bare variable name — must not be quoted.
                 is_variable = True
 
         # Determine alignment from command type
@@ -6017,8 +6308,9 @@ class VIPPToDFAConverter:
     def _convert_box_command_dfa(self, cmd: XeroxCommand):
         """Convert a box drawing command to proper DFA BOX.
 
-        Uses absolute margin-relative positioning for non-zero coords,
-        POSX/POSY anchors only for zero-offset (inside XGFRESDEF) patterns.
+        Uses absolute margin-relative positioning for non-zero coords.
+        For x=0 y=0 in DBM inline context, uses SAME SAME (current position)
+        since POSX/POSY are only valid inside SEGMENT/XGFRESDEF definitions.
 
         VIPP: 00 -13.5 193 0.001 XDRK DRAWB
         DFA:  POSITION (0 MM-$MR_LEFT) (13.5 MM-$MR_TOP)
@@ -6050,6 +6342,10 @@ class VIPPToDFAConverter:
                                   'L_MED', 'L_THN', 'L_THK', 'L_DSH', 'L_DOT') if style else False
 
         # Determine positioning pattern
+        # x>0 or y!=0 → absolute margin-relative position
+        # x=0 and y=0 → DBM inline context: "current position" → use SAME SAME
+        # Note: POSX/POSY anchors are only valid inside XGFRESDEF-generated SEGMENTs,
+        # not in top-level DOCFORMAT/OUTLINE blocks.
         use_absolute = (x > 0 or y != 0)
 
         # Generate BOX
@@ -6059,7 +6355,8 @@ class VIPPToDFAConverter:
         if use_absolute:
             self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_inverted} MM-$MR_TOP)")
         else:
-            self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
+            # x=0 y=0: draw at current inline position
+            self.add_line("POSITION (SAME) (SAME)")
 
         self.add_line(f"WIDTH {width} MM HEIGHT {height} MM")
 
@@ -6099,10 +6396,21 @@ class VIPPToDFAConverter:
         self.dedent()
 
     def _convert_resource_command_dfa(self, cmd: XeroxCommand, x_pos: float, y_pos: float):
-        """Convert a resource call (SCALL/ICALL) to proper DFA SEGMENT."""
-        if cmd.parameters:
-            resource_name = self._sanitize_dfa_name(cmd.parameters[0].strip('()'))
-            # Add segment position correction
+        """Convert a resource call (SCALL/ICALL) to proper DFA SEGMENT or inlined BOX/RULE.
+
+        For XGFRESDEF subroutines (drawing macros): inline DRAWB children as absolute BOX/RULE
+        commands using (x_pos, y_pos) as the origin.
+        For AFP page segments (raster images): generate SEGMENT name POSITION ...;
+        """
+        if not cmd.parameters:
+            return
+        resource_name = self._sanitize_dfa_name(cmd.parameters[0].strip('()'))
+        sub = self.subroutines.get(resource_name)
+        if sub and sub.get('xgfresdef'):
+            # Inline the XGFRESDEF subroutine as BOX/RULE commands at the call-site coordinates
+            self._inline_xgfresdef_drawbs(resource_name, x_pos, y_pos)
+        else:
+            # AFP page segment: generate standard SEGMENT reference
             self.add_line(f"SEGMENT {resource_name} POSITION {x_pos} MM ({y_pos} MM-$MR_TOP+&CORSEGMENT);")
 
     def _generate_font_switched_output(self, parts: List, default_font: str, align: str):
@@ -6191,9 +6499,35 @@ class VIPPToDFAConverter:
             self.add_line("POSITION (0 MM-$MR_LEFT) (0 MM-$MR_TOP+&CORSEGMENT);")
             self.dedent()
         elif cmd.name == 'ICALL':
-            self.add_line(f"IMAGE '{resource_name}'")
+            # DFA has no IMAGE command — use CREATEOBJECT IOBDLL(IOBDEFS)
+            import os as _os
+            ext = _os.path.splitext(resource_name)[1].upper().lstrip('.')
+            if not ext:
+                ext = 'JPG'
+            # Extract scale parameter (2nd numeric parameter after filename)
+            scale = 1.0
+            for p in cmd.parameters:
+                if not (p.startswith('(') and p.endswith(')')):
+                    try:
+                        scale = float(p)
+                        break
+                    except (ValueError, TypeError):
+                        pass
+            # XOBJECTAREASIZE = scale × line_measure (180 MM standard)
+            LINE_MEASURE_MM = 180.0
+            estimated_width = max(5, min(200, round(scale * LINE_MEASURE_MM)))
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
             self.indent()
-            self.add_line(position + ";")
+            self.add_line("POSITION (0 MM-$MR_LEFT) (0 MM-$MR_TOP)")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
+            self.add_line(f"('XOBJECTAREASIZE'='{estimated_width}')")
+            self.add_line("('OBJECTMAPPING'='2')")
+            self.dedent()
+            self.add_line(";")
             self.dedent()
 
     def _convert_cache_command(self, cmd: XeroxCommand):
@@ -6360,19 +6694,20 @@ class VIPPToDFAConverter:
         """
         Generate form selection code in PRINTFOOTER.
 
-        2-FRM pattern (e.g. SIBS_CAST):
+        2-FRM pattern (e.g. SIBS_CAST — simple documents where form alternates predictably):
             IF P<1; THEN; USE FORMAT <first_F> EXTERNAL; ELSE; USE FORMAT <subseq_S> EXTERNAL; ENDIF;
             P = P + 1;
-        Multi-FRM pattern (3+ FRMs, e.g. CASIO):
-            P = P + 1;
-            IF P==1; THEN; USE FORMAT <frm1> EXTERNAL; ENDIF;
-            IF P==2; THEN; USE FORMAT <frm2> EXTERNAL; ENDIF;
-            ...
-            IF P>N; THEN; P=1; USE FORMAT <frm1> EXTERNAL; ENDIF;
 
-        The critical difference: 2-FRM increments P AFTER routing so P=0 on first call
-        gets the first-page form (F suffix), and P>=1 on subsequent calls gets the
-        subsequent-page form (S suffix).
+        Multi-FRM pattern (3+ FRMs, e.g. CASIO — data-driven form selection):
+            The SETFORM command in each PREFIX CASE sets VAR_CURFORM = 'FORMNAME'.
+            PRINTFOOTER uses USE FORMAT REFERENCE(VAR_CURFORM) EXTERNAL to select the
+            right background for each physical page based on which prefix record ran last.
+            P is still incremented for page numbering ("Page X of Y").
+
+        The critical difference from the old P-counter approach: for complex multi-FRM
+        documents, the form selection is DATA-DRIVEN, not position-sequential. Using a
+        fixed P counter would select the wrong FRM for pages where the order varies by
+        customer data.
         """
         # List available forms
         frm_names = []
@@ -6393,39 +6728,16 @@ class VIPPToDFAConverter:
             self.add_line(f"      IF P<1; THEN; USE FORMAT {first_form} EXTERNAL; ELSE; USE FORMAT {subseq_form} EXTERNAL; ENDIF;")
             self.add_line(f"      P = P + 1;")
         else:
-            # Multi-FRM pattern (3+): increment BEFORE, then sequential IF P==N checks
-            # Custom sorting based on FRM naming conventions
-            def frm_sort_key(name):
-                base_name = name.rsplit('_', 1)[0] if '_' in name else name
-                if name.endswith('_TNC'):
-                    suffix = '_TNC'
-                elif name.endswith('S'):
-                    suffix = 'S'
-                elif name.endswith('F3'):
-                    suffix = 'F3'
-                elif name.endswith('F'):
-                    suffix = 'F'
-                elif name.endswith('B2'):
-                    suffix = 'B2'
-                elif name.endswith('B'):
-                    suffix = 'B'
-                else:
-                    suffix = 'Z'
-
-                priority = {
-                    'S': 0, 'F': 1, '_TNC': 2, 'F3': 3,
-                    'B': 4, 'B2': 5, 'Z': 99
-                }
-                return (priority.get(suffix, 99), base_name, name)
-
-            frm_names = sorted(frm_names, key=frm_sort_key)
-
+            # Multi-FRM pattern (3+ FRMs): use data-driven VAR_CURFORM selection.
+            # Each PREFIX DOCFORMAT sets VAR_CURFORM = 'FORMNAME' when it processes
+            # a SETFORM command. PRINTFOOTER reads VAR_CURFORM to select the correct
+            # background FRM for this physical page.
+            # VAR_CURFORM is initialized to '' in $_BEFOREDOC; if empty, use no FRM overlay.
+            # P is incremented here for page numbering only.
             self.add_line(f"      P = P + 1;")
-            for idx, frm_name in enumerate(frm_names, start=1):
-                self.add_line(f"      IF P=={idx}; THEN; USE FORMAT {frm_name} EXTERNAL; ENDIF;")
-
-            first_frm = frm_names[0]
-            self.add_line(f"      IF P>{len(frm_names)}; THEN; P=1; USE FORMAT {first_frm} EXTERNAL; ENDIF;")
+            self.add_line(f"      IF ISTRUE(NOSPACE(VAR_CURFORM) <> '');")
+            self.add_line(f"      THEN; USE FORMAT REFERENCE(VAR_CURFORM) EXTERNAL;")
+            self.add_line(f"      ENDIF;")
 
     def _generate_variable_initialization(self):
         """
@@ -6476,6 +6788,18 @@ class VIPPToDFAConverter:
                         continue
                     dfa_value = self._convert_setvar_value(var_value)
                     self.add_line(f"{var_name} = {dfa_value};")
+                    already_emitted.add(var_name)
+                    init_count += 1
+                    continue
+
+                # Match /VarName () /INI (no SETVAR keyword — empty string init, e.g. VAR_ARRAY1F1)
+                # This is a VIPP pattern: /VAR_ARRAY1F1 () /INI declares an empty string variable.
+                m_arr = re.match(r'/([\w.-]+)\s+\(\)\s+/INI\s*$', stripped)
+                if m_arr:
+                    var_name = self._sanitize_dfa_name(m_arr.group(1))
+                    if var_name == 'VARINI' or var_name in already_emitted:
+                        continue
+                    self.add_line(f"{var_name} = '';")
                     already_emitted.add(var_name)
                     init_count += 1
                     continue
@@ -6698,6 +7022,7 @@ class VIPPToDFAConverter:
         self.indent()
         self.add_line("P = 0;     /* Reset page counter for new document */")
         self.add_line("PP = 0;    /* Reset total page counter */")
+        self.add_line("VAR_CURFORM = '';  /* Reset FRM selector — set by SETFORM-equivalent DOCFORMATs */")
         self.dedent()
         self.add_line("")
 
@@ -6835,6 +7160,15 @@ def main():
                     frm_dfa_outputs = {}
                     for frm_filename, frm in frm_files.items():
                         try:
+                            # FRM files are referenced via USE FORMAT ... EXTERNAL.
+                            # External format files must NOT have a DOCFORMAT wrapper —
+                            # that causes PPDE9087E "Mainlevel INCLUDE contains illegal
+                            # command type". They DO need an OUTLINE wrapper for their
+                            # output commands (as_include=True).
+                            # CRITICAL: USE FORMAT CASIOS EXTERNAL must never be called from
+                            # inside an already-open OUTLINE (causes PPDE7209E). The SETFORM
+                            # handler in _convert_case_commands closes any open OUTLINE before
+                            # emitting USE FORMAT ... EXTERNAL.
                             frm_dfa_code = converter.generate_frm_dfa_code(frm, as_include=True)
                             frm_dfa_outputs[frm_filename] = frm_dfa_code
                             # Collect COLOR references from FRM DFA
