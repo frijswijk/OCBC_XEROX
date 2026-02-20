@@ -1244,7 +1244,13 @@ def migrate(args: argparse.Namespace) -> int:
                 dest = jpeg_out_dir / (resource_file.stem + ".jpg")
                 ok = _gs_convert(
                     gs_cmd, "jpeg",
-                    ["-r150", "-dJPEGQ=90"],
+                    # -dEPSCrop: crop output to the %%BoundingBox declared in the EPS
+                    # file, not the full MediaBox/page. Without this, Ghostscript
+                    # renders the full page (e.g. A4) and the logo sits at the bottom
+                    # surrounded by whitespace — matching the page geometry but not
+                    # the artwork bounding box.  -r300 matches Adobe Illustrator's
+                    # default export resolution for a tight, high-quality result.
+                    ["-dEPSCrop", "-r300", "-dJPEGQ=90"],
                     resource_file, dest,
                 )
                 if ok:
