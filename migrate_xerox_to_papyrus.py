@@ -146,6 +146,44 @@ WINDOWS_FONTS_DIR = Path("C:/Windows/Fonts")
 # installed via Settings > Fonts > "Install for me only"):
 WINDOWS_USER_FONTS_DIR = Path.home() / "AppData" / "Local" / "Microsoft" / "Windows" / "Fonts"
 
+# ---------------------------------------------------------------------------
+# Project template
+# ---------------------------------------------------------------------------
+
+# Folder containing the XXX project template (run_env.bat, run_docexec.bat,
+# run_pdd.bat, userisis/ppde.prf, DEFAULT.LBP, pdd.prf).
+# All config files use relative paths so they work for any project name.
+# Only run_env.bat contains the literal string XXX which is replaced with
+# the actual project name during migration.
+TEMPLATE_DIR = Path(__file__).parent / "template_pdd" / "XXX"
+
+
+def _apply_template(template_dir: Path, output_root: Path, project_name: str) -> list:
+    """
+    Copy the project template to output_root, substituting XXX → project_name
+    in every text file that contains it.
+
+    Returns a list of relative paths of files copied.
+    """
+    if not template_dir.is_dir():
+        return []
+
+    copied = []
+    for src in sorted(template_dir.rglob("*")):
+        if not src.is_file():
+            continue
+        rel = src.relative_to(template_dir)
+        dest = output_root / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            text = src.read_text(encoding="utf-8", errors="replace")
+            text = text.replace("XXX", project_name)
+            dest.write_text(text, encoding="utf-8")
+        except OSError:
+            shutil.copy2(src, dest)
+        copied.append(str(rel))
+    return copied
+
 # Mapping from the font face name used in DFA  FONT ... AS '<face>'
 # to the standard Windows TTF filename(s) for that face.
 # Keys are lower-cased; values are lists of candidate filenames.
@@ -1299,11 +1337,29 @@ def migrate(args: argparse.Namespace) -> int:
             )
 
     # ------------------------------------------------------------------
-    # Step 10 — Generate configuration files
+    # Step 10 — Copy project template (bat files + userisis config)
     # ------------------------------------------------------------------
-    report.section("Step 10: Generate configuration files")
+    report.section("Step 10: Apply project template")
 
-    # 10a. .prj file
+    template_files = _apply_template(TEMPLATE_DIR, output_root, project_name)
+    if template_files:
+        for tf in template_files:
+            report.item(f"Copied template  {tf}  (XXX → {project_name})")
+    else:
+        report.warn(
+            f"Template not found at {TEMPLATE_DIR} — "
+            "run_env.bat, run_docexec.bat, run_pdd.bat and userisis config files "
+            "were NOT created.  Copy them manually from template_pdd/XXX."
+        )
+
+    bat_path = output_root / "run_docexec.bat"
+    log_path = output_root / "docdef" / f"{project_name}_docexec.log"
+
+    # ------------------------------------------------------------------
+    # Step 11 — Generate <project_name>.prj
+    # ------------------------------------------------------------------
+    report.section("Step 11: Generate project file (.prj)")
+
     prj_content = generate_prj(
         project_name  = project_name,
         project_root  = output_root,
@@ -1313,38 +1369,6 @@ def migrate(args: argparse.Namespace) -> int:
     prj_path = docdef_dir / f"{project_name}.prj"
     prj_path.write_text(prj_content, encoding="utf-8")
     report.item(f"Generated  \\docdef\\{prj_path.name}")
-
-    # 10b. DEFAULT.LBP
-    lbp_content = generate_lbp(project_root=output_root, resource_root=resource_root)
-    lbp_path = output_root / "userisis" / "DEFAULT.LBP"
-    lbp_path.write_text(lbp_content, encoding="utf-8")
-    report.item(f"Generated  \\userisis\\DEFAULT.LBP")
-
-    # 10c. ppde.prf
-    prf_content = generate_prf(
-        project_name  = project_name,
-        project_root  = output_root,
-        dfa_filename  = main_dfa.name,
-    )
-    prf_path = output_root / "userisis" / "ppde.prf"
-    prf_path.write_text(prf_content, encoding="utf-8")
-    report.item(f"Generated  \\userisis\\ppde.prf")
-
-    # ------------------------------------------------------------------
-    # Step 11 — Generate DocEXEC run script (.bat)
-    # ------------------------------------------------------------------
-    report.section("Step 11: Generate DocEXEC run script")
-
-    bat_content = generate_docexec_bat(
-        project_name  = project_name,
-        project_root  = output_root,
-        prj_filename  = prj_path.name,
-    )
-    bat_path = output_root / f"run_docexec_{project_name}.bat"
-    bat_path.write_text(bat_content, encoding="ascii")
-    log_path = output_root / "docdef" / f"{project_name}_docexec.log"
-    report.item(f"Generated  {bat_path.name}")
-    report.item(f"DocEXEC log will be written to  \\docdef\\{log_path.name}")
 
     # ------------------------------------------------------------------
     # Step 12 — Optionally run DocEXEC and check the log
