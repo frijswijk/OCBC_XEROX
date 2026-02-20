@@ -3810,6 +3810,8 @@ class VIPPToDFAConverter:
         self.indent()
         self.add_line("CODE 1200")
         self.add_line("AFPLRECL 8192")
+        self.add_line("SOURCERES 240")
+        self.add_line("TARGETRES 240")
         self.add_line("PTXUNIT 1440")
         self.add_line("FDFINCLUDE YES")
         self.add_line("TLE YES")
