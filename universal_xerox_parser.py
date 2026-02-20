@@ -1925,24 +1925,40 @@ class XeroxParser:
 class VIPPToDFAConverter:
     """Converts Xerox VIPP commands to Papyrus DocDEF (DFA) code."""
 
-    # Font style mappings from VIPP to Papyrus
+    # Font style mappings from VIPP to Papyrus.
+    # Covers both symbolic aliases (ARIALB …) and Xerox printer-resident
+    # font aliases (NHE, NTMR …).  Printer-resident fonts are mapped to the
+    # closest TTF substitute; the migrate script copies those TTF files.
     FONT_STYLE_MAPPINGS = {
-        'ARIAL': 'Arial',
-        'ARIALB': 'Arial Bold',
-        'ARIALO': 'Arial Italic',
-        'ARIALBO': 'Arial Bold Italic',
-        'COURIER': 'Courier New',
-        'COURIERB': 'Courier New Bold',
-        'COURIERO': 'Courier New Italic',
-        'COURIERBO': 'Courier New Bold Italic',
-        'HELVETICA': 'Helvetica',
-        'HELVE': 'Helvetica',
-        'HELVEB': 'Helvetica Bold',
-        'TIMES': 'Times New Roman',
-        'TIMESB': 'Times New Roman Bold',
-        'TIMESI': 'Times New Roman Italic',
-        'TIMESBI': 'Times New Roman Bold Italic',
-        'NZDB': 'NZDB',  # Special character font
+        # Standard VIPP symbolic names
+        'ARIAL':      'Arial',
+        'ARIALB':     'Arial Bold',
+        'ARIALO':     'Arial Italic',
+        'ARIALBO':    'Arial Bold Italic',
+        'COURIER':    'Courier New',
+        'COURIERB':   'Courier New Bold',
+        'COURIERO':   'Courier New Italic',
+        'COURIERBO':  'Courier New Bold Italic',
+        'HELVETICA':  'Helvetica',
+        'HELVE':      'Helvetica',
+        'HELVEB':     'Helvetica Bold',
+        'TIMES':      'Times New Roman',
+        'TIMESB':     'Times New Roman Bold',
+        'TIMESI':     'Times New Roman Italic',
+        'TIMESBI':    'Times New Roman Bold Italic',
+        'NZDB':       'NZDB',  # Special character font
+        # Xerox VIPP printer-resident font aliases → TTF substitutes
+        'NTMR':  'Times New Roman',
+        'NTMI':  'Times New Roman Italic',
+        'NTMB':  'Times New Roman Bold',
+        'NHE':   'Helvetica',
+        'NHEB':  'Helvetica Bold',
+        'NHEBO': 'Helvetica Bold Italic',
+        'NHEN':  'Arial Narrow',
+        'NHENB': 'Arial Narrow Bold',
+        'NCR':   'Courier New',
+        'NCRB':  'Courier New Bold',
+        'SBT':   'Stone Sans Bold',  # Unknown Xerox proprietary — needs manual TTF
     }
 
     # Command mappings from VIPP to DFA
