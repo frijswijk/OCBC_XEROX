@@ -100,6 +100,137 @@ def _gs_convert(
 
 
 # ---------------------------------------------------------------------------
+# psew3pic integration — JPG/TIF → AFP Page Segment (.240 / .300)
+# ---------------------------------------------------------------------------
+
+def _find_psepic() -> "str | None":
+    """
+    Return path to a working psew3pic.exe, or None if not found.
+
+    psew3pic must match the installed Papyrus runtime version (isiscomm).
+    The version-matched binaries under psew3<vvv>\pic\ are tried first;
+    a standalone copy next to this script is used as a last resort (it may
+    be an older version and fail if the isiscomm DLLs do not match).
+    """
+    import glob as _glob
+
+    # 1. Version-matched Papyrus installation (psew3<vvv> matches pdew6<vvv>).
+    #    Prefer the highest version number (sorted reverse).
+    for pattern in [
+        r"C:\ISIS\samples_pdd\psew3*\pic\psew3pic.exe",
+        r"C:\ISIS\demoext_client\psew3*\pic\psew3pic.exe",
+        r"C:\ISIS\ISIS_DocDesigner_Workshop\psew3*\pic\psew3pic.exe",
+        r"C:\ISIS\psew3*\pic\psew3pic.exe",
+    ]:
+        for match in sorted(_glob.glob(pattern), reverse=True):
+            if Path(match).exists():
+                return match
+
+    # 2. Dropped next to this script (convenience; may be version-mismatched)
+    local = Path(__file__).parent / "psew3pic.exe"
+    if local.exists():
+        return str(local)
+
+    # 3. OCBC samples folder copy
+    ocbc_copy = Path(r"C:\ISIS\samples_pdd\OCBC\psew3pic.exe")
+    if ocbc_copy.exists():
+        return str(ocbc_copy)
+
+    return None
+
+
+def _make_pseg_stem(file_stem: str) -> str:
+    """
+    Derive the AFP page-segment base name from an image file stem.
+
+    AFP page-segment names are at most 8 characters.  With the mandatory
+    'S1' prefix that leaves 6 characters for the base name.  We strip
+    non-alphanumeric characters (spaces, hyphens, underscores …) and
+    uppercase the result, keeping the first 6 characters.
+
+    Examples:
+        OCBC            → S1OCBC   (6 chars)
+        SCISSORS        → S1SCISSO (8 chars)
+        OCBC Al-Amin    → S1OCBCAL (8 chars)
+        PERBANKAN-ISLAM → S1PERBAN (8 chars)
+    """
+    clean = re.sub(r'[^A-Z0-9]', '', file_stem.upper())[:6]
+    return f"S1{clean}"
+
+
+def _run_psepic(
+    psepic_exe: str,
+    input_path: Path,
+    output_path: Path,
+    resolution: int,
+) -> bool:
+    """
+    Convert a JPG/TIF image to an AFP Page Segment using psew3pic.exe.
+
+    Creates a temporary ICD parameter file (format documented in picrge.pdf)
+    and invokes psew3pic.  For colour JPEG images we select:
+      - PICImgMode    = 3   (IOCA FS11 — required for JPEG + RGB)
+      - PICColorMode  = 2   (RGB)
+      - PICCompression= 4   (JPEG)
+    PICPsgPrefix is set to 0 because we embed the 'S1' prefix directly in
+    the TargetName, giving us full control over the output file name.
+
+    Returns True when psew3pic exits successfully and the output file exists.
+    """
+    import tempfile, os
+
+    icd_lines = [
+        "[PPMF]",
+        f'PPMFInputName ="{input_path}"',
+        f'TargetName    ="{output_path}"',
+        "",
+        "[PIC]",
+        'PICOutimgType ="1"',        # 1 = AFP (PSEG)
+        'PICPsgPrefix  ="0"',        # 0 = no auto-prefix; name is set in TargetName
+        'PICImgMode    ="3"',        # 3 = IOCA FS11 (JPEG + RGB colour)
+        'PICColorMode  ="2"',        # 2 = RGB
+        'PICCompression="4"',        # 4 = JPEG
+        f'PICresolution ="{resolution}"',
+        'PICMaintDim   ="1"',        # maintain physical print size when resampling
+        'PICBestZoom   ="1"',        # enhanced zoom quality
+        "",
+    ]
+    icd_content = "\r\n".join(icd_lines)
+
+    tmp_icd = Path(tempfile.gettempdir()) / f"psepic_{output_path.stem}.icd"
+    try:
+        tmp_icd.write_text(icd_content, encoding="utf-8")
+    except OSError:
+        return False
+
+    # Replicate the ISIS environment variables set by run_env.bat
+    env = os.environ.copy()
+    isis_common = env.get("ISIS_COMMON", r"C:\ISIS\samples_pdd\isiscomm")
+    env["ISIS_COMMON"]     = isis_common
+    env["ISIS_KEY_MODE"]   = env.get("ISIS_KEY_MODE",   "-")
+    env["ISIS_OMS_DOMAIN"] = env.get("ISIS_OMS_DOMAIN", "ATPRIMIPAS")
+    env["ISIS_OMS_PORT"]   = env.get("ISIS_OMS_PORT",   "32003")
+    # Add ISIS_COMMON\w3\lib to PATH so psew3pic can find its DLLs
+    current_path = env.get("PATH", env.get("Path", ""))
+    env["PATH"] = f"{isis_common}\\w3\\lib;{current_path}"
+
+    try:
+        result = subprocess.run(
+            [psepic_exe, str(tmp_icd)],
+            capture_output=True, text=True, timeout=120,
+            env=env,
+        )
+        return result.returncode == 0 and output_path.exists()
+    except (subprocess.TimeoutExpired, OSError):
+        return False
+    finally:
+        try:
+            tmp_icd.unlink()
+        except OSError:
+            pass
+
+
+# ---------------------------------------------------------------------------
 # Constants — sub-folder names that make up a Papyrus Designer project
 # ---------------------------------------------------------------------------
 
@@ -1267,6 +1398,48 @@ def migrate(args: argparse.Namespace) -> int:
             "Ghostscript not found — PS and EPS files not converted. "
             "Install from https://www.ghostscript.com (gswin64c) and re-run, "
             "or manually convert: .ps→.pdf into \\pdf\\ and .eps→.jpg into \\jpeg\\"
+        )
+
+    # ------------------------------------------------------------------
+    # Step 7c — Convert JPG/TIF resources to AFP Page Segments
+    #           using psew3pic.exe (Papyrus ImageConverter)
+    # ------------------------------------------------------------------
+    report.section("Step 7c: Generate AFP Page Segments (psew3pic)")
+
+    psepic_exe = _find_psepic()
+    if psepic_exe:
+        report.item(f"psew3pic : {psepic_exe}")
+        pseg_dir = resource_root / "pseg"
+        jpeg_dir = resource_root / "jpeg"
+
+        # Collect all JPG files currently in \jpeg\ (original + EPS-converted)
+        jpg_files = sorted(set(
+            list(jpeg_dir.glob("*.jpg"))  +
+            list(jpeg_dir.glob("*.JPG"))  +
+            list(jpeg_dir.glob("*.jpeg")) +
+            list(jpeg_dir.glob("*.JPEG"))
+        ))
+
+        for jpg_path in jpg_files:
+            pseg_stem = _make_pseg_stem(jpg_path.stem)  # e.g. S1OCBC
+            for res in (240, 300):
+                dest = pseg_dir / f"{pseg_stem}.{res}"
+                ok = _run_psepic(psepic_exe, jpg_path, dest, res)
+                if ok:
+                    report.item(
+                        f"PSeg {res}dpi : {jpg_path.name}  ->  "
+                        f"\\pseg\\{dest.name}"
+                    )
+                else:
+                    report.warn(
+                        f"psew3pic failed for {jpg_path.name} at {res}dpi — "
+                        f"place {dest.name} manually in \\pseg\\"
+                    )
+    else:
+        report.warn(
+            "psew3pic.exe not found — AFP Page Segments not generated. "
+            "Place psew3pic.exe next to migrate_xerox_to_papyrus.py "
+            "(or install Papyrus ImageConverter) and re-run."
         )
 
     # ------------------------------------------------------------------
