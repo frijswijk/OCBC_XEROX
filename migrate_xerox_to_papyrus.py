@@ -1403,44 +1403,30 @@ def migrate(args: argparse.Namespace) -> int:
     # ------------------------------------------------------------------
     # Step 7c — Convert JPG/TIF resources to AFP Page Segments
     #           using psew3pic.exe (Papyrus ImageConverter)
+    # NOTE: Commented out pending Papyrus ImageConverter product license.
+    #       psew3pic returns PPIC0200E "Bad IMAGE TYPE parameter" without it.
+    #       Re-enable when ISIS Papyrus support activates the license.
     # ------------------------------------------------------------------
-    report.section("Step 7c: Generate AFP Page Segments (psew3pic)")
-
-    psepic_exe = _find_psepic()
-    if psepic_exe:
-        report.item(f"psew3pic : {psepic_exe}")
-        pseg_dir = resource_root / "pseg"
-        jpeg_dir = resource_root / "jpeg"
-
-        # Collect all JPG files currently in \jpeg\ (original + EPS-converted)
-        jpg_files = sorted(set(
-            list(jpeg_dir.glob("*.jpg"))  +
-            list(jpeg_dir.glob("*.JPG"))  +
-            list(jpeg_dir.glob("*.jpeg")) +
-            list(jpeg_dir.glob("*.JPEG"))
-        ))
-
-        for jpg_path in jpg_files:
-            pseg_stem = _make_pseg_stem(jpg_path.stem)  # e.g. S1OCBC
-            for res in (240, 300):
-                dest = pseg_dir / f"{pseg_stem}.{res}"
-                ok = _run_psepic(psepic_exe, jpg_path, dest, res)
-                if ok:
-                    report.item(
-                        f"PSeg {res}dpi : {jpg_path.name}  ->  "
-                        f"\\pseg\\{dest.name}"
-                    )
-                else:
-                    report.warn(
-                        f"psew3pic failed for {jpg_path.name} at {res}dpi — "
-                        f"place {dest.name} manually in \\pseg\\"
-                    )
-    else:
-        report.warn(
-            "psew3pic.exe not found — AFP Page Segments not generated. "
-            "Place psew3pic.exe next to migrate_xerox_to_papyrus.py "
-            "(or install Papyrus ImageConverter) and re-run."
-        )
+    # report.section("Step 7c: Generate AFP Page Segments (psew3pic)")
+    # psepic_exe = _find_psepic()
+    # if psepic_exe:
+    #     pseg_dir = resource_root / "pseg"
+    #     jpeg_dir = resource_root / "jpeg"
+    #     jpg_files = sorted(set(
+    #         list(jpeg_dir.glob("*.jpg")) + list(jpeg_dir.glob("*.JPG")) +
+    #         list(jpeg_dir.glob("*.jpeg")) + list(jpeg_dir.glob("*.JPEG"))
+    #     ))
+    #     for jpg_path in jpg_files:
+    #         pseg_stem = _make_pseg_stem(jpg_path.stem)
+    #         for res in (240, 300):
+    #             dest = pseg_dir / f"{pseg_stem}.{res}"
+    #             ok = _run_psepic(psepic_exe, jpg_path, dest, res)
+    #             if ok:
+    #                 report.item(f"PSeg {res}dpi : {jpg_path.name} -> \\pseg\\{dest.name}")
+    #             else:
+    #                 report.warn(f"psew3pic failed for {jpg_path.name} at {res}dpi")
+    # else:
+    #     report.warn("psew3pic.exe not found — AFP Page Segments not generated.")
 
     # ------------------------------------------------------------------
     # Step 8 — Copy reference PDF into \reference\

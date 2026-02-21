@@ -3647,20 +3647,24 @@ class VIPPToDFAConverter:
             self.dedent()
 
         else:
-            # Standard SEGMENT command for other file types (e.g., TXNB)
-            # Use position based on whether it was explicitly set
-            self.add_line(f"SEGMENT {resource_name}")
+            # AFP page segment: SEGMENT requires .240/.300 files from psew3pic (unlicensed).
+            # Commented out; use CREATEOBJECT IOBDLL to load JPG directly instead.
+            # Re-enable SEGMENT block when psew3pic license is available.
+            x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
+            y_part = f"{y} MM-$MR_TOP+&CORSEGMENT" if y_was_set else "SAME"
+            pos = f"({x_part}) ({y_part})"
+            self.add_line(f"/* SEGMENT {resource_name} */")
+            self.add_line(f"/* POSITION {pos}; */")
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
             self.indent()
-            if not x_was_set and not y_was_set:
-                self.add_line("POSITION (SAME) (SAME);")
-            else:
-                x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
-                # Add segment correction to Y position when it's numeric
-                if y_was_set:
-                    y_part = f"{y} MM-$MR_TOP+&CORSEGMENT"
-                else:
-                    y_part = "SAME"
-                self.add_line(f"POSITION ({x_part}) ({y_part});")
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line("('OTHERTYPES'='JPG')")
+            self.add_line("('OBJECTMAPPING'='2');")
+            self.dedent()
             self.dedent()
 
     def _convert_frm_image(self, cmd: XeroxCommand, x: float, y: float):
@@ -6410,8 +6414,21 @@ class VIPPToDFAConverter:
             # Inline the XGFRESDEF subroutine as BOX/RULE commands at the call-site coordinates
             self._inline_xgfresdef_drawbs(resource_name, x_pos, y_pos)
         else:
-            # AFP page segment: generate standard SEGMENT reference
-            self.add_line(f"SEGMENT {resource_name} POSITION {x_pos} MM ({y_pos} MM-$MR_TOP+&CORSEGMENT);")
+            # AFP page segment: SEGMENT requires .240/.300 files from psew3pic (unlicensed).
+            # Commented out; use CREATEOBJECT IOBDLL to load JPG directly instead.
+            # Re-enable SEGMENT when psew3pic license is available.
+            self.add_line(f"/* SEGMENT {resource_name} POSITION ({x_pos} MM-$MR_LEFT) ({y_pos} MM-$MR_TOP+&CORSEGMENT); */")
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+            self.indent()
+            self.add_line(f"POSITION ({x_pos} MM-$MR_LEFT) ({y_pos} MM-$MR_TOP+&CORSEGMENT)")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line("('OTHERTYPES'='JPG')")
+            self.add_line("('OBJECTMAPPING'='2');")
+            self.dedent()
+            self.dedent()
 
     def _generate_font_switched_output(self, parts: List, default_font: str, align: str):
         """

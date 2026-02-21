@@ -83,28 +83,10 @@ set "VERBOSE="
 set /p VERBOSE="Show converter output in real time? [Y/N, default N]: "
 
 :: ------------------------------------------------------------------
-:: Log file
+:: Log file — DISABLED (PowerShell tee causes pipe deadlock issues)
+:: Re-enable when a reliable tee solution is available.
 :: ------------------------------------------------------------------
-
-echo.
-echo --- Output log ---
-echo.
-
-:: Generate a timestamp using PowerShell (locale-independent)
-for /f %%T in ('powershell -nologo -command "Get-Date -Format yyyyMMdd_HHmmss"') do set "TIMESTAMP=%%T"
-
-:: Default log path: <output folder>\migrate_<project>_<timestamp>.log
-set "LOGFILE_DEFAULT=!OUTPUT!\migrate_!PROJNAME!_!TIMESTAMP!.log"
-
-set "SAVELOG=Y"
-set /p SAVELOG="Save console output to a log file? [Y/N, default Y]: "
-
-if /I "!SAVELOG!"=="N" goto build_cmd
-
-set "LOGFILE=!LOGFILE_DEFAULT!"
-echo   Default log file: !LOGFILE_DEFAULT!
-set /p LOGFILE="Log file path (press ENTER for default): "
-if "!LOGFILE!"=="" set "LOGFILE=!LOGFILE_DEFAULT!"
+set "SAVELOG=N"
 
 :: ------------------------------------------------------------------
 :: Build command
@@ -134,10 +116,6 @@ echo ============================================================
 echo   Command to execute:
 echo.
 echo   !CMD!
-if /I not "!SAVELOG!"=="N" (
-    echo.
-    echo   Log file: !LOGFILE!
-)
 echo.
 echo ============================================================
 
@@ -150,37 +128,8 @@ if /I "!CONFIRM!"=="N" (
 
 echo.
 
-:: Ensure the output folder exists before writing the log
-if /I not "!SAVELOG!"=="N" (
-    if not exist "!OUTPUT!" mkdir "!OUTPUT!" 2>nul
-)
-
-:: Run — with or without tee to log file
-if /I "!SAVELOG!"=="N" (
-    !CMD!
-) else (
-    :: cmd.exe treats | as a pipe operator even inside "double quotes", so we
-    :: cannot write  powershell -command "... | Tee-Object ..."  inline.
-    :: Solution: write the tee logic to a temp .ps1 file where cmd.exe never
-    :: parses it, then invoke PowerShell with -File.
-    ::
-    :: IMPORTANT: Do NOT use "$input | Tee-Object" — $input is pre-enumerated
-    :: in PowerShell, causing a deadlock when output exceeds the 64KB pipe
-    :: buffer (PowerShell waits for EOF before reading; cmd waits for the pipe
-    :: to drain — neither proceeds).  Use a process{} block instead so
-    :: PowerShell consumes and forwards each line as it arrives.
-    set "PSSCRIPT=%TEMP%\migrate_tee_!PROJNAME!.ps1"
-    (
-        echo param([string]$lf^)
-        echo begin  { $sw = [IO.StreamWriter]::new($lf, $false, [Text.Encoding]::UTF8^) }
-        echo process{ Write-Host $_; $sw.WriteLine($_^) }
-        echo end    { $sw.Close(^) }
-    ) > "!PSSCRIPT!"
-    !CMD! 2>&1 | powershell -nologo -NonInteractive -File "!PSSCRIPT!" -lf "!LOGFILE!"
-    del "!PSSCRIPT!" 2>nul
-    echo.
-    echo Log saved to: !LOGFILE!
-)
+:: Run the migration directly (no log file)
+!CMD!
 
 :end
 echo.
