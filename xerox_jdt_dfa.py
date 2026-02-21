@@ -4654,58 +4654,56 @@ class VIPPToDFAConverter:
                 except (ValueError, IndexError):
                     pass
 
+        # Extract scale from SCALL parameters (VIPP: scale SCALL)
+        scall_scale = 0.0
+        if cmd.parameters:
+            for param in cmd.parameters:
+                if not param.startswith('(') and not param.startswith('['):
+                    try:
+                        v = float(param)
+                        if v > 0:
+                            scall_scale = v
+                            break
+                    except (ValueError, TypeError):
+                        pass
+
         # Generate DFA based on file type
         if file_ext in ('jpg', 'jpeg', 'tif', 'tiff'):
-            # Generate CREATEOBJECT IOBDLL for image files
-            # CREATEOBJECT always uses POSITION (SAME) (SAME) to inherit from previous command
-            # since SCALL itself has no position parameters
             other_type = 'JPG' if file_ext in ('jpg', 'jpeg') else 'TIF'
-
-            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
-            self.indent()
-            self.add_line("POSITION (SAME) (SAME)")
-            self.add_line("PARAMETERS")
-            self.indent()
-            self.add_line(f"('FILENAME'='{resource_name}')")
-            self.add_line("('OBJECTTYPE'='1')")
-            self.add_line(f"('OTHERTYPES'='{other_type}')")
-
-            # Only include dimensions if CACHE dimensions are available
-            if cache_width is not None and cache_height is not None:
-                self.add_line(f"('XOBJECTAREASIZE'='{cache_width}')")
-                self.add_line(f"('YOBJECTAREASIZE'='{cache_height}')")
-
-            self.add_line("('OBJECTMAPPING'='2');")
-            self.dedent()
-            self.dedent()
+            dims = (cache_width, cache_height) if cache_width is not None else None
+            self._emit_scaled_image(
+                resource_name, other_type, "SAME", "SAME",
+                scale=scall_scale, cache_dims=dims,
+            )
 
         elif file_ext == 'eps':
             # EPS converted to JPG by migrate script — use CREATEOBJECT IOBDLL.
             # SEGMENT commented out; re-enable when psew3pic license is available.
             x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
-            pos = f"({x_part}) (0 MM-$MR_TOP+&CORSEGMENT)"
-            self.add_line(f"/* SEGMENT {resource_name} */")
-            self.add_line(f"/* POSITION {pos}; */")
-            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
-            self.indent()
-            self.add_line(f"POSITION {pos}")
-            self.add_line("PARAMETERS")
-            self.indent()
-            self.add_line(f"('FILENAME'='{resource_name}')")
-            self.add_line("('OBJECTTYPE'='1')")
-            self.add_line("('OTHERTYPES'='JPG')")
-            self.add_line("('OBJECTMAPPING'='2');")
-            self.dedent()
-            self.dedent()
+            pos_x = x_part
+            pos_y = "0 MM-$MR_TOP+&CORSEGMENT"
+            self.add_line(f"/* SEGMENT {resource_name} POSITION ({pos_x}) ({pos_y}); */")
+            self._emit_scaled_image(resource_name, 'JPG', pos_x, pos_y, scale=scall_scale)
 
         else:
             # AFP page segment: SEGMENT commented out; use CREATEOBJECT IOBDLL instead.
             # Re-enable SEGMENT block when psew3pic license is available.
             x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
             y_part = f"{y} MM-$MR_TOP+&CORSEGMENT" if y_was_set else "SAME"
-            pos = f"({x_part}) ({y_part})"
-            self.add_line(f"/* SEGMENT {resource_name} */")
-            self.add_line(f"/* POSITION {pos}; */")
+            self.add_line(f"/* SEGMENT {resource_name} POSITION ({x_part}) ({y_part}); */")
+            self._emit_scaled_image(resource_name, 'JPG', x_part, y_part, scale=scall_scale)
+
+    def _emit_scaled_image(self, resource_name: str, ext: str,
+                           x_expr: str, y_expr: str,
+                           scale: float = 0.0,
+                           cache_dims: "tuple | None" = None):
+        """Emit CREATEOBJECT IOBDLL for an image with optional scaling.
+
+        Same logic as universal_xerox_parser._emit_scaled_image — see there for details.
+        """
+        pos = f"({x_expr}) ({y_expr})"
+
+        if cache_dims is not None:
             self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
             self.indent()
             self.add_line(f"POSITION {pos}")
@@ -4713,29 +4711,84 @@ class VIPPToDFAConverter:
             self.indent()
             self.add_line(f"('FILENAME'='{resource_name}')")
             self.add_line("('OBJECTTYPE'='1')")
-            self.add_line("('OTHERTYPES'='JPG')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
+            self.add_line(f"('XOBJECTAREASIZE'='{cache_dims[0]}')")
+            self.add_line(f"('YOBJECTAREASIZE'='{cache_dims[1]}')")
+            self.add_line("('OBJECTMAPPING'='2');")
+            self.dedent()
+            self.dedent()
+
+        elif scale > 0.0 and abs(scale - 1.0) > 0.001:
+            scale_pct = scale * 100
+            self.add_line(f"/* Scale {resource_name} to {scale_pct:.4g}% via IOB_INFO */")
+            self.add_line("CREATEOBJECT IOBDLL(IOB_INFO)")
+            self.indent()
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
+            self.add_line("('VARPREFIX'='IMG_');")
+            self.dedent()
+            self.dedent()
+            self.add_line(f"IMG_W_MM = (IMG_XSIZE / #1440) * #25.4 * #{scale:.6g} ;")
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+            self.indent()
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
+            self.add_line("('OBJECTMAPPING'='2')")
+            self.add_line("('XOBJECTAREASIZE'=IMG_W_MM);")
+            self.dedent()
+            self.dedent()
+
+        else:
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+            self.indent()
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
             self.add_line("('OBJECTMAPPING'='2');")
             self.dedent()
             self.dedent()
 
     def _convert_frm_image(self, cmd: XeroxCommand, x: float, y: float):
-        """Convert FRM ICALL command to DFA IMAGE."""
-        resource_name = ""
-        scale = "1.0"
+        """Convert FRM ICALL command to DFA CREATEOBJECT IOBDLL(IOBDEFS).
 
-        for i, param in enumerate(cmd.parameters):
+        VIPP ICALL format: (filename) scale rotation ICALL
+        scale is the first numeric parameter (fraction of line measure).
+        """
+        resource_name = ""
+        scale = 0.0
+        found_scale = False
+
+        for param in cmd.parameters:
             if param.startswith('(') and param.endswith(')'):
                 resource_name = param[1:-1]
-            elif i > 0 and param.replace('.', '', 1).isdigit():
-                scale = param
+            elif not found_scale:
+                try:
+                    scale = float(param)
+                    found_scale = True
+                except (ValueError, TypeError):
+                    pass
 
-        if resource_name:
-            self.add_line(f"IMAGE '{resource_name}'")
-            self.indent()
-            self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y} MM-$MR_TOP)")
-            self.add_line(f"SCALE {scale}")
-            self.add_line(";")
-            self.dedent()
+        if not resource_name:
+            return
+
+        import os as _os
+        ext = _os.path.splitext(resource_name)[1].upper().lstrip('.') or 'JPG'
+
+        self._emit_scaled_image(
+            resource_name, ext,
+            f"{x} MM-$MR_LEFT", f"{y} MM-$MR_TOP",
+            scale=scale,
+        )
 
     def add_line(self, line: str):
         """Add a line of output with proper indentation."""

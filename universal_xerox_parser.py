@@ -3604,47 +3604,36 @@ class VIPPToDFAConverter:
                 except (ValueError, IndexError):
                     pass
 
+        # Extract scale from SCALL parameters (VIPP: scale SCALL)
+        # The scale is the first numeric parameter in the SCALL command itself.
+        scall_scale = 0.0
+        if cmd.parameters:
+            for param in cmd.parameters:
+                if not param.startswith('(') and not param.startswith('['):
+                    try:
+                        v = float(param)
+                        if v > 0:
+                            scall_scale = v
+                            break
+                    except (ValueError, TypeError):
+                        pass
+
         # Generate DFA based on file type
         if file_ext in ('jpg', 'jpeg', 'tif', 'tiff'):
-            # Generate CREATEOBJECT IOBDLL for image files
-            # CREATEOBJECT always uses POSITION (SAME) (SAME) to inherit from previous command
-            # since SCALL itself has no position parameters
             other_type = 'JPG' if file_ext in ('jpg', 'jpeg') else 'TIF'
-
-            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
-            self.indent()
-            self.add_line("POSITION (SAME) (SAME)")
-            self.add_line("PARAMETERS")
-            self.indent()
-            self.add_line(f"('FILENAME'='{resource_name}')")
-            self.add_line("('OBJECTTYPE'='1')")
-            self.add_line(f"('OTHERTYPES'='{other_type}')")
-
-            # Only include dimensions if CACHE dimensions are available
-            if cache_width is not None and cache_height is not None:
-                self.add_line(f"('XOBJECTAREASIZE'='{cache_width}')")
-                self.add_line(f"('YOBJECTAREASIZE'='{cache_height}')")
-
-            self.add_line("('OBJECTMAPPING'='2');")
-            self.dedent()
-            self.dedent()
+            dims = (cache_width, cache_height) if cache_width is not None else None
+            self._emit_scaled_image(
+                resource_name, other_type, "SAME", "SAME",
+                scale=scall_scale, cache_dims=dims,
+            )
 
         elif file_ext == 'eps':
-            # EPS converted to JPG by migrate script → generate CREATEOBJECT with JPG type
-            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
-            self.indent()
-            self.add_line("POSITION (SAME) (SAME)")
-            self.add_line("PARAMETERS")
-            self.indent()
-            self.add_line(f"('FILENAME'='{resource_name}')")
-            self.add_line("('OBJECTTYPE'='1')")
-            self.add_line("('OTHERTYPES'='JPG')")
-            if cache_width is not None and cache_height is not None:
-                self.add_line(f"('XOBJECTAREASIZE'='{cache_width}')")
-                self.add_line(f"('YOBJECTAREASIZE'='{cache_height}')")
-            self.add_line("('OBJECTMAPPING'='2');")
-            self.dedent()
-            self.dedent()
+            # EPS converted to JPG by migrate script → treat as JPG
+            dims = (cache_width, cache_height) if cache_width is not None else None
+            self._emit_scaled_image(
+                resource_name, 'JPG', "SAME", "SAME",
+                scale=scall_scale, cache_dims=dims,
+            )
 
         else:
             # AFP page segment: SEGMENT requires .240/.300 files from psew3pic (unlicensed).
@@ -3667,57 +3656,113 @@ class VIPPToDFAConverter:
             self.dedent()
             self.dedent()
 
+    def _emit_scaled_image(self, resource_name: str, ext: str,
+                           x_expr: str, y_expr: str,
+                           scale: float = 0.0,
+                           cache_dims: "tuple | None" = None):
+        """Emit CREATEOBJECT IOBDLL for an image with optional scaling.
+
+        Three modes (in priority order):
+        1. cache_dims=(w,h) — explicit pixel dimensions from CACHE [w h]: use directly
+        2. scale > 0 and != 1.0 — Xerox percentage scale: use Method 1 (IOB_INFO)
+             IOB_INFO reads original dimensions → calculate MM width → IOBDEFS
+        3. Otherwise — no size info: IOBDEFS with OBJECTMAPPING='2' only (auto-fit)
+
+        IOB_INFO creates IMG_XSIZE / IMG_YSIZE in 1/1440-inch units.
+        Formula: IMG_W_MM = (IMG_XSIZE / #1440) * #25.4 * #scale
+        """
+        pos = f"({x_expr}) ({y_expr})"
+
+        if cache_dims is not None:
+            # Explicit pixel dimensions from CACHE [w h]
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+            self.indent()
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
+            self.add_line(f"('XOBJECTAREASIZE'='{cache_dims[0]}')")
+            self.add_line(f"('YOBJECTAREASIZE'='{cache_dims[1]}')")
+            self.add_line("('OBJECTMAPPING'='2');")
+            self.dedent()
+            self.dedent()
+
+        elif scale > 0.0 and abs(scale - 1.0) > 0.001:
+            # Method 1: IOB_INFO → calculate width → IOBDEFS
+            scale_pct = scale * 100
+            self.add_line(f"/* Scale {resource_name} to {scale_pct:.4g}% via IOB_INFO */")
+            self.add_line("CREATEOBJECT IOBDLL(IOB_INFO)")
+            self.indent()
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
+            self.add_line("('VARPREFIX'='IMG_');")
+            self.dedent()
+            self.dedent()
+            # IMG_XSIZE is in 1/1440-inch units; convert to MM then apply scale
+            self.add_line(f"IMG_W_MM = (IMG_XSIZE / #1440) * #25.4 * #{scale:.6g} ;")
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+            self.indent()
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
+            self.add_line("('OBJECTMAPPING'='2')")
+            self.add_line("('XOBJECTAREASIZE'=IMG_W_MM);")
+            self.dedent()
+            self.dedent()
+
+        else:
+            # No scale info — OBJECTMAPPING='2' lets DocEXEC auto-fit
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+            self.indent()
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
+            self.add_line("('OBJECTMAPPING'='2');")
+            self.dedent()
+            self.dedent()
+
     def _convert_frm_image(self, cmd: XeroxCommand, x: float, y: float):
         """Convert FRM ICALL command to DFA CREATEOBJECT IOBDLL(IOBDEFS).
 
-        DFA does not have an IMAGE command. Images are inserted via CREATEOBJECT IOBDLL(IOBDEFS).
-        The FILENAME parameter uses the image file name (without path).
-        OBJECTTYPE '1' = image object; OTHERTYPES indicates the format (JPG, TIF, etc).
-        XOBJECTAREASIZE controls the output width in MM (estimated from ICALL scale).
-        OBJECTMAPPING '2' = scale to fit.
+        VIPP ICALL format: (filename) scale rotation ICALL
+        scale is the first numeric parameter (fraction of line measure).
         """
         resource_name = ""
-        scale = 1.0
+        scale = 0.0
+        found_scale = False
 
-        for i, param in enumerate(cmd.parameters):
+        for param in cmd.parameters:
             if param.startswith('(') and param.endswith(')'):
                 resource_name = param[1:-1]
-            elif i > 0:
+            elif not found_scale:
                 try:
                     scale = float(param)
+                    found_scale = True   # take only the FIRST numeric (scale), not rotation
                 except (ValueError, TypeError):
                     pass
 
         if not resource_name:
             return
 
-        # Determine file extension for OTHERTYPES
         import os as _os
-        ext = _os.path.splitext(resource_name)[1].upper().lstrip('.')
-        if not ext:
-            ext = 'JPG'
+        ext = _os.path.splitext(resource_name)[1].upper().lstrip('.') or 'JPG'
 
-        # Estimate display width from scale (ICALL scale is relative to line measure).
-        # VIPP line measure is typically the layout frame width, commonly 180-190 MM.
-        # Using 180 MM as the standard line measure: scale 0.06 × 180 = 10.8 MM.
-        # Clamped to a reasonable display range (5–200 MM).
-        LINE_MEASURE_MM = 180.0
-        estimated_width = max(5.0, min(200.0, scale * LINE_MEASURE_MM)) if scale > 0 else 15.0
-
-        # Generate CREATEOBJECT
-        self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
-        self.indent()
-        self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y} MM-$MR_TOP)")
-        self.add_line("PARAMETERS")
-        self.indent()
-        self.add_line(f"('FILENAME'='{resource_name}')")
-        self.add_line("('OBJECTTYPE'='1')")
-        self.add_line(f"('OTHERTYPES'='{ext}')")
-        self.add_line(f"('XOBJECTAREASIZE'='{estimated_width:.0f}')")
-        self.add_line("('OBJECTMAPPING'='2')")
-        self.dedent()
-        self.add_line(";")
-        self.dedent()
+        self._emit_scaled_image(
+            resource_name, ext,
+            f"{x} MM-$MR_LEFT", f"{y} MM-$MR_TOP",
+            scale=scale,
+        )
 
     def add_line(self, line: str):
         """Add a line of output with proper indentation."""
