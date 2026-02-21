@@ -4679,32 +4679,42 @@ class VIPPToDFAConverter:
             self.dedent()
 
         elif file_ext == 'eps':
-            # EPS files: use SEGMENT with vertical position 0 MM
-            # (Xerox measures upward, so we don't have enough info for vertical position)
-            self.add_line(f"SEGMENT {resource_name}")
+            # EPS converted to JPG by migrate script — use CREATEOBJECT IOBDLL.
+            # SEGMENT commented out; re-enable when psew3pic license is available.
+            x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
+            pos = f"({x_part}) (0 MM-$MR_TOP+&CORSEGMENT)"
+            self.add_line(f"/* SEGMENT {resource_name} */")
+            self.add_line(f"/* POSITION {pos}; */")
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
             self.indent()
-            # For EPS, use horizontal position from MOVETO, vertical is always 0 MM with segment correction
-            if x_was_set:
-                self.add_line(f"POSITION ({x} MM-$MR_LEFT) (0 MM-$MR_TOP+&CORSEGMENT);")
-            else:
-                self.add_line("POSITION (SAME) (0 MM-$MR_TOP+&CORSEGMENT);")
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line("('OTHERTYPES'='JPG')")
+            self.add_line("('OBJECTMAPPING'='2');")
+            self.dedent()
             self.dedent()
 
         else:
-            # Standard SEGMENT command for other file types (e.g., TXNB)
-            # Use position based on whether it was explicitly set
-            self.add_line(f"SEGMENT {resource_name}")
+            # AFP page segment: SEGMENT commented out; use CREATEOBJECT IOBDLL instead.
+            # Re-enable SEGMENT block when psew3pic license is available.
+            x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
+            y_part = f"{y} MM-$MR_TOP+&CORSEGMENT" if y_was_set else "SAME"
+            pos = f"({x_part}) ({y_part})"
+            self.add_line(f"/* SEGMENT {resource_name} */")
+            self.add_line(f"/* POSITION {pos}; */")
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
             self.indent()
-            if not x_was_set and not y_was_set:
-                self.add_line("POSITION (SAME) (SAME);")
-            else:
-                x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
-                # Add segment correction to Y position when it's numeric
-                if y_was_set:
-                    y_part = f"{y} MM-$MR_TOP+&CORSEGMENT"
-                else:
-                    y_part = "SAME"
-                self.add_line(f"POSITION ({x_part}) ({y_part});")
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line("('OTHERTYPES'='JPG')")
+            self.add_line("('OBJECTMAPPING'='2');")
+            self.dedent()
             self.dedent()
 
     def _convert_frm_image(self, cmd: XeroxCommand, x: float, y: float):
@@ -6149,11 +6159,26 @@ class VIPPToDFAConverter:
             self.add_line(f"BOX X {x} MM Y {y} MM WIDTH {width} MM HEIGHT {height} MM;")
 
     def _convert_resource_command_dfa(self, cmd: XeroxCommand, x_pos: float, y_pos: float):
-        """Convert a resource call (SCALL/ICALL) to proper DFA SEGMENT."""
-        if cmd.parameters:
-            resource_name = cmd.parameters[0].strip('()')
-            # Add segment position correction
-            self.add_line(f"SEGMENT {resource_name} POSITION {x_pos} MM ({y_pos} MM-$MR_TOP+&CORSEGMENT);")
+        """Convert a resource call (SCALL/ICALL) to CREATEOBJECT IOBDLL.
+
+        SEGMENT commented out; re-enable when psew3pic license is available.
+        """
+        if not cmd.parameters:
+            return
+        resource_name = cmd.parameters[0].strip('()')
+        pos = f"({x_pos} MM-$MR_LEFT) ({y_pos} MM-$MR_TOP+&CORSEGMENT)"
+        self.add_line(f"/* SEGMENT {resource_name} POSITION {pos}; */")
+        self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+        self.indent()
+        self.add_line(f"POSITION {pos}")
+        self.add_line("PARAMETERS")
+        self.indent()
+        self.add_line(f"('FILENAME'='{resource_name}')")
+        self.add_line("('OBJECTTYPE'='1')")
+        self.add_line("('OTHERTYPES'='JPG')")
+        self.add_line("('OBJECTMAPPING'='2');")
+        self.dedent()
+        self.dedent()
 
     def _generate_font_switched_output(self, parts: List, default_font: str, align: str):
         """
@@ -6235,15 +6260,34 @@ class VIPPToDFAConverter:
                 resource_name = param.strip('()')
 
         if cmd.name == 'SCALL':
-            self.add_line(f"SEGMENT {resource_name}")
+            # SEGMENT commented out; use CREATEOBJECT IOBDLL instead.
+            # Re-enable SEGMENT block when psew3pic license is available.
+            pos = "(0 MM-$MR_LEFT) (0 MM-$MR_TOP+&CORSEGMENT)"
+            self.add_line(f"/* SEGMENT {resource_name} */")
+            self.add_line(f"/* POSITION {pos}; */")
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
             self.indent()
-            # Add segment position correction for vertical position
-            self.add_line("POSITION (0 MM-$MR_LEFT) (0 MM-$MR_TOP+&CORSEGMENT);")
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line("('OTHERTYPES'='JPG')")
+            self.add_line("('OBJECTMAPPING'='2');")
+            self.dedent()
             self.dedent()
         elif cmd.name == 'ICALL':
-            self.add_line(f"IMAGE '{resource_name}'")
+            # IMAGE is not a valid DFA command — use CREATEOBJECT IOBDLL instead.
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
             self.indent()
-            self.add_line(position + ";")
+            self.add_line(f"POSITION {position}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line("('OTHERTYPES'='JPG')")
+            self.add_line("('OBJECTMAPPING'='2');")
+            self.dedent()
             self.dedent()
 
     def _convert_cache_command(self, cmd: XeroxCommand):
