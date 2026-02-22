@@ -1623,10 +1623,10 @@ class XeroxParser:
                 self._parse_fromline(jdt, current_line)
                 continue
 
-            # Handle XGFRESDEF (same as FRM) - skip for now
+            # Handle XGFRESDEF: /name { commands } XGFRESDEF
+            # Parse and store resource definitions for SCALL conversion
             if token.value == 'XGFRESDEF':
-                # Skip XGFRESDEF for now
-                self.pos += 1
+                self._parse_jdt_xgfresdef(jdt)
                 continue
 
             # Collect BEGINPAGE tokens
@@ -1642,6 +1642,240 @@ class XeroxParser:
                     beginpage_tokens.append(token)
 
             self.pos += 1
+
+    def _parse_jdt_xgfresdef(self, jdt: XeroxJDT):
+        """
+        Parse XGFRESDEF resource definition in JDT context.
+
+        Format: /name { commands } XGFRESDEF
+        Look backward from the XGFRESDEF token to find the resource name
+        and the brace-delimited command block.
+
+        Simple DRAWB resources (e.g. DREDBOX) are stored as box metadata.
+        Complex resources (e.g. GOVBOX with BEGINTABLE) are stored as 'complex'.
+        """
+        # self.pos points at XGFRESDEF
+        # Scan backward to find: /name { ... }
+        # The } is just before XGFRESDEF, the { is matched further back
+        xgf_pos = self.pos
+        self.pos += 1  # Move past XGFRESDEF
+
+        # Find the resource name — look backward for a /NAME variable token
+        # and the { ... } brace block containing the resource commands.
+        resource_name = None
+        brace_start = None
+        brace_end = None
+        # Track nesting depth to handle nested braces like {Font21} inside GOVBOX
+        brace_depth = 0
+        for i in range(xgf_pos - 1, max(xgf_pos - 1000, -1), -1):
+            if i < 0:
+                break
+            t = self.tokens[i]
+            if t.type == 'delimiter' and t.value == '}':
+                if brace_end is None:
+                    brace_end = i
+                brace_depth += 1
+            elif t.type == 'delimiter' and t.value == '{':
+                brace_depth -= 1
+                if brace_depth == 0 and brace_end is not None:
+                    brace_start = i
+            elif t.type == 'variable' and t.value.startswith('/'):
+                if brace_start is not None:
+                    resource_name = t.value.lstrip('/')
+                    break
+
+        if not resource_name or brace_start is None or brace_end is None:
+            return
+
+        # Extract tokens between braces
+        block_tokens = self.tokens[brace_start + 1:brace_end]
+
+        # Check for DRAWB — simple box resource
+        has_drawb = any(t.value == 'DRAWB' for t in block_tokens)
+        if has_drawb:
+            # Extract: x y width height style DRAWB
+            nums = [int(float(t.value)) for t in block_tokens if t.type == 'number']
+            style = None
+            for t in block_tokens:
+                if t.type == 'identifier' and t.value not in ('DRAWB', 'MM', 'SETUNIT'):
+                    style = t.value
+            if len(nums) >= 4:
+                jdt.xgfresdef_resources[resource_name] = {
+                    'type': 'box',
+                    'x': nums[0],
+                    'y': nums[1],
+                    'width': nums[2],
+                    'height': nums[3],
+                    'style': style or 'R_S1'
+                }
+                return
+
+        # Complex resource (BEGINTABLE, etc.) — extract table data if present
+        has_begintable = any(t.value == 'BEGINTABLE' for t in block_tokens)
+        if has_begintable:
+            table_data = self._parse_xgfresdef_table(block_tokens)
+            jdt.xgfresdef_resources[resource_name] = {
+                'type': 'table',
+                'name': resource_name,
+                'rows': table_data['rows'],
+                'post_text': table_data['post_text'],
+            }
+        else:
+            jdt.xgfresdef_resources[resource_name] = {
+                'type': 'complex',
+                'name': resource_name
+            }
+
+    def _parse_xgfresdef_table(self, block_tokens: list) -> dict:
+        """
+        Parse BEGINTABLE/SHROW content from XGFRESDEF block tokens.
+
+        Extracts:
+        - rows: list of rows, each row is a list of cells
+          Each cell = {'text': str, 'font': str, 'width': int}
+        - post_text: list of {'text': str, 'font': str, 'type': 'SHL'|'SHP'}
+
+        The VIPP structure:
+          [ ... ] BEGINTABLE
+          [ [ /Width 45 /CellText (text) /TextAtt {Font21}] ... ] SHROW
+          ... more SHROW
+          Font21 (Website:) SHL
+          Font23 (url) 166 3 SHP
+        """
+        rows = []
+        post_text = []
+
+        # Find BEGINTABLE position and SHROW positions
+        i = 0
+        n = len(block_tokens)
+
+        # Skip to after BEGINTABLE
+        while i < n and block_tokens[i].value != 'BEGINTABLE':
+            i += 1
+        i += 1  # Move past BEGINTABLE
+
+        # Parse SHROW entries
+        while i < n:
+            t = block_tokens[i]
+            if t.value == 'SHROW':
+                i += 1
+                continue
+
+            # Each SHROW is preceded by [ [ ... ] [ ... ] ]
+            # Collect cells for current row
+            if t.type == 'delimiter' and t.value == '[':
+                # This might be a row start — look for nested [ ] cell defs
+                row_cells = []
+                i += 1  # skip outer [
+                outer_depth = 1  # track bracket depth for outer row [ ]
+                while i < n and outer_depth > 0:
+                    ct = block_tokens[i]
+                    if ct.type == 'delimiter' and ct.value == ']':
+                        outer_depth -= 1
+                        if outer_depth == 0:
+                            i += 1
+                            break
+                        i += 1
+                        continue
+                    if ct.type == 'delimiter' and ct.value == '[':
+                        # Start of cell — parse with bracket depth tracking
+                        cell = {'text': '', 'font': '', 'width': 0}
+                        i += 1
+                        cell_depth = 1
+                        while i < n and cell_depth > 0:
+                            tk = block_tokens[i]
+                            if tk.type == 'delimiter' and tk.value == '[':
+                                cell_depth += 1
+                                i += 1
+                                continue
+                            if tk.type == 'delimiter' and tk.value == ']':
+                                cell_depth -= 1
+                                if cell_depth == 0:
+                                    i += 1
+                                    break
+                                i += 1
+                                continue
+                            # Look for /Width N
+                            if tk.type == 'variable' and tk.value == '/Width':
+                                if i + 1 < n and block_tokens[i + 1].type == 'number':
+                                    cell['width'] = int(float(block_tokens[i + 1].value))
+                                    i += 2
+                                    continue
+                            # Look for /CellText (text)
+                            if tk.type == 'variable' and tk.value == '/CellText':
+                                if i + 1 < n and block_tokens[i + 1].type == 'string':
+                                    raw_text = block_tokens[i + 1].value
+                                    # Strip VIPP parens wrapper if present
+                                    if raw_text.startswith('(') and raw_text.endswith(')'):
+                                        raw_text = raw_text[1:-1]
+                                    cell['text'] = raw_text
+                                    i += 2
+                                    continue
+                            # Look for /TextAtt {FontNN}
+                            if tk.type == 'variable' and tk.value == '/TextAtt':
+                                # Skip the { FontNN } block
+                                if i + 1 < n and block_tokens[i + 1].type == 'delimiter' and block_tokens[i + 1].value == '{':
+                                    i += 2
+                                    while i < n and not (block_tokens[i].type == 'delimiter' and block_tokens[i].value == '}'):
+                                        if block_tokens[i].type == 'identifier':
+                                            cell['font'] = block_tokens[i].value.upper()
+                                        i += 1
+                                    i += 1  # past }
+                                    continue
+                            i += 1
+                        if cell['text']:
+                            row_cells.append(cell)
+                    else:
+                        i += 1
+                if row_cells:
+                    rows.append(row_cells)
+                continue
+
+            # Post-table text: SHL, SHP
+            if t.value == 'SHL':
+                # Look backward for string and font
+                text = ''
+                font = ''
+                for j in range(i - 1, max(i - 5, -1), -1):
+                    if block_tokens[j].type == 'string' and not text:
+                        raw = block_tokens[j].value
+                        # Strip VIPP parens wrapper
+                        if raw.startswith('(') and raw.endswith(')'):
+                            raw = raw[1:-1]
+                        # Strip ~~ font switches for DFA
+                        import re
+                        raw = re.sub(r'~~L[01]', '', raw)
+                        text = raw
+                    if block_tokens[j].type == 'identifier' and not font:
+                        font = block_tokens[j].value.upper()
+                if text:
+                    post_text.append({'text': text, 'font': font, 'type': 'SHL'})
+                i += 1
+                continue
+
+            if t.value == 'SHP':
+                # Look backward for string, width, alignment
+                text = ''
+                font = ''
+                for j in range(i - 1, max(i - 10, -1), -1):
+                    if block_tokens[j].type == 'string' and not text:
+                        raw = block_tokens[j].value
+                        # Strip VIPP parens wrapper
+                        if raw.startswith('(') and raw.endswith(')'):
+                            raw = raw[1:-1]
+                        import re
+                        raw = re.sub(r'~~L[01]', '', raw)
+                        text = raw
+                    if block_tokens[j].type == 'identifier' and not font:
+                        font = block_tokens[j].value.upper()
+                if text:
+                    post_text.append({'text': text, 'font': font, 'type': 'SHP'})
+                i += 1
+                continue
+
+            i += 1
+
+        return {'rows': rows, 'post_text': post_text}
 
     def _parse_setmargin(self, jdt: XeroxJDT):
         """Parse SETMARGIN command: top bottom left right SETMARGIN"""
@@ -1975,6 +2209,16 @@ class XeroxParser:
             if token.value == '{SCALL}':
                 special_call = 'SCALL'
                 self.pos += 1
+                continue
+
+            # Detect {SCALL} split across three tokens: { SCALL }
+            if (token.type == 'delimiter' and token.value == '{' and
+                    self.pos + 2 < len(self.tokens) and
+                    self.tokens[self.pos + 1].value == 'SCALL' and
+                    self.tokens[self.pos + 2].type == 'delimiter' and
+                    self.tokens[self.pos + 2].value == '}'):
+                special_call = 'SCALL'
+                self.pos += 3  # Skip {, SCALL, }
                 continue
 
             if token.type == 'number':
@@ -2736,8 +2980,8 @@ class VIPPToDFAConverter:
         Returns:
             Tuple of (x_dfa_expr, y_dfa_expr) as strings
         """
-        x_dfa = f"UNIH*#{x_xerox}"
-        y_dfa = f"UNIH*#{y_xerox}"
+        x_dfa = f"&UNIH*#{x_xerox}"
+        y_dfa = f"&UNIH*#{y_xerox}"
         return (x_dfa, y_dfa)
 
     def _generate_jdt_docformat_main(self):
@@ -2780,8 +3024,8 @@ class VIPPToDFAConverter:
         Critical rules confirmed:
         - ENDFORMAT is NOT valid DFA syntax; DOCFORMATs flow directly into each other
         - VARIABLE keyword is only valid inside RECORD...ENDIO blocks
-        - OUTPUT must be directly inside OUTLINE...ENDIO; never at mainlevel or in IF branches
-        - OUTPUT inside IF/THEN/ELSE needs nested OUTLINE POSITION (SAME)(SAME) DIRECTION ACROSS; wrapper
+        - OUTPUT must be inside an OUTLINE...ENDIO context (can be in IF/THEN/ELSE within it)
+        - DO NOT nest OUTLINE inside IF/THEN — this shifts RPE absolute coordinates
         - FROMLINE outputs must be in THEN branch BEFORE ENDGROUP (after ENDGROUP the doc is closed)
         - Arrays (CONTENT[], CC[]) auto-expand on subscripted assignment — no VARIABLE ARRAY needed
         """
@@ -2851,45 +3095,72 @@ class VIPPToDFAConverter:
         # 4. Close the document unconditionally so DocEXEC does not auto-generate
         # a blank page for the empty trailing document cycle started after EOF.
         self.add_line("ENDDOCUMENT;")
-        self.add_line("")
-
-        # 4. Reset arrays and condition flags for next page.
-        # /HOLD conditions latch for the entire document run — they must NOT be
-        # reset between pages.  Only primitive (non-compound) conditions whose
-        # operator is NOT 'HOLD' are reset here.  Compound conditions that are
-        # purely derived from /HOLD sub-conditions are also excluded: once their
-        # sub-conditions latch they will be re-derived immediately on the next
-        # FOR C iteration anyway.
-        self.add_line("/* Reset for next page */")
-        self.add_line("C = 1;")
-        self.add_line("CONTENT[C] = '1';")
-        if self.jdt.conditions:
-            # Build the set of /HOLD condition names (never reset between pages)
-            hold_cond_names = {
-                name for name, cond in self.jdt.conditions.items()
-                if not cond.is_compound and cond.operator == 'HOLD'
-            }
-            # Collect all condition names (direct + sub-condition references)
-            all_cond_names = set(self.jdt.conditions.keys())
-            for cond in self.jdt.conditions.values():
-                if cond.is_compound and cond.sub_conditions:
-                    for sub in cond.sub_conditions:
-                        all_cond_names.add(sub)
-            # Emit resets only for non-HOLD conditions
-            resettable = sorted(n for n in all_cond_names if n not in hold_cond_names)
-            if resettable:
-                for cond_name in resettable:
-                    self.add_line(f"{cond_name} = 0;")
+        self.add_line("/* $_BEFOREDOC re-initializes per-document state for next page */")
 
         self.dedent()
         self.add_line("ELSE;")
         self.indent()
-        # Accumulate this line
-        self.add_line("/* Accumulate line into arrays */")
+        # Accumulate this line with visual-line tracking and overprint merge.
+        # CC='+' overprint records are merged character-by-character into the
+        # existing CONTENT entry at the current visual line (FL[VL]).
+        # Normal records advance VL based on their CC code.
+        self.add_line("/* Accumulate line with visual-line tracking */")
         self.add_line("N = 0;")
+        self.add_line("CC_CHAR = LEFT(LINE1,1,'');")
+        self.add_line("IF CC_CHAR=='+';")
+        self.add_line("THEN;")
+        self.indent()
+        # Overprint: merge into existing CONTENT at current visual line
+        self.add_line("/* Overprint: merge non-space chars into CONTENT[FL[VL]] */")
+        self.add_line("OVRLINE = SUBSTR(LINE1,2,LENGTH(LINE1)-1,'');")
+        # Pad base content to at least overlay length so SUBSTR positions are correct
+        self.add_line("/* Pad base content to overlay length before char-by-char merge */")
+        self.add_line("IF ISTRUE(LENGTH(OVRLINE) > LENGTH(CONTENT[FL[VL]]));")
+        self.add_line("THEN;")
+        self.indent()
+        self.add_line("CONTENT[FL[VL]] = SUBSTR(CONTENT[FL[VL]] ! &SPACEPAD, 1, LENGTH(OVRLINE), '');")
+        self.dedent()
+        self.add_line("ENDIF;")
+        self.add_line("FOR OPOS REPEAT LENGTH(OVRLINE);")
+        self.indent()
+        self.add_line("OCHAR = SUBSTR(OVRLINE,OPOS,1,' ');")
+        self.add_line("IF OCHAR<>' ';")
+        self.add_line("THEN;")
+        self.indent()
+        self.add_line("CONTENT[FL[VL]] = SUBSTR(CONTENT[FL[VL]],1,OPOS-1,'') ! OCHAR ! SUBSTR(CONTENT[FL[VL]],OPOS+1,4096,'');")
+        self.dedent()
+        self.add_line("ENDIF;")
+        self.dedent()
+        self.add_line("ENDFOR;")
+        self.dedent()
+        self.add_line("ELSE;")
+        self.indent()
+        # Normal record: advance VL based on CC code
+        self.add_line("/* Normal record: advance visual line based on CC */")
+        self.add_line("IF CC_CHAR==' ';")
+        self.add_line("THEN;")
+        self.indent()
+        self.add_line("VL = VL + 1;")
+        self.dedent()
+        self.add_line("ENDIF;")
+        self.add_line("IF CC_CHAR=='0';")
+        self.add_line("THEN;")
+        self.indent()
+        self.add_line("VL = VL + 2;")
+        self.dedent()
+        self.add_line("ENDIF;")
+        self.add_line("IF CC_CHAR=='-';")
+        self.add_line("THEN;")
+        self.indent()
+        self.add_line("VL = VL + 3;")
+        self.dedent()
+        self.add_line("ENDIF;")
         self.add_line("C = C+1;")
-        self.add_line("CC[C] = LEFT(LINE1,1,'');")
+        self.add_line("CC[C] = CC_CHAR;")
         self.add_line("CONTENT[C] = SUBSTR(LINE1,2,LENGTH(LINE1)-1,'');")
+        self.add_line("FL[VL] = C;")
+        self.dedent()
+        self.add_line("ENDIF;")
         self.dedent()
         self.add_line("ENDIF;")
         self.dedent()
@@ -2921,56 +3192,73 @@ class VIPPToDFAConverter:
         self.dedent()
         self.add_line("")
 
-        # ---- $_BEFOREFIRSTDOC (LAST) — initializations only (NO VARIABLE keyword here) ----
-        # DFA rule: VARIABLE keyword is only valid inside RECORD...ENDIO blocks.
-        # At DOCFORMAT mainlevel (including $_BEFOREFIRSTDOC) only assignments are valid.
-        # DFA infers types from first use; arrays auto-expand on subscripted assignment.
-        self.add_line("/* Initialization — must appear AFTER output DOCFORMATs */")
-        self.add_line("DOCFORMAT $_BEFOREFIRSTDOC;")
+        # ---- $_BEFOREDOC — runs before EACH document (including the first) ----
+        # After ENDDOCUMENT, all non-& variables are reset.  This re-initializes
+        # per-document state: page counters, line accumulation, condition flags.
+        self.add_line("/* Per-document initialization — runs before each page/document */")
+        self.add_line("DOCFORMAT $_BEFOREDOC;")
         self.indent()
+        self.add_line("P = 0;")
         self.add_line("PP = 0;")
         self.add_line("")
-
-        # UNIH: Xerox internal resolution to page width
-        self.add_line("/* Xerox positioning units (2440 internal units = page width) */")
-        self.add_line(f"UNIH = $LP_WIDTH/2440;")
-        self.add_line("")
-
-        # Margin reference variables from SETMARGIN (kept for reference/debugging;
-        # RPE Y coordinates are absolute page positions so MTOP is NOT added to them)
-        self.add_line(f"MTOP   = UNIH*{mtop};")
-        self.add_line(f"MLEFT  = UNIH*{mleft};")
-        self.add_line(f"MRIGHT = UNIH*{mright};")
-        self.add_line("")
-
-        # Line accumulation: prime C and the first CONTENT element
-        # (CONTENT[] and CC[] auto-expand as arrays through subscripted assignment)
         self.add_line("/* Document line-accumulation — prime with sentinel '1' record */")
         self.add_line("C = 1;")
         self.add_line("CONTENT[C] = '1';")
         self.add_line("")
-
-        # FROMLINE / loop tracking variables — initialized to 0 (DFA infers type)
+        self.add_line("/* Visual line tracking reset */")
+        self.add_line("VL = 1;")
+        self.add_line("FL[1] = 1;")
+        self.add_line("")
         self.add_line("/* FROMLINE tracking variables */")
         self.add_line("LIN = 0;")
-        self.add_line("MEASURE = 0;")
-        self.add_line("Z = 0;")
-        self.add_line("II = 0;")
         self.add_line("")
-
-        # Condition flags — all initialised to 0
-        # Collect ALL condition names: both directly parsed and those only referenced
-        # inside compound sub_conditions lists.
-        if self.jdt.conditions:
+        # Condition flags — all reset to 0
+        if self.jdt and self.jdt.conditions:
             all_cond_names = set(self.jdt.conditions.keys())
             for cond in self.jdt.conditions.values():
                 if cond.is_compound and cond.sub_conditions:
                     for sub in cond.sub_conditions:
                         all_cond_names.add(sub)
-            self.add_line("/* SETRCD condition flags — all start at 0 */")
+            self.add_line("/* SETRCD condition flags — all reset to 0 */")
             for cond_name in sorted(all_cond_names):
                 self.add_line(f"{cond_name} = 0;")
             self.add_line("")
+        # SCALL table guard variables — prevent re-emission of table resources
+        if self.jdt and hasattr(self.jdt, 'xgfresdef_resources'):
+            table_resources = [name for name, res in self.jdt.xgfresdef_resources.items()
+                               if res.get('type') == 'table']
+            if table_resources:
+                self.add_line("/* SCALL table one-shot guards */")
+                for name in sorted(table_resources):
+                    self.add_line(f"DONE_{name} = 0;")
+                self.add_line("")
+        self.dedent()
+        self.add_line("")
+
+        # ---- $_BEFOREFIRSTDOC (LAST) — one-time job-level setup ----
+        # DFA rule: VARIABLE keyword is only valid inside RECORD...ENDIO blocks.
+        # At DOCFORMAT mainlevel (including $_BEFOREFIRSTDOC) only assignments are valid.
+        # DFA infers types from first use; arrays auto-expand on subscripted assignment.
+        self.add_line("/* One-time job initialization — & constants persist across documents */")
+        self.add_line("DOCFORMAT $_BEFOREFIRSTDOC;")
+        self.indent()
+
+        # UNIH: Xerox internal resolution to page width (job-level constant)
+        self.add_line("/* Xerox positioning units (2440 internal units = page width) */")
+        self.add_line(f"&UNIH = $LP_WIDTH/2440;")
+        self.add_line("")
+
+        # Margin reference variables from SETMARGIN (kept for reference/debugging)
+        self.add_line(f"&MTOP   = &UNIH*{mtop};")
+        self.add_line(f"&MLEFT  = &UNIH*{mleft};")
+        self.add_line(f"&MRIGHT = &UNIH*{mright};")
+        self.add_line("")
+
+        # SPACEPAD: 200 spaces used to pad short CONTENT strings before overprint merge
+        spaces_200 = "'" + " " * 200 + "'"
+        self.add_line("/* Space padding string for overprint merge */")
+        self.add_line(f"&SPACEPAD = {spaces_200};")
+        self.add_line("")
 
         # FOR I init loop: primes the RECORD reader (required by DFA line-mode)
         self.add_line("/* Initialization loop — primes the input record reader */")
@@ -3089,7 +3377,24 @@ class VIPPToDFAConverter:
             pos = max(1, cond.position)
             length = max(1, cond.length)
             substr_expr = f"SUBSTR(CONTENT[C],{pos},{length},'')"
-            val_escaped = cond.value.replace("'", "''")
+            # Bug fix (Bug 1 — SETRCD string padding):
+            # VIPP SETRCD compares SUBSTR(record, pos, length) against the match
+            # string padded with trailing spaces to exactly `length` characters.
+            # When len(matchstring) < length, the comparison string must be padded
+            # with trailing spaces so that DFA string equality works correctly.
+            # Example: `/IF_CND55  2  6  /eq  (DCDO)  SETRCD`
+            #   → VIPP compares 6 chars against 'DCDO  ' (DCDO + 2 trailing spaces)
+            #   → DFA must generate: SUBSTR(CONTENT[C],2,6,'')==' DCDO  '
+            raw_val = cond.value
+            padded_val = raw_val.ljust(length)   # pad with trailing spaces to length
+            val_escaped = padded_val.replace("'", "''")
+            # Include a comment when padding was actually applied
+            if len(raw_val) < length:
+                self.add_line(
+                    f"/* {cond_name}: JDT SETRCD pos={pos} len={length} "
+                    f"string={raw_val!r} ({len(raw_val)} chars) "
+                    f"\u00bb pad to {length}: {padded_val!r} */"
+                )
             self.add_line(f"IF ISTRUE({substr_expr}{dfa_op}'{val_escaped}');")
             self.add_line("THEN;")
             self.indent()
@@ -3120,37 +3425,20 @@ class VIPPToDFAConverter:
         Emit all FROMLINE output blocks inside the page-output THEN branch.
 
         ALL FROMLINE blocks are wrapped in a SINGLE outer OUTLINE at (0 MM)(0 MM).
-        This is critical: each OUTLINE block advances the DFA page cursor by its
-        content height.  With 19 FROMLINE blocks previously each in their own
-        OUTLINE at (0 MM)(0 MM), the cumulative cursor advance exceeded the page
-        height (297 mm), causing DocEXEC to overflow to extra physical pages.
 
-        Structure:
-            OUTLINE
-                POSITION (0 MM) (0 MM)
-                DIRECTION ACROSS;
-                /* --- FROMLINE N --- */
-                LIN = N;
-                OUTPUT ...;           <- unconditional: valid directly in outer OUTLINE
-                IF ISTRUE(...);
-                THEN;
-                    OUTLINE           <- conditional: nested OUTLINE required for OUTPUT
-                        POSITION (SAME) (SAME)
-                        DIRECTION ACROSS;
-                        OUTPUT ...;
-                    ENDIO;
-                ENDIF;
-                /* --- FROMLINE M --- */
-                LIN = M;
-                ...
-            ENDIO;
+        Key fix — multi-line FROMLINE ranges:
+        In VIPP JDT, FROMLINE N applies its RPE to all visual lines from N up to
+        (but not including) the next FROMLINE number.  For example, if FROMLINE 19
+        is followed by FROMLINE 70, then FROMLINE 19's RPE applies to VL 19-69.
 
-        Each FROMLINE block:
-        1. Sets LIN = line_number
-        2. Outputs unconditional fields from that line using SUBSTR(CONTENT[LIN],...)
-        3. If the line has /IF_CND.../ELSE.../ENDIFALL chains, wraps the branch
-           outputs in nested OUTLINE POSITION (SAME)(SAME) blocks (DFA rule: OUTPUT
-           inside IF/THEN/ELSE inside an OUTLINE still needs its own nested OUTLINE).
+        For single-line ranges (e.g., FROMLINE 14 to FROMLINE 15 = just VL 14),
+        the existing approach works: LIN = FL[14]; check conditions; output.
+
+        For multi-line ranges (e.g., FROMLINE 19 covering VL 19-69), we emit a
+        FOR loop that iterates from start_vl to end_vl.  Inside the loop, SETRCD
+        conditions are re-evaluated PER-LINE against CONTENT[LIN] so the condition
+        chain correctly routes each individual line's content (not using page-level
+        flags which reflect ALL lines on the page).
         """
         if not self.jdt.rpe_lines:
             self.add_line("/* No FROMLINE data to output */")
@@ -3166,37 +3454,203 @@ class VIPPToDFAConverter:
         self.add_line("DIRECTION ACROSS;")
         self.add_line("")
 
-        for line_num in sorted(self.jdt.rpe_lines.keys()):
+        # Calculate FROMLINE ranges based on sorted FROMLINE numbers.
+        # The range of FROMLINE N = [N .. next_FROMLINE-1].
+        all_fromline_nums = sorted(self.jdt.rpe_lines.keys())
+        lpp = self.jdt.grid.get('lpp', 70)  # lines per page from SETGRID
+
+        ranges = {}
+        for i, fnum in enumerate(all_fromline_nums):
+            if i + 1 < len(all_fromline_nums):
+                end_vl = all_fromline_nums[i + 1] - 1
+            else:
+                end_vl = max(fnum, lpp)
+            ranges[fnum] = (fnum, end_vl)
+
+        for line_num in all_fromline_nums:
             rpe_list = self.jdt.rpe_lines[line_num]
             if not rpe_list:
                 continue
 
-            # Partition into unconditional (condition_name=='') and conditional groups
-            # Preserve the exact parse order for the conditional chain
+            # Partition into unconditional and conditional groups.
             unconditional = [r for r in rpe_list if not r.condition_name]
-            # Build ordered chain of (cond_name, [rpe, ...]) preserving parse order
             cond_chain = self._build_condition_chain(rpe_list)
 
-            self.add_line(f"/* --- FROMLINE {line_num} --- */")
-            self.add_line(f"LIN = {line_num};")
-            self.add_line("")
+            start_vl, end_vl = ranges[line_num]
+            range_size = end_vl - start_vl + 1
 
-            # Unconditional outputs for this line — valid directly in outer OUTLINE
-            for rpe in unconditional:
-                self._emit_rpe_output(rpe, line_var="LIN")
-                self.add_line("")
-
-            # Conditional chain (/IF_CND.../ELSE/IF_CND.../ELSE.../ENDIFALL)
-            # Each branch's OUTPUTs are still wrapped in nested OUTLINE blocks
-            # (DFA rule: OUTPUT inside IF/THEN/ELSE needs nested OUTLINE wrapper
-            # even when the IF block is itself inside an outer OUTLINE).
-            if cond_chain:
-                self._emit_condition_chain(cond_chain, line_var="LIN")
-                self.add_line("")
+            if range_size > 2:
+                # Multi-line FROMLINE: emit a FOR loop with per-line SETRCD eval
+                self._emit_fromline_loop(line_num, start_vl, end_vl,
+                                         unconditional, cond_chain)
+            else:
+                # Single-line FROMLINE: direct access
+                self._emit_fromline_single(line_num, unconditional, cond_chain)
 
         # Close the single outer OUTLINE
         self.dedent()
         self.add_line("ENDIO;")
+        self.add_line("")
+
+    def _emit_fromline_single(self, line_num: int, unconditional: list,
+                              cond_chain: list):
+        """Emit a single-line FROMLINE block (direct FL[N] access)."""
+        self.add_line(f"/* --- FROMLINE {line_num} --- */")
+        self.add_line(f"LIN = FL[{line_num}];")
+        self.add_line("IF ISTRUE(LIN > 0);")
+        self.add_line("THEN;")
+        self.indent()
+
+        for rpe in unconditional:
+            self._emit_rpe_output(rpe, line_var="LIN")
+            self.add_line("")
+
+        if cond_chain:
+            self._emit_condition_chain(cond_chain, line_var="LIN")
+            self.add_line("")
+
+        self.dedent()
+        self.add_line("ENDIF;")
+        self.add_line("")
+
+    def _emit_fromline_loop(self, line_num: int, start_vl: int, end_vl: int,
+                            unconditional: list, cond_chain: list):
+        """
+        Emit a multi-line FROMLINE loop over VL range [start_vl..end_vl].
+
+        For each VL in the range, looks up FL[VL] to get the CONTENT index.
+        Before applying the condition chain, re-evaluates SETRCD conditions
+        for the specific CONTENT[LIN] line so that per-line routing is correct.
+
+        Y positioning: RPE Y values are fixed for the FROMLINE's first visual
+        line.  For subsequent VLs in the range, we add YOFF (incremented by
+        LINE_HEIGHT=50 units per VL) so each line renders at the correct
+        vertical position.  Card-type entries (Y >= 2000) are absolute
+        bottom-of-page positions and do NOT get the offset.
+        """
+        line_height = 50  # VIPP units between consecutive visual lines
+
+        self.add_line(f"/* --- FROMLINE {line_num} (covers VL {start_vl}-{end_vl}) --- */")
+
+        # Reset HOLD flags before the loop so they accumulate correctly
+        # line-by-line (the pre-scan sets them globally for ALL content lines,
+        # but in VIPP they only latch when the matching line is reached during
+        # FROMLINE processing).
+        if self.jdt and self.jdt.conditions:
+            simple_hold = [(n, c) for n, c in self.jdt.conditions.items()
+                           if not c.is_compound and c.operator == 'HOLD']
+            if simple_hold:
+                self.add_line("/* Reset HOLD flags — will re-accumulate per-line */")
+                for name, _ in sorted(simple_hold, key=lambda x: x[0]):
+                    self.add_line(f"{name} = 0;")
+                self.add_line("")
+
+        self.add_line(f"VL{line_num} = {start_vl};")
+        self.add_line(f"YOFF = 0;")
+        self.add_line(f"FOR FL{line_num}_LOOP REPEAT 1;")
+        self.indent()
+
+        self.add_line(f"LIN = FL[VL{line_num}];")
+        self.add_line("IF ISTRUE(LIN > 0);")
+        self.add_line("THEN;")
+        self.indent()
+
+        # Re-evaluate SETRCD conditions for this specific line
+        self._emit_perline_setrcd_eval("LIN")
+
+        for rpe in unconditional:
+            self._emit_rpe_output(rpe, line_var="LIN", y_offset_var="YOFF")
+            self.add_line("")
+
+        if cond_chain:
+            self._emit_condition_chain(cond_chain, line_var="LIN", y_offset_var="YOFF")
+            self.add_line("")
+
+        self.dedent()
+        self.add_line("ENDIF;")
+        self.add_line("")
+
+        # Advance VL iterator and Y offset; continue loop while within range
+        self.add_line(f"YOFF = YOFF + {line_height};")
+        self.add_line(f"VL{line_num} = VL{line_num} + 1;")
+        self.add_line(f"IF VL{line_num} <= {end_vl};")
+        self.add_line("THEN;")
+        self.indent()
+        self.add_line(f"FL{line_num}_LOOP = 0;")
+        self.dedent()
+        self.add_line("ENDIF;")
+
+        self.dedent()
+        self.add_line("ENDFOR;")
+        self.add_line("")
+
+    def _emit_perline_setrcd_eval(self, line_var: str):
+        """
+        Emit per-line SETRCD condition re-evaluation against CONTENT[line_var].
+
+        For multi-line FROMLINE loops, page-level flags reflect ALL lines on the
+        page and are incorrect for per-line routing.  This method re-evaluates
+        conditions against a SPECIFIC CONTENT line:
+
+        - Non-HOLD simple conditions: reset to 0, re-evaluate against CONTENT[line_var]
+        - HOLD conditions: evaluated (set-only, never reset) so they latch
+          correctly line-by-line during the FROMLINE loop
+        - Compound conditions: recomputed from the re-evaluated simple flags
+        """
+        if not self.jdt or not self.jdt.conditions:
+            return
+
+        simple_non_hold = [(n, c) for n, c in self.jdt.conditions.items()
+                           if not c.is_compound and c.operator != 'HOLD']
+        simple_hold = [(n, c) for n, c in self.jdt.conditions.items()
+                       if not c.is_compound and c.operator == 'HOLD']
+        compound = [(n, c) for n, c in self.jdt.conditions.items()
+                    if c.is_compound]
+
+        if not simple_non_hold and not simple_hold and not compound:
+            return
+
+        self.add_line("/* Re-evaluate SETRCD conditions for CONTENT[LIN] */")
+
+        # Reset non-HOLD simple flags
+        for name, _ in sorted(simple_non_hold, key=lambda x: x[0]):
+            self.add_line(f"{name} = 0;")
+
+        # Evaluate simple conditions against CONTENT[line_var]
+        op_map = {'eq': '==', 'ne': '<>', 'gt': '>', 'lt': '<'}
+        for name, cond in sorted(simple_non_hold, key=lambda x: x[0]):
+            dfa_op = op_map.get(cond.operator, '==')
+            pos = max(1, cond.position)
+            length = max(1, cond.length)
+            padded_val = cond.value.ljust(length)
+            val_escaped = padded_val.replace("'", "''")
+            substr_expr = f"SUBSTR(CONTENT[{line_var}],{pos},{length},'')"
+            self.add_line(f"IF ISTRUE({substr_expr}{dfa_op}'{val_escaped}');"
+                          f" THEN; {name} = 1; ENDIF;")
+
+        # Evaluate HOLD conditions (set-only, never reset — they latch once triggered).
+        # In VIPP, HOLD flags only become TRUE when the matching line is reached
+        # during FROMLINE processing.  The FROMLINE loop resets them before the
+        # loop starts; here we set them if the current line matches.
+        if simple_hold:
+            self.add_line("/* HOLD conditions: set-only (latch) */")
+            for name, cond in sorted(simple_hold, key=lambda x: x[0]):
+                val_escaped = cond.value.replace("'", "''")
+                self.add_line(f"IF ISTRUE(POS('{val_escaped}',CONTENT[{line_var}],1)>0);"
+                              f" THEN; {name} = 1; ENDIF;")
+
+        # Reset and recompute compound conditions (depend on the re-evaluated simple flags)
+        if compound:
+            for name, _ in sorted(compound, key=lambda x: x[0]):
+                self.add_line(f"{name} = 0;")
+            for name, cond in sorted(compound, key=lambda x: x[0]):
+                if not cond.sub_conditions or len(cond.sub_conditions) < 2:
+                    continue
+                dfa_op = " OR " if cond.compound_operator.lower() == "or" else " AND "
+                parts = [f"ISTRUE({sub}==1)" for sub in cond.sub_conditions]
+                expr = dfa_op.join(parts)
+                self.add_line(f"IF {expr}; THEN; {name} = 1; ENDIF;")
+
         self.add_line("")
 
     def _build_condition_chain(self, rpe_list) -> list:
@@ -3221,7 +3675,8 @@ class VIPPToDFAConverter:
                 chain[seen[cond]][1].append(rpe)
         return chain
 
-    def _emit_condition_chain(self, chain: list, line_var: str = "LIN"):
+    def _emit_condition_chain(self, chain: list, line_var: str = "LIN",
+                              y_offset_var: str = None):
         """
         Emit a fully-nested IF/ELSE/ENDIF structure for a JDT /ENDIFALL chain.
 
@@ -3247,9 +3702,48 @@ class VIPPToDFAConverter:
         """
         if not chain:
             return
-        self._emit_chain_recursive(chain, 0, line_var)
+        self._emit_chain_recursive(chain, 0, line_var, y_offset_var)
 
-    def _emit_chain_recursive(self, chain: list, idx: int, line_var: str):
+    def _setrcd_cond_expr(self, cond_name: str, line_var: str) -> str:
+        """
+        Return the DFA condition expression for a SETRCD condition evaluated
+        against CONTENT[line_var].
+
+        In VIPP JDT, FROMLINE conditionals (/IF_CND53 etc.) are evaluated
+        PER INPUT RECORD — each record carries its own content and the RPE
+        is applied only if the condition matches THAT record's data.
+
+        In the DFA, we accumulate records into CONTENT[1..n] first, then
+        output FROMLINE N using CONTENT[LIN=N].  We must therefore check the
+        SETRCD condition directly against CONTENT[LIN], NOT against a global
+        page-level flag (which may have been set by a different record).
+
+        For simple /eq conditions:
+            SUBSTR(CONTENT[LIN],pos,len,'')=='{padded_val}'
+        For compound or HOLD conditions: fall back to {cond_name}==1.
+        """
+        if not self.jdt or not self.jdt.conditions:
+            return f"{cond_name}==1"
+        cond = self.jdt.conditions.get(cond_name)
+        if cond is None or cond.is_compound:
+            # Compound conditions (AND/OR of other flags): the page-level flag
+            # is still the best approximation we have.
+            return f"{cond_name}==1"
+        if cond.operator == 'HOLD':
+            # HOLD: the flag latches for the whole document — page-level flag
+            # is correct here since HOLD is document-scoped, not line-scoped.
+            return f"{cond_name}==1"
+        op_map = {'eq': '==', 'ne': '<>', 'gt': '>', 'lt': '<'}
+        dfa_op = op_map.get(cond.operator, '==')
+        pos = max(1, cond.position)
+        length = max(1, cond.length)
+        raw_val = cond.value
+        padded_val = raw_val.ljust(length)   # same padding as _emit_simple_setrcd_check
+        val_escaped = padded_val.replace("'", "''")
+        return f"SUBSTR(CONTENT[{line_var}],{pos},{length},'')=='{val_escaped}'"
+
+    def _emit_chain_recursive(self, chain: list, idx: int, line_var: str,
+                              y_offset_var: str = None):
         """
         Recursive helper for _emit_condition_chain.
 
@@ -3268,6 +3762,10 @@ class VIPPToDFAConverter:
             ELSE;
                 ...
             ENDIF;
+
+        The condition expression is resolved via _setrcd_cond_expr() so that
+        simple SETRCD conditions check CONTENT[line_var] directly rather than
+        a page-level flag (which may have been set by a different content line).
         """
         if idx >= len(chain):
             return
@@ -3278,52 +3776,53 @@ class VIPPToDFAConverter:
             # Terminal plain ELSE — wrap outputs in a nested OUTLINE
             self.add_line("ELSE;")
             self.indent()
-            self._emit_rpe_list_in_outline(arrays, line_var)
+            self._emit_rpe_list_in_outline(arrays, line_var, y_offset_var)
             self.dedent()
             # No further nesting
         elif idx == 0:
             # First IF in the chain
-            self.add_line(f"IF ISTRUE({cond_name}==1);")
+            cond_expr = self._setrcd_cond_expr(cond_name, line_var)
+            self.add_line(f"IF ISTRUE({cond_expr});")
             self.add_line("THEN;")
             self.indent()
-            self._emit_rpe_list_in_outline(arrays, line_var)
+            self._emit_rpe_list_in_outline(arrays, line_var, y_offset_var)
             self.dedent()
             # Recurse for rest of chain (which will appear in the ELSE branch)
-            self._emit_chain_recursive(chain, idx + 1, line_var)
+            self._emit_chain_recursive(chain, idx + 1, line_var, y_offset_var)
             self.add_line("ENDIF;")
         else:
             # Subsequent condition — sits inside the ELSE of the previous IF
             self.add_line("ELSE;")
             self.indent()
-            self.add_line(f"IF ISTRUE({cond_name}==1);")
+            cond_expr = self._setrcd_cond_expr(cond_name, line_var)
+            self.add_line(f"IF ISTRUE({cond_expr});")
             self.add_line("THEN;")
             self.indent()
-            self._emit_rpe_list_in_outline(arrays, line_var)
+            self._emit_rpe_list_in_outline(arrays, line_var, y_offset_var)
             self.dedent()
             # Recurse for rest of chain
-            self._emit_chain_recursive(chain, idx + 1, line_var)
+            self._emit_chain_recursive(chain, idx + 1, line_var, y_offset_var)
             self.add_line("ENDIF;")
             self.dedent()
 
-    def _emit_rpe_list_in_outline(self, arrays: list, line_var: str):
+    def _emit_rpe_list_in_outline(self, arrays: list, line_var: str,
+                                   y_offset_var: str = None):
         """
-        Emit a list of RPE outputs wrapped in a nested OUTLINE block.
+        Emit a list of RPE outputs directly (no OUTLINE wrapper).
 
-        Used inside IF/THEN/ELSE branches where OUTPUT cannot appear directly
-        (DFA requires OUTPUT to always be directly inside an OUTLINE block).
+        These are already inside the main OUTLINE at POSITION (0 MM)(0 MM).
+        RPE coordinates are absolute page positions, so a nested OUTLINE at
+        POSITION (SAME)(SAME) would shift them by the current cursor offset,
+        causing "Text coordinate < 0" errors for items at the page bottom.
         """
         if not arrays:
             return
-        self.add_line("OUTLINE")
-        self.indent()
-        self.add_line("POSITION (SAME) (SAME)")
-        self.add_line("DIRECTION ACROSS;")
         for rpe in arrays:
-            self._emit_rpe_output(rpe, line_var=line_var)
-        self.dedent()
-        self.add_line("ENDIO;")
+            self._emit_rpe_output(rpe, line_var=line_var,
+                                  y_offset_var=y_offset_var)
 
-    def _emit_rpe_output(self, rpe: 'XeroxRPEArray', line_var: str = "LIN"):
+    def _emit_rpe_output(self, rpe: 'XeroxRPEArray', line_var: str = "LIN",
+                         y_offset_var: str = None):
         """
         Emit one DFA OUTPUT statement from an RPE array entry.
 
@@ -3346,12 +3845,68 @@ class VIPPToDFAConverter:
 
         Font: mapped from JDT /FontN alias to the DFA FONT name (same alias uppercased).
         Color: BLACK→B, WHITE→WHITE, RED→R; ignored for SCALL entries.
+
+        y_offset_var: if set, the DFA variable name holding the accumulated Y offset
+            (in VIPP grid units).  Added to Y for multi-line FROMLINE loops so each
+            visual line renders at the correct vertical position.  NOT applied to
+            card-type entries (Y >= 2000) which are absolute bottom-of-page positions.
         """
         # --- Content expression ---
         if rpe.special_call == 'SCALL':
-            # SCALL resource call — emit a placeholder comment; resource is in the FRM
             res_name = rpe.literal_text.strip("'\"()") if rpe.literal_text else "UNKNOWN"
-            self.add_line(f"/* SCALL {res_name} — resource defined in FRM overlay */")
+            # Look up XGFRESDEF resource definition
+            res_def = None
+            if self.jdt and hasattr(self.jdt, 'xgfresdef_resources'):
+                res_def = self.jdt.xgfresdef_resources.get(res_name)
+            if res_def and res_def.get('type') == 'box':
+                # Convert DRAWB box resource to DFA BOX
+                # SCALL RPE field order differs from normal RPE:
+                #   Normal: [cond vskip xpos yskip hpos(Y) vpos(DY) start len]
+                #   SCALL:  [{SCALL} cond xpos yskip ypos vpos(DY) 0 (name)]
+                # After {SCALL} consumed, xpos→elements[1]=vertical_skip,
+                # ypos→elements[3]=y_skip, DY→elements[4]=horizontal_position
+                x_pos = rpe.vertical_skip         # SCALL xpos
+                y_pos = rpe.y_skip                # SCALL ypos
+                dy = rpe.horizontal_position      # SCALL DY
+                box_w = res_def['width']
+                box_h = res_def['height']
+                style = res_def.get('style', 'R_S1')
+                # Y offset for multi-line FROMLINE loops
+                effective_y = y_pos + dy
+                use_offset = y_offset_var and effective_y < 2000
+                if use_offset:
+                    if dy != 0:
+                        box_y = f"&UNIH*(#{y_pos}+#{dy}+{y_offset_var})"
+                    else:
+                        box_y = f"&UNIH*(#{y_pos}+{y_offset_var})"
+                else:
+                    if dy != 0:
+                        box_y = f"&UNIH*(#{y_pos}+#{dy})"
+                    else:
+                        box_y = f"&UNIH*#{y_pos}"
+                box_x = f"&UNIH*#{x_pos}"
+                # Determine color from style name
+                # XDRKR_S1 = dark red filled, R_S1 = red filled
+                if 'R' in style.upper():
+                    box_color = 'R'
+                elif 'G' in style.upper():
+                    box_color = 'G'
+                else:
+                    box_color = 'B'
+                self.add_line(f"BOX")
+                self.indent()
+                self.add_line(f"POSITION ({box_x}) ({box_y})")
+                self.add_line(f"WIDTH &UNIH*#{box_w}")
+                self.add_line(f"HEIGHT &UNIH*#{box_h}")
+                self.add_line(f"COLOR {box_color} THICKNESS 0 TYPE SOLID SHADE 100;")
+                self.dedent()
+                return
+            # Table resource — convert BEGINTABLE/SHROW to DFA TEXT _TABLE
+            if res_def and res_def.get('type') == 'table':
+                self._emit_table_scall(res_def, rpe, y_offset_var)
+                return
+            # Unknown complex resource — emit comment stub (no visible text)
+            self.add_line(f"/* SCALL {res_name} — complex resource, not converted */")
             return
 
         if rpe.literal_text is not None:
@@ -3361,14 +3916,17 @@ class VIPPToDFAConverter:
             content_expr = f"'{lit_escaped}'"
         else:
             # Field substring from CONTENT[line_var]
-            # JDT start is 1-based on CONTENT (CC already stripped).
-            # start=0 means "beginning of content" = DFA position 1.
+            # VIPP RPE START is 0-based (PostScript convention).
+            # DFA SUBSTR is 1-based.  Convert: dfa_start = start + 1.
+            # Verified with FIN886 raw data:
+            #   FROMLINE 3: START=73 → CONTENT[74] = page number (' ' ' ' ' ' ' ' '1')
+            #   FROMLINE 9: START=24 → CONTENT[25] = merchant number ('ZXYZXYYXZYX')
             start = rpe.start_position
             length = rpe.length
             if start == 0 and length == 0:
                 # Empty/null output — skip
                 return
-            dfa_start = max(1, start)  # DFA SUBSTR is 1-based; 0 → 1
+            dfa_start = start + 1  # 0-based VIPP → 1-based DFA
             if length > 0:
                 content_expr = f"SUBSTR(CONTENT[{line_var}],{dfa_start},{length},'')"
             else:
@@ -3391,12 +3949,24 @@ class VIPPToDFAConverter:
         # 12mm too far down and pushes the bottom-of-page content past 297mm,
         # causing DocEXEC to overflow to an extra physical page.
         # Correct formula: DFA Y = UNIH * (Y + DY)   [no MTOP term].
-        if dy != 0:
-            y_expr = f"UNIH*(#{y_pos}+#{dy})"
+        #
+        # For multi-line FROMLINE loops: y_offset_var (e.g. YOFF) holds the
+        # accumulated line offset in grid units.  Card-type entries (Y >= 2000)
+        # are fixed bottom-of-page positions and must NOT get the offset.
+        effective_y = y_pos + dy
+        use_offset = y_offset_var and effective_y < 2000
+        if use_offset:
+            if dy != 0:
+                y_expr = f"&UNIH*(#{y_pos}+#{dy}+{y_offset_var})"
+            else:
+                y_expr = f"&UNIH*(#{y_pos}+{y_offset_var})"
         else:
-            y_expr = f"UNIH*#{y_pos}"
+            if dy != 0:
+                y_expr = f"&UNIH*(#{y_pos}+#{dy})"
+            else:
+                y_expr = f"&UNIH*#{y_pos}"
 
-        x_expr = f"UNIH*#{x_pos}"
+        x_expr = f"&UNIH*#{x_pos}"
 
         # --- Alignment ---
         cc_flag = rpe.condition_index  # field[0]: 0=left, 1=right, 2=center
@@ -3421,6 +3991,177 @@ class VIPPToDFAConverter:
         self.add_line(f"{align}")
         self.add_line(f"COLOR {color_name};")
         self.dedent()
+
+    def _emit_table_scall(self, res_def: dict, rpe: 'XeroxRPEArray',
+                          y_offset_var: str = None):
+        """
+        Emit DFA TEXT _TABLE for a BEGINTABLE-based XGFRESDEF resource.
+
+        Converts VIPP BEGINTABLE/SHROW to DFA _TABLE syntax inside a TEXT block.
+        The position is derived from the SCALL RPE coordinates (same field mapping
+        as DREDBOX BOX: X=vertical_skip, Y=y_skip, DY=horizontal_position).
+
+        Args:
+            res_def: Parsed resource definition with 'rows' and 'post_text'
+            rpe: The RPE entry for the SCALL
+            y_offset_var: Y offset variable for multi-line FROMLINE loops
+        """
+        res_name = res_def.get('name', 'TABLE')
+        rows = res_def.get('rows', [])
+        post_text = res_def.get('post_text', [])
+
+        if not rows:
+            self.add_line(f"/* SCALL {res_name} — table resource with no rows */")
+            return
+
+        # Guard: emit table resource only once (HOLD conditions stay latched,
+        # so the SCALL would fire on every subsequent FROMLINE iteration).
+        guard_var = f"DONE_{res_name}"
+        self.add_line(f"IF ISTRUE({guard_var}==0);")
+        self.add_line("THEN;")
+        self.indent()
+        self.add_line(f"{guard_var} = 1;")
+
+        # SCALL RPE field order: X=vertical_skip, Y=y_skip, DY=horizontal_position
+        x_pos = rpe.vertical_skip
+        y_pos = rpe.y_skip
+        dy = rpe.horizontal_position
+
+        effective_y = y_pos + dy
+        use_offset = y_offset_var and effective_y < 2000
+        if use_offset:
+            if dy != 0:
+                y_expr = f"&UNIH*(#{y_pos}+#{dy}+{y_offset_var})"
+            else:
+                y_expr = f"&UNIH*(#{y_pos}+{y_offset_var})"
+        else:
+            if dy != 0:
+                y_expr = f"&UNIH*(#{y_pos}+#{dy})"
+            else:
+                y_expr = f"&UNIH*#{y_pos}"
+        x_expr = f"&UNIH*#{x_pos}"
+
+        # Calculate column widths — use widths from first row
+        first_row = rows[0]
+        col_widths = [c.get('width', 25) for c in first_row]
+        total_w = sum(col_widths) if col_widths else 100
+        # Convert to percentage for _TABLE _COLUMNS
+        pct_widths = [round(w / total_w * 100) for w in col_widths]
+        # Ensure they sum to 100
+        diff = 100 - sum(pct_widths)
+        if diff != 0 and pct_widths:
+            pct_widths[-1] += diff
+        col_spec = ','.join(str(p) for p in pct_widths)
+        num_cols = len(first_row)
+
+        self.add_line(f"/* SCALL {res_name} — table resource */")
+        self.add_line("TEXT")
+        self.indent()
+        self.add_line(f"POSITION ({x_expr}) ({y_expr})")
+        # Table width: use the print area width (~187 MM is standard for OCBC statements)
+        self.add_line("WIDTH 187 MM")
+        self.add_line(f"FONT FONT23")
+        self.add_line(f"NORMAL")
+        self.add_line(f"_TABLE(THICKNESS 0.3 MM  COLOR B  _COLUMNS {col_spec})")
+
+        for row_idx, row in enumerate(rows):
+            # First row = header
+            if row_idx == 0:
+                self.add_line("_ROW(HEIGHT 4 MM  HEADER)")
+            else:
+                self.add_line("_ROW(HEIGHT 4 MM)")
+
+            # Handle merged cells: if row has fewer cells than first row,
+            # calculate _CELLSPAN for merged columns
+            for cell_idx, cell in enumerate(row):
+                cell_text = cell.get('text', '')
+                cell_font = cell.get('font', 'FONT23')
+                cell_w = cell.get('width', 0)
+
+                # Detect cell spanning: if this cell's width spans multiple columns
+                cellspan = 1
+                if num_cols > 0 and cell_w > 0 and len(row) < num_cols:
+                    # Count how many standard columns this cell spans
+                    target_w = cell_w
+                    span_w = 0
+                    for ci in range(cell_idx, num_cols):
+                        span_w += col_widths[ci] if ci < len(col_widths) else col_widths[-1]
+                        cellspan += 1
+                        if span_w >= target_w:
+                            break
+                    cellspan = max(1, cellspan - 1)
+
+                if cellspan > 1:
+                    self.add_line(f"_CELL(_CELLSPAN {cellspan})")
+                else:
+                    self.add_line("_CELL()")
+
+                # Font: header vs data
+                if row_idx == 0:
+                    self.add_line(f"ALIGN CENTER")
+                    self.add_line(f"FONT {cell_font}")
+                    self.add_line("BOLD")
+                else:
+                    self.add_line(f"ALIGN CENTER")
+                    self.add_line(f"FONT {cell_font}")
+                    self.add_line("NORMAL")
+
+                # Escape quotes
+                cell_text_esc = cell_text.replace("'", "''")
+                self.add_line(f"'{cell_text_esc}'")
+
+        self.add_line("_TABLEEND")
+        self.add_line(";")
+        self.dedent()
+
+        # Post-table text (Website, Note, etc.)
+        # After a TEXT _TABLE block, the cursor Y may not be at the table bottom.
+        # Use explicit absolute positioning: table_Y + (num_rows * row_height) + gap.
+        if post_text:
+            num_rows = len(rows)
+            # Each row is ~4 MM; add 2 MM gap below table
+            table_height_vipp = num_rows * 100 + 50  # rough estimate in VIPP units
+            post_y = y_pos + dy + table_height_vipp
+            if use_offset:
+                post_y_expr = f"&UNIH*(#{post_y}+{y_offset_var})"
+            else:
+                post_y_expr = f"&UNIH*#{post_y}"
+            first_post = True
+            for pt in post_text:
+                text = pt.get('text', '')
+                font = pt.get('font', 'FONT23')
+                ptype = pt.get('type', 'SHL')
+                text_esc = text.replace("'", "''")
+
+                if first_post:
+                    pos_str = f"POSITION ({x_expr}) ({post_y_expr})"
+                    first_post = False
+                else:
+                    pos_str = "POSITION (SAME) (NEXT)"
+
+                if ptype == 'SHL':
+                    self.add_line(f"OUTPUT '{text_esc}'")
+                    self.indent()
+                    self.add_line(f"FONT {font} NORMAL")
+                    self.add_line(pos_str)
+                    self.add_line("ALIGN LEFT NOPAD")
+                    self.add_line("COLOR B;")
+                    self.dedent()
+                elif ptype == 'SHP':
+                    self.add_line("TEXT")
+                    self.indent()
+                    self.add_line(pos_str)
+                    self.add_line("WIDTH 166 MM")
+                    self.add_line(f"FONT {font}")
+                    self.add_line("NORMAL")
+                    self.add_line("ALIGN LEFT")
+                    self.add_line(f"'{text_esc}'")
+                    self.add_line(";")
+                    self.dedent()
+
+        # Close the one-shot guard IF block
+        self.dedent()
+        self.add_line("ENDIF;")
 
     # ------------------------------------------------------------------
     # Legacy helpers (kept for compatibility with DBM/FRM paths)
@@ -3519,9 +4260,10 @@ class VIPPToDFAConverter:
             self.add_line("")
 
             # Generate OUTLINE block for FRM content
+            # Use POSITION LEFT TOP for absolute page-level anchoring
             self.add_line("OUTLINE")
             self.indent()
-            self.add_line("POSITION (0 MM) (0 MM)")
+            self.add_line("POSITION LEFT TOP")
             self.add_line("DIRECTION ACROSS;")
             self.add_line("")
 
@@ -3540,9 +4282,11 @@ class VIPPToDFAConverter:
             self.add_line("")
 
             # Add OUTLINE wrapper for FRM commands
+            # Use POSITION LEFT TOP so that when called from PRINTFOOTER
+            # the FRM anchors to the logical page origin (not the cursor position).
             self.add_line("OUTLINE ")
             self.indent()
-            self.add_line("POSITION (0 MM) (0 MM)")
+            self.add_line("POSITION LEFT TOP")
             self.add_line("DIRECTION ACROSS;")
             self.add_line("")            
 
@@ -4667,6 +5411,31 @@ class VIPPToDFAConverter:
                     except (ValueError, TypeError):
                         pass
 
+        # Compute fixed width from EPS BoundingBox when a scale is present.
+        # The VIPP scale was designed for the EPS vector dimensions, but at runtime
+        # DocEXEC may find a full-page JPEG instead, giving a much larger image.
+        # By pre-computing the target width from the EPS we avoid the mismatch.
+        eps_fixed_width_mm = 0.0
+        if scall_scale > 0.0 and abs(scall_scale - 1.0) > 0.001:
+            import os as _os
+            # Derive source directory from the FRM file path
+            frm_dir = _os.path.dirname(frm.filename) if frm and frm.filename else ""
+            if not frm_dir and self.jdt and self.jdt.filename:
+                frm_dir = _os.path.dirname(self.jdt.filename)
+            # Look for matching EPS file
+            eps_name = resource_name  # e.g. "OCBC" or "OCBC Al-Amin"
+            for candidate in [
+                _os.path.join(frm_dir, eps_name + '.eps'),
+                _os.path.join(frm_dir, eps_name + '.EPS'),
+            ]:
+                bbox = self._read_eps_bbox(candidate)
+                if bbox is not None:
+                    width_pt, height_pt = bbox
+                    eps_fixed_width_mm = (width_pt / 72.0) * 25.4 * scall_scale
+                    logger.info(f"EPS BoundingBox for {eps_name}: {width_pt:.1f}x{height_pt:.1f} pt "
+                                f"-> target width {eps_fixed_width_mm:.1f} MM at {scall_scale*100:.1f}%")
+                    break
+
         # Generate DFA based on file type
         if file_ext in ('jpg', 'jpeg', 'tif', 'tiff'):
             other_type = 'JPG' if file_ext in ('jpg', 'jpeg') else 'TIF'
@@ -4674,6 +5443,7 @@ class VIPPToDFAConverter:
             self._emit_scaled_image(
                 resource_name, other_type, "SAME", "SAME",
                 scale=scall_scale, cache_dims=dims,
+                fixed_width_mm=eps_fixed_width_mm,
             )
 
         elif file_ext == 'eps':
@@ -4683,7 +5453,8 @@ class VIPPToDFAConverter:
             pos_x = x_part
             pos_y = "0 MM-$MR_TOP+&CORSEGMENT"
             self.add_line(f"/* SEGMENT {resource_name} POSITION ({pos_x}) ({pos_y}); */")
-            self._emit_scaled_image(resource_name, 'JPG', pos_x, pos_y, scale=scall_scale)
+            self._emit_scaled_image(resource_name, 'JPG', pos_x, pos_y,
+                                    scale=scall_scale, fixed_width_mm=eps_fixed_width_mm)
 
         else:
             # AFP page segment: SEGMENT commented out; use CREATEOBJECT IOBDLL instead.
@@ -4691,19 +5462,44 @@ class VIPPToDFAConverter:
             x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
             y_part = f"{y} MM-$MR_TOP+&CORSEGMENT" if y_was_set else "SAME"
             self.add_line(f"/* SEGMENT {resource_name} POSITION ({x_part}) ({y_part}); */")
-            self._emit_scaled_image(resource_name, 'JPG', x_part, y_part, scale=scall_scale)
+            self._emit_scaled_image(resource_name, 'JPG', x_part, y_part,
+                                    scale=scall_scale, fixed_width_mm=eps_fixed_width_mm)
 
     def _emit_scaled_image(self, resource_name: str, ext: str,
                            x_expr: str, y_expr: str,
                            scale: float = 0.0,
-                           cache_dims: "tuple | None" = None):
+                           cache_dims: "tuple | None" = None,
+                           fixed_width_mm: float = 0.0):
         """Emit CREATEOBJECT IOBDLL for an image with optional scaling.
 
-        Same logic as universal_xerox_parser._emit_scaled_image — see there for details.
+        Priority order:
+        0. fixed_width_mm > 0 — pre-computed width (from EPS BoundingBox): emit constant
+        1. cache_dims=(w,h) — explicit pixel dimensions from CACHE [w h]
+        2. scale > 0 and != 1.0 — IOB_INFO runtime query
+        3. Otherwise — auto-fit via OBJECTMAPPING='2'
         """
         pos = f"({x_expr}) ({y_expr})"
 
-        if cache_dims is not None:
+        if fixed_width_mm > 0.0:
+            # Pre-computed target width (e.g. from EPS BoundingBox × scale)
+            scale_pct = scale * 100 if scale > 0 else 0
+            self.add_line(f"/* Scale {resource_name} to {scale_pct:.4g}% — "
+                          f"target width {fixed_width_mm:.1f} MM (from EPS BoundingBox) */")
+            self.add_line(f"IMG_W_MM = #{fixed_width_mm:.2f} ;")
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+            self.indent()
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
+            self.add_line("('OBJECTMAPPING'='2')")
+            self.add_line("('XOBJECTAREASIZE'=IMG_W_MM);")
+            self.dedent()
+            self.dedent()
+
+        elif cache_dims is not None:
             self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
             self.indent()
             self.add_line(f"POSITION {pos}")
@@ -4757,6 +5553,29 @@ class VIPPToDFAConverter:
             self.add_line("('OBJECTMAPPING'='2');")
             self.dedent()
             self.dedent()
+
+    @staticmethod
+    def _read_eps_bbox(eps_path: str):
+        """Read %%BoundingBox from an EPS file and return (width_pt, height_pt) or None.
+
+        The BoundingBox line gives coordinates in PostScript points (1/72 inch):
+            %%BoundingBox: llx lly urx ury
+        Width = urx - llx, Height = ury - lly.
+        """
+        try:
+            with open(eps_path, 'r', encoding='latin-1') as f:
+                for line in f:
+                    if line.startswith('%%BoundingBox:') and 'atend' not in line.lower():
+                        parts = line.split()
+                        if len(parts) >= 5:
+                            llx, lly, urx, ury = float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])
+                            return (urx - llx, ury - lly)
+                    # Stop searching after DSC header
+                    if line.startswith('%%EndComments'):
+                        break
+        except (IOError, OSError, ValueError):
+            pass
+        return None
 
     def _convert_frm_image(self, cmd: XeroxCommand, x: float, y: float):
         """Convert FRM ICALL command to DFA CREATEOBJECT IOBDLL(IOBDEFS).

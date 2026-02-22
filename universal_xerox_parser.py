@@ -2184,9 +2184,10 @@ class VIPPToDFAConverter:
             self.add_line("")
 
             # Generate OUTLINE block for FRM content
+            # Use POSITION LEFT TOP for absolute page-level anchoring
             self.add_line("OUTLINE")
             self.indent()
-            self.add_line("POSITION (0 MM) (0 MM)")
+            self.add_line("POSITION LEFT TOP")
             self.add_line("DIRECTION ACROSS;")
             self.add_line("")
 
@@ -2205,9 +2206,11 @@ class VIPPToDFAConverter:
             self.add_line("")
 
             # Add OUTLINE wrapper for FRM commands
+            # Use POSITION LEFT TOP so that when called from PRINTFOOTER
+            # the FRM anchors to the logical page origin (not the cursor position).
             self.add_line("OUTLINE ")
             self.indent()
-            self.add_line("POSITION (0 MM) (0 MM)")
+            self.add_line("POSITION LEFT TOP")
             self.add_line("DIRECTION ACROSS;")
             self.add_line("")            
 
@@ -3618,6 +3621,27 @@ class VIPPToDFAConverter:
                     except (ValueError, TypeError):
                         pass
 
+        # Compute fixed width from EPS BoundingBox when a scale is present.
+        eps_fixed_width_mm = 0.0
+        if scall_scale > 0.0 and abs(scall_scale - 1.0) > 0.001:
+            import os as _os
+            frm_dir = _os.path.dirname(frm.filename) if frm and frm.filename else ""
+            if not frm_dir and self.dbm and hasattr(self.dbm, 'filename'):
+                frm_dir = _os.path.dirname(self.dbm.filename)
+            # The original SCALL filename (before sanitization) determines the EPS lookup
+            eps_name = filename.rsplit('.', 1)[0] if '.' in filename else filename
+            for candidate in [
+                _os.path.join(frm_dir, eps_name + '.eps'),
+                _os.path.join(frm_dir, eps_name + '.EPS'),
+            ]:
+                bbox = self._read_eps_bbox(candidate)
+                if bbox is not None:
+                    width_pt, height_pt = bbox
+                    eps_fixed_width_mm = (width_pt / 72.0) * 25.4 * scall_scale
+                    logger.info(f"EPS BoundingBox for {eps_name}: {width_pt:.1f}x{height_pt:.1f} pt "
+                                f"-> target width {eps_fixed_width_mm:.1f} MM at {scall_scale*100:.1f}%")
+                    break
+
         # Generate DFA based on file type
         if file_ext in ('jpg', 'jpeg', 'tif', 'tiff'):
             other_type = 'JPG' if file_ext in ('jpg', 'jpeg') else 'TIF'
@@ -3625,6 +3649,7 @@ class VIPPToDFAConverter:
             self._emit_scaled_image(
                 resource_name, other_type, "SAME", "SAME",
                 scale=scall_scale, cache_dims=dims,
+                fixed_width_mm=eps_fixed_width_mm,
             )
 
         elif file_ext == 'eps':
@@ -3633,6 +3658,7 @@ class VIPPToDFAConverter:
             self._emit_scaled_image(
                 resource_name, 'JPG', "SAME", "SAME",
                 scale=scall_scale, cache_dims=dims,
+                fixed_width_mm=eps_fixed_width_mm,
             )
 
         else:
@@ -3641,28 +3667,18 @@ class VIPPToDFAConverter:
             # Re-enable SEGMENT block when psew3pic license is available.
             x_part = f"{x} MM-$MR_LEFT" if x_was_set else "SAME"
             y_part = f"{y} MM-$MR_TOP+&CORSEGMENT" if y_was_set else "SAME"
-            pos = f"({x_part}) ({y_part})"
-            self.add_line(f"/* SEGMENT {resource_name} */")
-            self.add_line(f"/* POSITION {pos}; */")
-            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
-            self.indent()
-            self.add_line(f"POSITION {pos}")
-            self.add_line("PARAMETERS")
-            self.indent()
-            self.add_line(f"('FILENAME'='{resource_name}')")
-            self.add_line("('OBJECTTYPE'='1')")
-            self.add_line("('OTHERTYPES'='JPG')")
-            self.add_line("('OBJECTMAPPING'='2');")
-            self.dedent()
-            self.dedent()
+            self._emit_scaled_image(resource_name, 'JPG', x_part, y_part,
+                                    scale=scall_scale, fixed_width_mm=eps_fixed_width_mm)
 
     def _emit_scaled_image(self, resource_name: str, ext: str,
                            x_expr: str, y_expr: str,
                            scale: float = 0.0,
-                           cache_dims: "tuple | None" = None):
+                           cache_dims: "tuple | None" = None,
+                           fixed_width_mm: float = 0.0):
         """Emit CREATEOBJECT IOBDLL for an image with optional scaling.
 
-        Three modes (in priority order):
+        Priority order:
+        0. fixed_width_mm > 0 — pre-computed width (from EPS BoundingBox): emit constant
         1. cache_dims=(w,h) — explicit pixel dimensions from CACHE [w h]: use directly
         2. scale > 0 and != 1.0 — Xerox percentage scale: use Method 1 (IOB_INFO)
              IOB_INFO reads original dimensions → calculate MM width → IOBDEFS
@@ -3673,7 +3689,26 @@ class VIPPToDFAConverter:
         """
         pos = f"({x_expr}) ({y_expr})"
 
-        if cache_dims is not None:
+        if fixed_width_mm > 0.0:
+            # Pre-computed target width (e.g. from EPS BoundingBox × scale)
+            scale_pct = scale * 100 if scale > 0 else 0
+            self.add_line(f"/* Scale {resource_name} to {scale_pct:.4g}% — "
+                          f"target width {fixed_width_mm:.1f} MM (from EPS BoundingBox) */")
+            self.add_line(f"IMG_W_MM = #{fixed_width_mm:.2f} ;")
+            self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
+            self.indent()
+            self.add_line(f"POSITION {pos}")
+            self.add_line("PARAMETERS")
+            self.indent()
+            self.add_line(f"('FILENAME'='{resource_name}')")
+            self.add_line("('OBJECTTYPE'='1')")
+            self.add_line(f"('OTHERTYPES'='{ext}')")
+            self.add_line("('OBJECTMAPPING'='2')")
+            self.add_line("('XOBJECTAREASIZE'=IMG_W_MM);")
+            self.dedent()
+            self.dedent()
+
+        elif cache_dims is not None:
             # Explicit pixel dimensions from CACHE [w h]
             self.add_line("CREATEOBJECT IOBDLL(IOBDEFS)")
             self.indent()
@@ -3731,6 +3766,28 @@ class VIPPToDFAConverter:
             self.add_line("('OBJECTMAPPING'='2');")
             self.dedent()
             self.dedent()
+
+    @staticmethod
+    def _read_eps_bbox(eps_path: str):
+        """Read %%BoundingBox from an EPS file and return (width_pt, height_pt) or None.
+
+        The BoundingBox line gives coordinates in PostScript points (1/72 inch):
+            %%BoundingBox: llx lly urx ury
+        Width = urx - llx, Height = ury - lly.
+        """
+        try:
+            with open(eps_path, 'r', encoding='latin-1') as f:
+                for line in f:
+                    if line.startswith('%%BoundingBox:') and 'atend' not in line.lower():
+                        parts = line.split()
+                        if len(parts) >= 5:
+                            llx, lly, urx, ury = float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])
+                            return (urx - llx, ury - lly)
+                    if line.startswith('%%EndComments'):
+                        break
+        except (IOError, OSError, ValueError):
+            pass
+        return None
 
     def _convert_frm_image(self, cmd: XeroxCommand, x: float, y: float):
         """Convert FRM ICALL command to DFA CREATEOBJECT IOBDLL(IOBDEFS).
