@@ -6067,6 +6067,18 @@ class VIPPToDFAConverter:
             )
             needs_istrue = has_comparison_op or is_bare_variable
 
+        # Detect always-true PREFIX self-comparison wrapping PAGEBRK.
+        # Pattern: `IF PREFIX (STMTTP) eq { PAGEBRK ... } ENDIF` inside a PREFIX case handler.
+        # Since the handler is only entered when PREFIX matches, the condition is always true.
+        # In DFA this translates to an unconditional USE LOGICALPAGE NEXT, creating a blank page.
+        # Replace with a proper page overflow check (same pattern as FRLEFT conversion).
+        if not is_frleft and cmd.children:
+            has_prefix_cmp = 'PREFIX' in condition and '==' in condition
+            has_pagebrk_child = any(c.name == 'PAGEBRK' for c in cmd.children)
+            if has_prefix_cmp and has_pagebrk_child:
+                condition = '$SL_LMAXY>$LP_HEIGHT-MM(20)'
+                needs_istrue = True
+
         # Don't output empty conditions - just output IF with THEN
         if condition.strip():
             if needs_istrue:
