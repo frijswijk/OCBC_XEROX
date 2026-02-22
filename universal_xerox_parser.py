@@ -5542,6 +5542,7 @@ class VIPPToDFAConverter:
         i = 0
         prev_cmd_was_pagebrk = False  # Track if previous command was PAGEBRK (to suppress NEWFRONT/NEWBACK double break)
         leading_pagebrk_suppressed = False  # For suppress_leading_pagebrk: only suppress the FIRST PAGEBRK
+        last_cache_cmd = None  # Track preceding CACHE command for CACHE+SCALL image patterns
         while i < len(commands):
             cmd = commands[i]
 
@@ -5822,9 +5823,25 @@ class VIPPToDFAConverter:
                 i += 1
                 continue
 
+            # Handle CACHE command — store for the following SCALL
+            if cmd.name == 'CACHE':
+                last_cache_cmd = cmd
+                i += 1
+                continue
+
             # Handle segment/image calls
             if cmd.name == 'SCALL' or cmd.name == 'ICALL':
-                self._convert_resource_command_dfa(cmd, current_x, current_y)
+                if last_cache_cmd is not None:
+                    # CACHE+SCALL pattern (e.g. "(OCBC.eps) CACHE 0.38 SCALL"):
+                    # filename is in CACHE params, scale is in SCALL params.
+                    # Delegate to _convert_frm_segment which handles EPS BoundingBox lookup,
+                    # IMG_W_MM calculation, and XOBJECTAREASIZE emission correctly.
+                    self._convert_frm_segment(cmd, current_x, current_y, None,
+                                              last_cache_cmd,
+                                              x_was_explicitly_set, y_was_explicitly_set)
+                    last_cache_cmd = None  # Clear after use
+                else:
+                    self._convert_resource_command_dfa(cmd, current_x, current_y)
                 i += 1
                 continue
 
