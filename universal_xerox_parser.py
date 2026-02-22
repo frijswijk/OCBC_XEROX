@@ -4313,6 +4313,13 @@ class VIPPToDFAConverter:
             frm_sorted = sorted(self.frm_files.keys())
             frm_names = [''.join(c for c in os.path.splitext(f)[0].upper() if c.isalnum() or c == '_')
                          for f in frm_sorted]
+            # Apply the same collision-avoidance as the file-writing loop: when the FRM base
+            # name matches the DBM base name, the FRM file is written with an 'F' suffix
+            # (e.g. UT00060F.dfa). The USE FORMAT name must match the written filename.
+            frm_names = [
+                (n + 'F' if n == docdef_name else n)
+                for n in frm_names
+            ]
             if len(frm_names) >= 2:
                 first_form = next((f for f in frm_names if f.endswith('F')), frm_names[0])
                 subseq_form = next((f for f in frm_names if f.endswith('S')), frm_names[-1])
@@ -4364,6 +4371,11 @@ class VIPPToDFAConverter:
                 frm_sorted = sorted(self.frm_files.keys())
                 frm_names = [''.join(c for c in os.path.splitext(f)[0].upper() if c.isalnum() or c == '_')
                              for f in frm_sorted]
+                # Apply collision-avoidance: FRM with same base name as DBM is written with 'F' suffix.
+                frm_names = [
+                    (n + 'F' if n == docdef_name else n)
+                    for n in frm_names
+                ]
                 if len(frm_names) >= 2:
                     first_form = next((f for f in frm_names if f.endswith('F')), frm_names[0])
                     subseq_form = next((f for f in frm_names if f.endswith('S')), frm_names[-1])
@@ -5701,6 +5713,17 @@ class VIPPToDFAConverter:
                             c for c in _os.path.splitext(form_raw)[0].upper()
                             if c.isalnum() or c == '_'
                         )
+                        # Apply collision-avoidance: if the FRM base name matches the
+                        # DBM base name, the FRM file was written with an 'F' suffix
+                        # (e.g. UT00060F.dfa). VAR_CURFORM must use the suffixed name
+                        # so that USE FORMAT REFERENCE(VAR_CURFORM) EXTERNAL resolves
+                        # to the correct file.
+                        _dbm_docdef = ''.join(
+                            c for c in _os.path.splitext(_os.path.basename(self.dbm.filename))[0]
+                            if c.isalnum()
+                        )
+                        if form_stem == _dbm_docdef:
+                            form_stem = form_stem + 'F'
                         # SETFORM in VIPP marks the page background overlay for the
                         # current page — it does NOT immediately render content.
                         # In DFA, running USE FORMAT EXTERNAL in the DOCFORMAT body
@@ -6093,14 +6116,18 @@ class VIPPToDFAConverter:
             )
             needs_istrue = has_comparison_op or is_bare_variable
 
-        # Detect always-true PREFIX self-comparison wrapping PAGEBRK.
-        # Pattern: `IF PREFIX (STMTTP) eq { PAGEBRK ... } ENDIF` inside a PREFIX case handler.
-        # Since the handler is only entered when PREFIX matches, the condition is always true.
+        # Detect always-true self-comparison wrapping PAGEBRK in a PREFIX case handler.
+        # Two patterns:
+        #   1. `IF PREFIX (STMTTP) eq { PAGEBRK }` — direct PREFIX comparison
+        #   2. `IF VAR_DTL (DTL) eq { PAGEBRK }` — variable set to PREFIX at top of case
+        # Both are always-true because the case handler is only entered when PREFIX matches.
         # In DFA this translates to an unconditional USE LOGICALPAGE NEXT, creating a blank page.
         # Replace with a proper page overflow check (same pattern as FRLEFT conversion).
         if not is_frleft and cmd.children:
-            has_prefix_cmp = 'PREFIX' in condition and '==' in condition
             has_pagebrk_child = any(c.name == 'PAGEBRK' for c in cmd.children)
+            # Catch both `PREFIX == 'X'` and `VAR_<name> == 'X'` patterns
+            has_prefix_cmp = (('PREFIX' in condition or 'VAR_' in condition)
+                              and '==' in condition)
             if has_prefix_cmp and has_pagebrk_child:
                 condition = '$SL_LMAXY>$LP_HEIGHT-MM(20)'
                 needs_istrue = True
@@ -7069,11 +7096,16 @@ class VIPPToDFAConverter:
         This function is kept for backward compatibility but delegates to
         the PRINTFOOTER function pattern.
         """
-        # List available forms
+        # List available forms.
+        # Apply collision-avoidance: FRM with same base name as DBM is written
+        # with an 'F' suffix on disk; the USE FORMAT reference must match.
+        dbm_docdef_name = ''.join(c for c in os.path.splitext(os.path.basename(self.dbm.filename))[0] if c.isalnum())
         frm_names = []
         for frm_filename in sorted(self.frm_files.keys()):
             frm_name = os.path.splitext(frm_filename)[0].upper()
             frm_name = ''.join(c for c in frm_name if c.isalnum() or c == '_')
+            if frm_name == dbm_docdef_name:
+                frm_name = frm_name + 'F'
             frm_names.append(frm_name)
 
         if len(frm_names) > 0:
@@ -7114,10 +7146,17 @@ class VIPPToDFAConverter:
         customer data.
         """
         # List available forms
+        # Compute the DBM docdef name so we can apply the same collision-avoidance
+        # as the file-writing loop: when an FRM has the same base name as the DBM,
+        # the FRM file is written with an 'F' suffix (e.g. UT00060F.dfa), so the
+        # USE FORMAT reference must also use the suffixed name.
+        dbm_docdef_name = ''.join(c for c in os.path.splitext(os.path.basename(self.dbm.filename))[0] if c.isalnum())
         frm_names = []
         for frm_filename in sorted(self.frm_files.keys()):
             frm_name = os.path.splitext(frm_filename)[0].upper()
             frm_name = ''.join(c for c in frm_name if c.isalnum() or c == '_')
+            if frm_name == dbm_docdef_name:
+                frm_name = frm_name + 'F'
             frm_names.append(frm_name)
 
         if len(frm_names) == 0:
