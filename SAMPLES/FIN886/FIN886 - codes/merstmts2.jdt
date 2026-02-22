@@ -1,59 +1,74 @@
-%!PS-Adobe-2.0
-%%Title: bkcmerstmts.jdt
+%!PS-Adobe-2.0
+
+%%Title: bkcmerstmts.jdt
+
 %%Application: Bank Card Merchant Summary Statement
 %%Creator: Lum Chi Yan
-%%CreationDate: 16th Aug 2003
-%%For: JDT definition for Xerox Generic Format
-%%EndComments
-%
-%----------------------------------------------------------------------------
-% Job has to be submitted with the duplex option (ex : lpr -C"(duplex)"
-%----------------------------------------------------------------------------
-%
-%----------------------------------------------------------------------------
-% set orientation
-%----------------------------------------------------------------------------
-PORT                    % PORT - Portrait       IPORT - Inverse Portrait
-                        % LAND - Landscape      ILAND - Inverse Landscape
+%%CreationDate: 16th Aug 2003
 
-%----------------------------------------------------------------------------
-% set PCC
-%----------------------------------------------------------------------------
+%%For: JDT definition for Xerox Generic Format
+
+%%EndComments
+
+% set orientation
+
+%----------------------------------------------------------------------------
+
+PORT                    % PORT - Portrait       IPORT - Inverse Portrait
+
+% set PCC
+
+%----------------------------------------------------------------------------
+
 /ANSI SETPCC
 [ /SK1 1] SETVFU
- 
-%----------------------------------------------------------------------------
-% set margins
-%----------------------------------------------------------------------------
-140                     % top margin
-0                       % bottom margin
-30                      % left margin
-100                     % right margin
-SETMARGIN
-%----------------------------------------------------------------------------
-% set grid i.e cpl and lpp
-%----------------------------------------------------------------------------
-90 66 SETGRID           % 90 char per line and 66 lines per page
+
+%----------------------------------------------------------------------------
+
+% set margins
+
+%----------------------------------------------------------------------------
+
+140                     % top margin
+
+0                       % bottom margin
+
+30                      % left margin
+
+100                     % right margin
+
+SETMARGIN
+
+%----------------------------------------------------------------------------
+
+% set grid i.e cpl and lpp
+
+%----------------------------------------------------------------------------
+
+90 66 SETGRID           % 90 char per line and 66 lines per page
+
 %----------------------------------------------------------------------------
 % set forms
 %----------------------------------------------------------------------------
 2 SETMAXFORM
-%(TLGRID) 1 SETFORM
-%(mestc2.ps) CACHE SETFORM
 
 % June 2023
-  (MESTDc.frm) CACHE SETFORM
+(MESTDc.frm) CACHE SETFORM
 
 %----------------------------------------------------------------------------
-% set back forms
+
+% set font
+
 %----------------------------------------------------------------------------
-%----------------------------------------------------------------------------
-% set font
-%----------------------------------------------------------------------------
-/NCR                    % font name (key)
-8                       % font size in points (1/72 inch)
-                        % 0 = font size will be computed out of grid definition
-SETFONT
+
+/NCR                    % font name (key)
+
+8                       % font size in points (1/72 inch)
+
+% 0 = font size will be computed out of grid definition
+
+SETFONT
+
 %------------------------------------------------------------------------------
 % Set RPE fonts
 /Font1	/NTMR	7.5	INDEXFONT
@@ -107,7 +122,7 @@ SETFONT
 /IF_CND21	2	3	/eq	(HD3)	SETRCD
 /IF_CND22	2	3	/eq	(HD2)	SETRCD
 /IF_CND23	8	5	/eq	(Termi)	SETRCD
-/IF_CND24	[IF_CND21 IF_CND22 /or]	SETRCD	
+/IF_CND24	[IF_CND21 IF_CND22 /or]	SETRCD
 /IF_CND25	2	5	/eq	(SUMMA)	SETRCD
 
 /IF_CND26 	10	9	/eq	(MC CREDIT)	SETRCD
@@ -117,7 +132,6 @@ SETFONT
 %combine IF_CND9
 /IF_CND29 [IF_CND28 IF_CND9 /or] SETRCD
 
-%for transaction details
 /IF_CND30 	18	9	/eq	(MC CREDIT)	SETRCD
 /IF_CND31 	18	8	/eq	(MC DEBIT)	SETRCD
 /IF_CND32 [IF_CND30 IF_CND31 /or] SETRCD
@@ -125,7 +139,7 @@ SETFONT
 % change request 29.06.2015 by Lian
 /IF_CND33 	10	10	/eq	(MC PREPAID)	SETRCD
 /IF_CND34 [IF_CND29 IF_CND33 /or] SETRCD
-	
+
 /IF_GOTRM1 	62	4	/eq	((RM))	SETRCD
 /IF_GOTRM2 	80	4	/eq	((RM))	SETRCD
 /IF_GOTRM3 	99	4	/eq	((RM))	SETRCD
@@ -135,74 +149,71 @@ SETFONT
 /IF_GOTRMALL [IF_GOTRM4 IF_GOTRM5 /or] SETRCD
 
 /BANNER   2   1   12   13   /eq   (DATE PRINTED:) SETPCD
-{ 
-/VAR_INIT 0 /INI SETVAR
-/VAR_DT1 (day) /INI SETVAR
-/VAR_DTd 0 /INI SETVAR
-/VAR_DT2 (month) /INI SETVAR
-/VAR_DTm 0 /INI SETVAR
-/VAR_DT3 (year) /INI SETVAR
-/VAR_DTy 0 /INI SETVAR
-/VAR_RUN (000) /INI SETVAR
-%/VAR_NME (BKCLTR) /INI SETVAR
+{
+    /VAR_INIT 0 /INI SETVAR
+    /VAR_DT1 (day) /INI SETVAR
+    /VAR_DTd 0 /INI SETVAR
+    /VAR_DT2 (month) /INI SETVAR
+    /VAR_DTm 0 /INI SETVAR
+    /VAR_DT3 (year) /INI SETVAR
+    /VAR_DTy 0 /INI SETVAR
+    /VAR_RUN (000) /INI SETVAR
 
+    IF BANNER {
+        SKIPPAGE
+    } ELSE {
+        IF VAR_INIT 0 eq {
+            /VAR_DTd   8   70  2 GETFIELD
+            /VAR_DTm   8   73  2 GETFIELD
+            /VAR_DT3   8   76  4 GETFIELD
 
-IF BANNER {
-	SKIPPAGE
-} ELSE { 
-	IF VAR_INIT 0 eq {
-		/VAR_DTd   8   70  2 GETFIELD
-		/VAR_DTm   8   73  2 GETFIELD
-		/VAR_DT3   8   76  4 GETFIELD
-		
-		CASE VAR_DTd { /VAR_DT1 ([=VAR_DTd=]) VSUB SETVAR}
-		(1) {/VAR_DT1 (01) SETVAR}
-		(2) {/VAR_DT1 (02) SETVAR}
-		(3) {/VAR_DT1 (03) SETVAR}
-		(4) {/VAR_DT1 (04) SETVAR}
-		(5) {/VAR_DT1 (05) SETVAR}
-		(6) {/VAR_DT1 (06) SETVAR}
-		(7) {/VAR_DT1 (07) SETVAR}
-		(8) {/VAR_DT1 (08) SETVAR}
-		(9) {/VAR_DT1 (09) SETVAR}
-		ENDCASE
+            CASE VAR_DTd { /VAR_DT1 ([=VAR_DTd=]) VSUB SETVAR}
+            (1) {/VAR_DT1 (01) SETVAR}
+            (2) {/VAR_DT1 (02) SETVAR}
+            (3) {/VAR_DT1 (03) SETVAR}
+            (4) {/VAR_DT1 (04) SETVAR}
+            (5) {/VAR_DT1 (05) SETVAR}
+            (6) {/VAR_DT1 (06) SETVAR}
+            (7) {/VAR_DT1 (07) SETVAR}
+            (8) {/VAR_DT1 (08) SETVAR}
+            (9) {/VAR_DT1 (09) SETVAR}
+        ENDCASE
 
-		CASE VAR_DTm { /VAR_DT2 ([=VAR_DTm=]) VSUB SETVAR}
-		(01) {/VAR_DT2 (JAN) SETVAR}
-		(02) {/VAR_DT2 (FEB) SETVAR}
-		(03) {/VAR_DT2 (MAR) SETVAR}
-		(04) {/VAR_DT2 (APR) SETVAR}
-		(05) {/VAR_DT2 (MAY) SETVAR}
-		(06) {/VAR_DT2 (JUN) SETVAR}
-		(07) {/VAR_DT2 (JUL) SETVAR}
-		(08) {/VAR_DT2 (AUG) SETVAR}
-		(09) {/VAR_DT2 (SEP) SETVAR}
-		(10) {/VAR_DT2 (OCT) SETVAR}
-		(11) {/VAR_DT2 (NOV) SETVAR}
-		(12) {/VAR_DT2 (DEC) SETVAR}
-		ENDCASE
+            CASE VAR_DTm { /VAR_DT2 ([=VAR_DTm=]) VSUB SETVAR}
+            (01) {/VAR_DT2 (JAN) SETVAR}
+            (02) {/VAR_DT2 (FEB) SETVAR}
+            (03) {/VAR_DT2 (MAR) SETVAR}
+            (04) {/VAR_DT2 (APR) SETVAR}
+            (05) {/VAR_DT2 (MAY) SETVAR}
+            (06) {/VAR_DT2 (JUN) SETVAR}
+            (07) {/VAR_DT2 (JUL) SETVAR}
+            (08) {/VAR_DT2 (AUG) SETVAR}
+            (09) {/VAR_DT2 (SEP) SETVAR}
+            (10) {/VAR_DT2 (OCT) SETVAR}
+            (11) {/VAR_DT2 (NOV) SETVAR}
+            (12) {/VAR_DT2 (DEC) SETVAR}
+        ENDCASE
 
-		/VAR_DT ([=VAR_DT1=]_[=VAR_DT2=]_20[=VAR_DT3=]_[=VAR_RUN=]) VSUB SETVAR
-		([=VAR_DT=]) VSUB BOOKMARK
-		/VAR_INIT 1 SETVAR
-	}ENDIF
-}ENDIF
+            /VAR_DT ([=VAR_DT1=]_[=VAR_DT2=]_20[=VAR_DT3=]_[=VAR_RUN=]) VSUB SETVAR
+            ([=VAR_DT=]) VSUB BOOKMARK
+            /VAR_INIT 1 SETVAR
+        }ENDIF
+    }ENDIF
 }  BEGINPAGE
-
 
 %RPE Definition
 50 BEGINRPE
 1 FROMLINE
-% Blank lines 
+% Blank lines
 [0	0	00	0	00	00	00	01	/Font7	WHITE]
 3 FROMLINE
 % PageNumber
-[1      0      2370     0      127     00      73      5     /Font14    BLACK] 
+[1      0      2370     0      127     00      73      5     /Font14    BLACK]
 4 FROMLINE
 5 FROMLINE
 [1	0	2370	0	170	00	67	6	/Font14	BLACK]
 8 FROMLINE
-% Merchant Number   
+% Merchant Number
 [0	0	1870	0	290	0	24	11	/Font6	BLACK]
 % Date
 [0	0	1870	0	370	0	69	8	/Font6	BLACK]
@@ -234,7 +245,6 @@ IF BANNER {
 [1	0	2440	0	563	0	1	3	/Font7	BLACK]
 
 18 FROMLINE
-%/IF_CND32
 %[0	0	230	0	700	50	0	(TESTING)	/Font9	RED]
 
 /IF_GOTRMALL
@@ -258,7 +268,7 @@ IF BANNER {
 /ELSE/IF_CND18
 [0	0	230	0	720	50	4	7	/Font6	BLACK]
 [1	0	1350	0	720	50	29	6	/Font6	BLACK]
-[1	0	1800	0	720	50	46	17	/Font6	BLACK]	
+[1	0	1800	0	720	50	46	17	/Font6	BLACK]
 
 /ELSE/IF_CND19
 [0	0	230	0	720	50	4	5	/Font6	BLACK]
@@ -266,7 +276,7 @@ IF BANNER {
 [1	0	1350	0	720	50	29	6	/Font6	BLACK]
 %[1	0	1800	0	720	50	45	16	/Font6	BLACK]
 [1	0	1800	0	720	50	45	19	/Font6	BLACK]
-%[1	0	1813	0	720	50	62	1	/Font6	BLACK]	
+%[1	0	1813	0	720	50	62	1	/Font6	BLACK]
 
 /ELSE/IF_CND10
 [0	0	230	0	700	50	1	70	/Font8	BLACK]
@@ -288,12 +298,10 @@ IF BANNER {
 [0	0	1930	0	760	50	0 ((RM))	/Font18	WHITE]
 [0	0	2265	0	760	50	0 ((RM))	/Font18	WHITE]
 
-
 /ELSE/IF_CND1
 [0	0	230	0	700	50	1	25	/Font5	BLACK]
 
 % change request 29.06.2015 by Lian
-%/ELSE/IF_CND29
 /ELSE/IF_CND34
 %[0	0	303.47	0	700	50	9	32	/Font6	BLACK]
 [0	0	240	    0	700	50	9	32	/Font6	BLACK]
@@ -307,7 +315,6 @@ IF BANNER {
 [1	0	2005	0	700	50	112	1	/Font6	BLACK]
 [1	0	2330	0	700	50	114	16	/Font6	BLACK]
 [1	0	2345	0	700	50	130	1	/Font6	BLACK]
-
 
 /ELSE/IF_CND6
 [0	0	240	0	720	50	9	25	/Font5	BLACK]
@@ -327,7 +334,6 @@ IF BANNER {
 [0	0	1610	0	700	50	0 (TOTAL SALES)	/Font18	WHITE]
 
 /ELSE/IF_CND23
-%/ELSE/IF_CND32
 [{SCALL} 0	150	0	660	50	0 (DREDBOX1)	/Font3	RED]
 [2	0	295	0	700	50	0 (TERMINAL)	/Font18	WHITE]
 [2	0	1300	0	700	50	0 (SETTLEMENT)	/Font18	WHITE]
@@ -345,7 +351,6 @@ IF BANNER {
 [2	0	1850	0	760	50	0 (TRANSACTION)	/Font18	WHITE]
 [2	0	2250	0	760	50	0 ((RM))	/Font18	WHITE]
 
-%Transaction data
 %[0	0	220	0	850	50	7	8	/Font18	BLACK]
 
 /ELSE/IF_CND24
@@ -379,7 +384,6 @@ IF BANNER {
 ENDRPE
 
 /DREDBOX1
-%ori{0	0	2100	120	XDRKR_S1	DRAWB} XGFRESDEF
 {0	0	2200	120	XDRKR_S1	DRAWB} XGFRESDEF
 /DREDBOX2
 {0	0	2200	60	XDRKR_S1	DRAWB} XGFRESDEF

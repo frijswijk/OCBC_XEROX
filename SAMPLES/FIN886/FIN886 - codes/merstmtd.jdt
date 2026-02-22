@@ -1,59 +1,74 @@
-%!PS-Adobe-2.0
-%%Title: bkcmerstmtd.jdt
+%!PS-Adobe-2.0
+
+%%Title: bkcmerstmtd.jdt
+
 %%Application: Bank Card Merchant Daily Statement
 %%Creator: Lum Chi Yan
-%%CreationDate: 16th Aug 2003
-%%For: JDT definition for Xerox Generic Format
-%%EndComments
-%
-%----------------------------------------------------------------------------
-% Job has to be submitted with the duplex option (ex : lpr -C"(duplex)"
-%----------------------------------------------------------------------------
-%
-%----------------------------------------------------------------------------
-% set orientation
-%----------------------------------------------------------------------------
-PORT                    % PORT - Portrait       IPORT - Inverse Portrait
-                        % LAND - Landscape      ILAND - Inverse Landscape
+%%CreationDate: 16th Aug 2003
 
-%----------------------------------------------------------------------------
-% set PCC
-%----------------------------------------------------------------------------
+%%For: JDT definition for Xerox Generic Format
+
+%%EndComments
+
+% set orientation
+
+%----------------------------------------------------------------------------
+
+PORT                    % PORT - Portrait       IPORT - Inverse Portrait
+
+% set PCC
+
+%----------------------------------------------------------------------------
+
 /ANSI SETPCC
 [ /SK1 1] SETVFU
- 
-%----------------------------------------------------------------------------
-% set margins
-%----------------------------------------------------------------------------
-140                     % top margin
-0                       % bottom margin
-30                      % left margin
-100                     % right margin
-SETMARGIN
-%----------------------------------------------------------------------------
-% set grid i.e cpl and lpp
-%----------------------------------------------------------------------------
-90 70 SETGRID           % 90 char per line and 66 lines per page
+
+%----------------------------------------------------------------------------
+
+% set margins
+
+%----------------------------------------------------------------------------
+
+140                     % top margin
+
+0                       % bottom margin
+
+30                      % left margin
+
+100                     % right margin
+
+SETMARGIN
+
+%----------------------------------------------------------------------------
+
+% set grid i.e cpl and lpp
+
+%----------------------------------------------------------------------------
+
+90 70 SETGRID           % 90 char per line and 66 lines per page
+
 %----------------------------------------------------------------------------
 % set forms
 %----------------------------------------------------------------------------
 2 SETMAXFORM
-%(TLGRID) 1 SETFORM
-%(mestd.ps) CACHE SETFORM
 
-% June 2023	
- (MESTDc.frm) CACHE SETFORM
- 
+% June 2023
+(MESTDc.frm) CACHE SETFORM
+
 %----------------------------------------------------------------------------
-% set back forms
+
+% set font
+
 %----------------------------------------------------------------------------
-%----------------------------------------------------------------------------
-% set font
-%----------------------------------------------------------------------------
-/NCR                    % font name (key)
-8                       % font size in points (1/72 inch)
-                        % 0 = font size will be computed out of grid definition
-SETFONT
+
+/NCR                    % font name (key)
+
+8                       % font size in points (1/72 inch)
+
+% 0 = font size will be computed out of grid definition
+
+SETFONT
+
 %------------------------------------------------------------------------------
 % Set RPE fonts
 /Font1	/NTMR	 7.5	INDEXFONT
@@ -101,14 +116,13 @@ SETFONT
 /IF_CND12	[IF_CND9 IF_CND10 /or] 	SETRCD
 /IF_CND13	[IF_CND12 IF_CND11 /or]	SETRCD
 /IF_CND14	2	3	/eq	(HD1)	SETRCD
-%ori/IF_CND15	44	5	/eq	(Sales) SETRCD
 /IF_CND15	45	6	/eq	(Amount) SETRCD
 /IF_CND16	44	5	/eq	(     ) SETRCD
 /IF_CND17	[IF_CND14 IF_CND15 /and]	SETRCD
 /IF_CND18	[IF_CND14 IF_CND16 /and]	SETRCD
 /IF_CND19	7	1	/eq	(4)	SETRCD
 /IF_CND20	7	1	/eq	(5)	SETRCD
-/IF_CND21	11	1	/eq	( )	SETRCD 
+/IF_CND21	11	1	/eq	( )	SETRCD
 /IF_CND22	[IF_CND19 IF_CND21 /and] SETRCD
 /IF_CND23	[IF_CND20 IF_CND21 /and] SETRCD
 /IF_CND24	[IF_CND22 IF_CND23 /or] SETRCD
@@ -127,7 +141,6 @@ SETFONT
 /IF_CND52 	2	8	/eq	(MC DEBIT)	SETRCD
 % change request 29.06.2015 by Lian
 /IF_CND73 	2	10	/eq	(MC PREPAID)	SETRCD
-%/IF_CND53	[IF_CND51 IF_CND52 /or]	SETRCD
 
 /IF_CND34	2	7	/eq	(SUMMARY) SETRCD
 /IF_CND35	2	1	/eq	(-)	SETRCD
@@ -147,8 +160,6 @@ SETFONT
 /IF_CND49	[IF_CND28A IF_CND48 /and] SETRCD
 /IF_CND50	3	14	/eq	(****Total of T) SETRCD
 
-%/IF_CND36	10	4	/eq	(VISA) SETRCD
-%/IF_CND37	10	4	/eq	(MAST) SETRCD
 /IF_CND53	2	3	/eq	(DCI)  SETRCD
 /IF_CND54	2	5	/eq	(CCI)  SETRCD
 /IF_CND55	2	6	/eq	(DCDO) SETRCD
@@ -171,13 +182,13 @@ SETFONT
 /IF_CND61   0   100   /HOLD   (GST Sum) SETRCD
 /IF_CND62   0   100   /HOLD   (Rumusan GST) SETRCD
 /IF_CND63   0   100   /HOLD   (Invoice Number) SETRCD
-/IF_CND64	0	100   /HOLD   (SR)	SETRCD 
-/IF_CND65	0	100   /HOLD   (OS)	SETRCD 
+/IF_CND64	0	100   /HOLD   (SR)	SETRCD
+/IF_CND65	0	100   /HOLD   (OS)	SETRCD
 
 /IF_CND66 [IF_CND64 IF_CND65 /or] SETRCD
 
-/IF_CND67	0	100   /HOLD   (ZR)	SETRCD 
-/IF_CND68	0	100   /HOLD   (ES)	SETRCD 
+/IF_CND67	0	100   /HOLD   (ZR)	SETRCD
+/IF_CND68	0	100   /HOLD   (ES)	SETRCD
 
 /IF_CND69 [IF_CND67 IF_CND68 /or] SETRCD
 
@@ -189,73 +200,70 @@ SETFONT
 /IF_CND80	10		07 			 /eq	(Refunds) SETRCD
 /IF_CND81	[IF_CND77 IF_CND80  /or] 			  SETRCD
 
-% for new card without credit card number
-/IF_CND82	07		07			 /eq	(       ) SETRCD 
+/IF_CND82	07		07			 /eq	(       ) SETRCD
 /IF_CND83	[IF_CND24 IF_CND82   /or] 			  SETRCD
 
 /BANNER   2   1   12   13   /eq   (DATE PRINTED:) SETPCD
-{ 
-/VAR_INIT 0 /INI SETVAR
-/VAR_DT1 (day) /INI SETVAR
-/VAR_DTd 0 /INI SETVAR
-/VAR_DT2 (month) /INI SETVAR
-/VAR_DTm 0 /INI SETVAR
-/VAR_DT3 (year) /INI SETVAR
-/VAR_DTy 0 /INI SETVAR
-/VAR_RUN (000) /INI SETVAR
-%/VAR_NME (BKCLTR) /INI SETVAR
+{
+    /VAR_INIT 0 /INI SETVAR
+    /VAR_DT1 (day) /INI SETVAR
+    /VAR_DTd 0 /INI SETVAR
+    /VAR_DT2 (month) /INI SETVAR
+    /VAR_DTm 0 /INI SETVAR
+    /VAR_DT3 (year) /INI SETVAR
+    /VAR_DTy 0 /INI SETVAR
+    /VAR_RUN (000) /INI SETVAR
 
+    IF BANNER {
+        SKIPPAGE
+    } ELSE {
+        IF VAR_INIT 0 eq {
+            /VAR_DTd   9   70  2 GETFIELD
+            /VAR_DTm   9   73  2 GETFIELD
+            /VAR_DT3   9   76  4 GETFIELD
 
-IF BANNER {
-	SKIPPAGE
-} ELSE { 
-	IF VAR_INIT 0 eq {
-		/VAR_DTd   9   70  2 GETFIELD
-		/VAR_DTm   9   73  2 GETFIELD
-		/VAR_DT3   9   76  4 GETFIELD
-		
-		CASE VAR_DTd { /VAR_DT1 ([=VAR_DTd=]) VSUB SETVAR}
-		(1) {/VAR_DT1 (01) SETVAR}
-		(2) {/VAR_DT1 (02) SETVAR}
-		(3) {/VAR_DT1 (03) SETVAR}
-		(4) {/VAR_DT1 (04) SETVAR}
-		(5) {/VAR_DT1 (05) SETVAR}
-		(6) {/VAR_DT1 (06) SETVAR}
-		(7) {/VAR_DT1 (07) SETVAR}
-		(8) {/VAR_DT1 (08) SETVAR}
-		(9) {/VAR_DT1 (09) SETVAR}
-		ENDCASE
+            CASE VAR_DTd { /VAR_DT1 ([=VAR_DTd=]) VSUB SETVAR}
+            (1) {/VAR_DT1 (01) SETVAR}
+            (2) {/VAR_DT1 (02) SETVAR}
+            (3) {/VAR_DT1 (03) SETVAR}
+            (4) {/VAR_DT1 (04) SETVAR}
+            (5) {/VAR_DT1 (05) SETVAR}
+            (6) {/VAR_DT1 (06) SETVAR}
+            (7) {/VAR_DT1 (07) SETVAR}
+            (8) {/VAR_DT1 (08) SETVAR}
+            (9) {/VAR_DT1 (09) SETVAR}
+        ENDCASE
 
-		CASE VAR_DTm { /VAR_DT2 ([=VAR_DTm=]) VSUB SETVAR}
-		(01) {/VAR_DT2 (JAN) SETVAR}
-		(02) {/VAR_DT2 (FEB) SETVAR}
-		(03) {/VAR_DT2 (MAR) SETVAR}
-		(04) {/VAR_DT2 (APR) SETVAR}
-		(05) {/VAR_DT2 (MAY) SETVAR}
-		(06) {/VAR_DT2 (JUN) SETVAR}
-		(07) {/VAR_DT2 (JUL) SETVAR}
-		(08) {/VAR_DT2 (AUG) SETVAR}
-		(09) {/VAR_DT2 (SEP) SETVAR}
-		(10) {/VAR_DT2 (OCT) SETVAR}
-		(11) {/VAR_DT2 (NOV) SETVAR}
-		(12) {/VAR_DT2 (DEC) SETVAR}
-		ENDCASE
+            CASE VAR_DTm { /VAR_DT2 ([=VAR_DTm=]) VSUB SETVAR}
+            (01) {/VAR_DT2 (JAN) SETVAR}
+            (02) {/VAR_DT2 (FEB) SETVAR}
+            (03) {/VAR_DT2 (MAR) SETVAR}
+            (04) {/VAR_DT2 (APR) SETVAR}
+            (05) {/VAR_DT2 (MAY) SETVAR}
+            (06) {/VAR_DT2 (JUN) SETVAR}
+            (07) {/VAR_DT2 (JUL) SETVAR}
+            (08) {/VAR_DT2 (AUG) SETVAR}
+            (09) {/VAR_DT2 (SEP) SETVAR}
+            (10) {/VAR_DT2 (OCT) SETVAR}
+            (11) {/VAR_DT2 (NOV) SETVAR}
+            (12) {/VAR_DT2 (DEC) SETVAR}
+        ENDCASE
 
-		/VAR_DT ([=VAR_DT1=]_[=VAR_DT2=]_20[=VAR_DT3=]_[=VAR_RUN=]) VSUB SETVAR
-		([=VAR_DT=]) VSUB BOOKMARK
-		/VAR_INIT 1 SETVAR
-	}ENDIF
-}ENDIF
+            /VAR_DT ([=VAR_DT1=]_[=VAR_DT2=]_20[=VAR_DT3=]_[=VAR_RUN=]) VSUB SETVAR
+            ([=VAR_DT=]) VSUB BOOKMARK
+            /VAR_INIT 1 SETVAR
+        }ENDIF
+    }ENDIF
 }  BEGINPAGE
 
 %RPE Definition
 50 BEGINRPE
 1 FROMLINE
-% Blank lines 
+% Blank lines
 [0	0	00	0	00	00	00	01	/Font7	WHITE]
 3 FROMLINE
 % PageNumber
-[1      0      2360     0      127     00      73      5     /Font14    BLACK] 
+[1      0      2360     0      127     00      73      5     /Font14    BLACK]
 4 FROMLINE
 5 FROMLINE
 [1	0	2360	0	162	 00	 67	 6	/Font14	BLACK]
@@ -263,11 +271,10 @@ IF BANNER {
 [0	0	210	0	122	 40	 0	 99	/Font14	BLACK]
 8 FROMLINE
 9 FROMLINE
-% Merchant Number   
+% Merchant Number
 [0	0	1870	0	300	0	24	11	/Font6	BLACK]
 % Date
 [0	0	1870	0	380	0	69	8	/Font6	BLACK]
-% Statement Title
 %[0	0	1350	0	127	0	0 (MERCHANT DETAIL STATEMENT) /Font8 BLACK]
 [0	0	1360	0	138	0	0 (MERCHANT STATEMENT) /Font8 BLACK]
 %9 FROMLINE
@@ -520,7 +527,7 @@ IF BANNER {
 [0	0	1350	0	715	50 0 (TRXN DATE) /Font18	WHITE]
 [0	0	1700	0	715	50 0 (REMARK)	/Font18	WHITE]
 
-/ELSE/IF_CND24 
+/ELSE/IF_CND24
 [0	0	180	0	700	50 	6	23	/Font6	BLACK]
 [0	0	700	0	700	50 	30	6	/Font6	BLACK]
 [1	0	1250	0	700	50 	39	16	/Font6	BLACK]
@@ -551,7 +558,7 @@ IF BANNER {
 [0	0	700	0	700	50	29	45	/Font6	BLACK]
 
 /ELSE/IF_CND26
-[2	0	1200	0	700	50	9	70	/Font6 	BLACK]	
+[2	0	1200	0	700	50	9	70	/Font6 	BLACK]
 
 /ELSE/IF_CND35
 [0	0	230	0	715	50	1	25	/Font5	BLACK]
@@ -566,27 +573,20 @@ IF BANNER {
 [0	0	1460	0	735	50 0 (ADJUSTMENT) /Font18	WHITE]
 %[0	0	1750	0	750	50 0 (DISCOUNT (RM)) /Font18	WHITE]
 [0	0	1850	0	735	50 0 (DISCOUNT) /Font18	WHITE]
-%[0	0	1600	0	735	50 0 (TAX) /Font18	WHITE]
 %[0	0	1920	0	735	50 0 (GST) /Font18	WHITE]
 [0	0	2240	0	735	50 0 (NET)	/Font18	WHITE]
 [0	0	1210	0	760	50	0 ((RM))	/Font18	WHITE]
 [0	0	1575	0	760	50	0 ((RM))	/Font18	WHITE]
 [0	0	1920	0	760	50	0 ((RM))	/Font18	WHITE]
-%[0	0	1580	0	760	50	0 (CODE)	/Font18	WHITE]
 %[0	0	1910	0	760	50	0 ((RM))	/Font18	WHITE]
 [0	0	2230	0	760	50	0 ((RM))	/Font18	WHITE]
 
-%/ELSE/IF_CND47
 % change request 25/05/2015 - Lian
-%/ELSE/IF_CND60
-%/ELSE/IF_CND74
-%/ELSE/IF_CND77
 /ELSE/IF_CND81
 %[0	0	300	0	710	50	9	32	/Font6	BLACK]
 [0	0	240	0	710	50	1	30	/Font6	BLACK]
 %[1	0	1180	0	710	50	42	6	/Font6	BLACK]
 [1	0	1010	0	710	50	33	6	/Font6	BLACK]
-% Amount
 %[1	0	1570	0	710	50	48	18	/Font6	BLACK]
 [1	0	1290	0	710	50	40	16	/Font6	BLACK]
 [1	0	1310	0	710	50	56	1	/Font6	BLACK]
@@ -595,19 +595,10 @@ IF BANNER {
 [1	0	1650	0	710	50	57	16	/Font6	BLACK]
 [1	0	1670	0	710	50	73	1	/Font6	BLACK]
 
-% Discount
 %[1	0	1920	0	710	50	66	18	/Font6	BLACK]
 [1	0	2000	0	710	50	74	16	/Font6	BLACK]
 [1	0	2020	0	710	50	90	1	/Font6	BLACK]
 
-% Tax Code
-%[1	0	1655	0	710	50	88	2	/Font6	BLACK]
-
-% GST
-%[1	0	1980	0	710	50	94	18	/Font6	BLACK]
-%[1	0	1995	0	710	50	112	1	/Font6	BLACK]
-
-% Net
 %[1	0	2280	0	710	50	84	17	/Font6	BLACK]
 [1	0	2295	0	710	50	114	16	/Font6	BLACK]
 [1	0	2305	0	710	50	130	1	/Font6	BLACK]
@@ -637,60 +628,36 @@ IF BANNER {
 
 % % remove GST summary on 11/06/2020 and add on a new table and website
 /ELSE/IF_CND61
-%[{SCALL} 0	150	0	670	50	0 (GSTBOX) 	/Font3	RED]
-%[0	0	230	0	700	50 0 (GST Summary) /Font18	WHITE]
-%[1	0	1550	0	700	50 0 (Tax Invoice) /Font18	WHITE]
 %[0	0	210	0	700	50	1	130 /Font18	WHITE]
- [{SCALL} 0	250		0	900		43		0 		(GOVBOX) 		/Font4		BLACK]
+[{SCALL} 0	250		0	900		43		0 		(GOVBOX) 		/Font4		BLACK]
 
 /ELSE/IF_CND62
-%[0	0	230	0	680	50 0 (Rumusan GST) /Font18	WHITE]
-%[1	0	1400	0	680	50 0 (Amount (MYR)) /Font18	WHITE]
-%[1	0	1700	0	680	50 0 (GST (MYR)) /Font18	WHITE]
 %[0	0	210	0	680	50	1	130 /Font18	WHITE]
 
 /ELSE/IF_CND66
-%[0	0	230	0	700	50	2	50	/Font6	BLACK]
-%[1	0	1400	0	700	50	61	23	/Font6	BLACK]
-%[1	0	1700	0	700	50	89	25	/Font6	BLACK]
 
-%/ELSE/IF_CND69
 %[0	0	230	0	700	50	2	130	/F20	BLACK]
 
-% for credit card without credit card number
-/ELSE/IF_CND82 
- %[0		0	180		0	700		50 		6		23				/Font6		BLACK]
-  [0		0	180		0	680		43 		6		23				/Font6		BLACK]
- %[0		0	700		0	700		50 		30		6				/Font6		BLACK]
-  [0		0	700		0	680		43 		30		6				/Font6		BLACK]
- %[1		0	1250	0	700		50 		39		16				/Font6		BLACK]
-  [1		0	1250	0	680		43 		39		16				/Font6		BLACK]
- %[1		0	1265	0	700		50 		55		1				/Font6		BLACK]
-  [1		0	1265	0	680		43 		55		1				/Font6		BLACK]
- %[0		0	1400	0	700		50 		60	 	8				/Font6		BLACK]
-  [0		0	1400	0	680		43 		60	 	8				/Font6		BLACK]
- %[0		0	1700	0	700		50 		72		40				/Font6		BLACK]
-  [0		0	1700	0	680		43 		72		40				/Font6		BLACK]
+/ELSE/IF_CND82
+%[0		0	180		0	700		50 		6		23				/Font6		BLACK]
+[0		0	180		0	680		43 		6		23				/Font6		BLACK]
+%[0		0	700		0	700		50 		30		6				/Font6		BLACK]
+[0		0	700		0	680		43 		30		6				/Font6		BLACK]
+%[1		0	1250	0	700		50 		39		16				/Font6		BLACK]
+[1		0	1250	0	680		43 		39		16				/Font6		BLACK]
+%[1		0	1265	0	700		50 		55		1				/Font6		BLACK]
+[1		0	1265	0	680		43 		55		1				/Font6		BLACK]
+%[0		0	1400	0	700		50 		60	 	8				/Font6		BLACK]
+[0		0	1400	0	680		43 		60	 	8				/Font6		BLACK]
+%[0		0	1700	0	700		50 		72		40				/Font6		BLACK]
+[0		0	1700	0	680		43 		72		40				/Font6		BLACK]
 
 /ELSE
 [0	0	240	0	700	50	1	130 /Font6	BLACK]
 
 /ENDIFALL
 
-%29 FROMLINE
-%/IF_CND53
-%[0	0	230	0	3000 50	2	80	/Font6	BLACK]
-%/ELSE/IF_CND54
-%[0	0	230	0	3050 50	2	80	/Font6	BLACK]
-%/ELSE/IF_CND55
-%[0	0	230	0	3100 50	2	80	/Font6	BLACK]
-%/ELSE/IF_CND56
-%[0	0	230	0	3150 50	2	80	/Font6	BLACK]
-%/ELSE/IF_CND57
-%[0	0	230	0	3200 50	2	80	/Font6	BLACK]
-%/ELSE/IF_CND58
 %[0	0	230	0	3250 50	2	80	/Font6	BLACK]
-%/ENDIFALL
 
 70 FROMLINE
 
@@ -705,58 +672,54 @@ ENDRPE
 % add-on new table and website on 10/06/2020
 /GOVBOX
 {
-	MM SETUNIT
-	03 SETLSP
-	
-	% Define Interative features for URL
-	% -----------------------------------
-	(~~) 2 SETFTSW
-	/L0 [ /URI ] INDEXPIF
-	/L1 null 	 INDEXPIF
-	
- 	[ /Margins [0.5 0.5 0.5 0.5] /CellStroke S1 /Height 1 /TextAtt {Font4} /Align 2 ] BEGINTABLE   % set table default
-   
-	[ 
- 	[ /Width 45 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (Payment Card) /TextAtt {Font21}]
- 	[ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (All Others) /TextAtt {Font21}]
- 	[ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (Petrol) /TextAtt {Font21}]
- 	[ /Width 35 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (Government Services) /TextAtt {Font21}]
-   ] SHROW
+    MM SETUNIT
+    03 SETLSP
 
-	[ 
- 	[ /Width 45 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (International Debit / Prepaid) /TextAtt {Font23}]
- 	[ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.21% or MYR0.70 + 0.01% (whichever is lower)) /TextAtt {Font23}]
- 	[ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.21% (subject to a cap of MYR0.55/ transaction)) /TextAtt {Font23}]
- 	[ /Width 35 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0%) /TextAtt {Font23}]
+    % Define Interative features for URL
+    % -----------------------------------
+    (~~) 2 SETFTSW
+    /L0 [ /URI ] INDEXPIF
+    /L1 null 	 INDEXPIF
+
+    [ /Margins [0.5 0.5 0.5 0.5] /CellStroke S1 /Height 1 /TextAtt {Font4} /Align 2 ] BEGINTABLE   % set table default
+
+    [
+    [ /Width 45 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (Payment Card) /TextAtt {Font21}]
+    [ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (All Others) /TextAtt {Font21}]
+    [ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (Petrol) /TextAtt {Font21}]
+    [ /Width 35 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (Government Services) /TextAtt {Font21}]
     ] SHROW
 
-	[ 
- 	[ /Width 45 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (Visa and MasterCard Credit Card) /TextAtt {Font23}]
- 	[ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.675%) /TextAtt {Font23}]
- 	[ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.90% (subject to a cap of MYR0.75/ transaction)) /TextAtt {Font23}]
- 	[ /Width 35 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.48%) /TextAtt {Font23}]
+    [
+    [ /Width 45 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (International Debit / Prepaid) /TextAtt {Font23}]
+    [ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.21% or MYR0.70 + 0.01% (whichever is lower)) /TextAtt {Font23}]
+    [ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.21% (subject to a cap of MYR0.55/ transaction)) /TextAtt {Font23}]
+    [ /Width 35 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0%) /TextAtt {Font23}]
     ] SHROW
 
-	[ 
- 	[ /Width 45 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (Domestic Debit / Prepaid) /TextAtt {Font23}]
- 	[ /Width 96 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.14% of the value of the transaction or MYR0.50 plus 0.01% of the value of the transaction (whichever is lower)) /TextAtt {Font23}]
- 	[ /Width 35 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0%) /TextAtt {Font23}]
+    [
+    [ /Width 45 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (Visa and MasterCard Credit Card) /TextAtt {Font23}]
+    [ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.675%) /TextAtt {Font23}]
+    [ /Width 48 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.90% (subject to a cap of MYR0.75/ transaction)) /TextAtt {Font23}]
+    [ /Width 35 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.48%) /TextAtt {Font23}]
     ] SHROW
-	
-	04 NL
-	Font21
-	(Website:) SHL
-	
-	Font23
-	(~~L0Visa International https://www.visa.com.my/run-your-business/small-business-tools/interchange.html~~L1) 166 3 SHP 
-	(~~L0MasterCard https://www.mastercard.com.my/en-my/about-mastercard/what-we-do/interchange.html~~L1) 166 3 SHP
-	
-	1 NL
-	Font22
-	(Note: - There is no reduction in MDR due to market sentiments in view of rising cost of business.) SHL
+
+    [
+    [ /Width 45 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (Domestic Debit / Prepaid) /TextAtt {Font23}]
+    [ /Width 96 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0.14% of the value of the transaction or MYR0.50 plus 0.01% of the value of the transaction (whichever is lower)) /TextAtt {Font23}]
+    [ /Width 35 /Align 2 /Margins [1 0.5 0.5 0.5] /CellText (0%) /TextAtt {Font23}]
+    ] SHROW
+
+    04 NL
+    Font21
+    (Website:) SHL
+
+    Font23
+    (~~L0Visa International https://www.visa.com.my/run-your-business/small-business-tools/interchange.html~~L1) 166 3 SHP
+    (~~L0MasterCard https://www.mastercard.com.my/en-my/about-mastercard/what-we-do/interchange.html~~L1) 166 3 SHP
+
+    1 NL
+    Font22
+    (Note: - There is no reduction in MDR due to market sentiments in view of rising cost of business.) SHL
 
 } XGFRESDEF
-
-
-
-

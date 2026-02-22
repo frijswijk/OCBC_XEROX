@@ -190,7 +190,8 @@ class XeroxLexer:
         
         # Page and positioning
         'SETPAGESIZE', 'SETLSP', 'SETPAGENUMBER', 'SETPAGEDEF', 'SETLKF', 'SETFORM',
-        'MOVETO', 'MOVEH', 'MOVEHR', 'LINETO', 'NL', 'ORITL', 'PORT', 'LAND', 'SHL', 'SHR', 'SHC', 'SHc', 'SHP', 'SHp', 'FORMAT',
+        'MOVETO', 'MOVEH', 'MOVEHR', 'LINETO', 'NL', 'ORITL', 'PORT', 'LAND', 'SHL', 'SHR', 'SHC', 'SHc', 'SHP', 'SHp', 'SHmf', 'FORMAT',
+        'NEWFRONT', 'NEWBACK', 'NEWFRAME', 'PAGEBRK',
         
         # Resource handling
         'CACHE', 'ICALL', 'SCALL', 'DRAWB',
@@ -681,6 +682,8 @@ class XeroxParser:
         'SETPAGEDEF': 1,  # [...] SETPAGEDEF
         'NEWFRAME': 0,    # NEWFRAME
         'PAGEBRK': 0,     # PAGEBRK
+        'NEWFRONT': 0,    # NEWFRONT — force to front side; registered so it does NOT pollute stack
+        'NEWBACK': 0,     # NEWBACK — force to back side; registered so it does NOT pollute stack
         'SKIPPAGE': 0,    # SKIPPAGE
 
         # Font/Color indexing
@@ -1972,7 +1975,7 @@ class VIPPToDFAConverter:
         'TIMESB':     'Times New Roman Bold',
         'TIMESI':     'Times New Roman Italic',
         'TIMESBI':    'Times New Roman Bold Italic',
-        'NZDB':       'NZDB',  # Special character font
+        'NZDB':       'Arial',  # Zapf Dingbats — no TTF available; use Arial + Unicode bullet substitution
         # Xerox VIPP printer-resident font aliases → TTF substitutes
         'NTMR':  'Times New Roman',
         'NTMI':  'Times New Roman Italic',
@@ -2801,11 +2804,12 @@ class VIPPToDFAConverter:
         current_font = default_font
 
         for match in re.finditer(pattern, text):
-            # Add text before switch with current font
-            if match.start() > last_pos:
-                text_segment = text[last_pos:match.start()]
-                if text_segment:
-                    segments.append((current_font, text_segment))
+            text_segment = text[last_pos:match.start()]
+            if text_segment:
+                segments.append((current_font, text_segment))
+            elif current_font in self._SST_CODES:
+                # SST code with no following text — still emit positioning command
+                segments.append((current_font, ''))
 
             # Update current font
             current_font = match.group(1)
@@ -2918,15 +2922,21 @@ class VIPPToDFAConverter:
             if not text_seg or text_seg.isspace():
                 continue
 
+            # Map font alias to base font + style
+            base_font, style = self._map_font_alias(font_alias, frm)
+
+            # Use Unicode substitution for Zapf Dingbats characters
+            if self._is_dingbats_font(font_alias, frm):
+                self.add_line(f"FONT {base_font} {style}")
+                self._emit_dingbats_text(text_seg)
+                continue
+
             # Format the text segment for TEXT command
             formatted_seg = self._format_text_segment_for_text_cmd(text_seg)
 
             # Skip if formatted segment is just empty quotes (''')
             if formatted_seg.strip() in ["''", "'''", '""', '"""']:
                 continue
-
-            # Map font alias to base font + style
-            base_font, style = self._map_font_alias(font_alias, frm)
 
             self.add_line(f"FONT {base_font} {style}")
             self.add_line(formatted_seg)
@@ -3128,14 +3138,12 @@ class VIPPToDFAConverter:
         elif alignment == 3:
             self.add_line("ALIGN JUSTIFY")
 
-        # Add font
-        self.add_line(f"FONT {dfa_font}")
-        self.add_line(style)
-
         # Add text content
         # For TEXT command, variables are in parentheses: (VAR)
         # Literals are in quotes: 'text'
         if is_variable:
+            self.add_line(f"FONT {dfa_font}")
+            self.add_line(style)
             # Variable reference - use parentheses
             # Check if it's VSUB-formatted (contains ! concatenation)
             if ' ! ' in text:
@@ -3145,12 +3153,120 @@ class VIPPToDFAConverter:
             else:
                 # Simple variable
                 self.add_line(f"({text})")
+        elif '~~' in text:
+            # Text contains VIPP ~~XX font switches — emit inline FONT changes
+            self._emit_font_switched_text_content(text, default_font, frm)
         else:
+            self.add_line(f"FONT {dfa_font}")
+            self.add_line(style)
             # Literal text - quote it, escaping any embedded apostrophes
             self.add_line(f"'{self._escape_dfa_quotes(text)}'")
 
         self.add_line(";")
         self.dedent()
+
+    # VIPP SST positioning codes (from INDEXSST definitions)
+    _SST_CODES = {'P0', 'P1', 'P2', 'N0', 'U0'}
+
+    # Zapf Dingbats character to DFA Unicode notation mapping.
+    # NZDB font has no TTF available; substitute with Unicode equivalents.
+    _ZAPF_DINGBATS_UNICODE = {
+        'l': "U'25CF'",   # ● BLACK CIRCLE (bullet)
+        'n': "U'25A0'",   # ■ BLACK SQUARE
+        'm': "U'25CB'",   # ○ WHITE CIRCLE
+        'u': "U'2756'",   # ❖ BLACK DIAMOND MINUS WHITE X
+    }
+
+    def _is_dingbats_font(self, alias: str, frm) -> bool:
+        """Check if a font alias maps to Zapf Dingbats (NZDB)."""
+        # Check FRM fonts
+        if frm and alias in frm.fonts and frm.fonts[alias].name == 'NZDB':
+            return True
+        # Check via reverse rename map
+        if frm:
+            for orig, renamed in frm.font_rename_map.items():
+                if renamed == alias and orig in frm.fonts and frm.fonts[orig].name == 'NZDB':
+                    return True
+        # Check DBM fonts
+        if hasattr(self, 'dbm') and self.dbm and alias in self.dbm.fonts and self.dbm.fonts[alias].name == 'NZDB':
+            return True
+        return False
+
+    def _emit_dingbats_text(self, text_seg: str):
+        """Emit dingbats text as DFA Unicode notation instead of quoted characters."""
+        for char in text_seg:
+            ucode = self._ZAPF_DINGBATS_UNICODE.get(char)
+            if ucode:
+                self.add_line(ucode)
+            else:
+                self.add_line(f"'{self._escape_dfa_quotes(char)}'")
+
+    def _emit_font_switched_text_content(self, text: str, default_font: str, frm=None):
+        """
+        Emit TEXT block content with inline FONT changes for ~~XX VIPP font switches.
+
+        Handles:
+        - ~~F1, ~~FA etc. → FONT F1_N NORMAL (mapped via _map_font_alias)
+        - ~~P1 → SUPERSCRIPT
+        - ~~P0 → NORMALSCRIPT
+        - ~~P2 → SUPERSCRIPT (approximate custom subscript)
+        - \\n  → NEWLINE (VIPP line break in strings)
+        """
+        segments = self._parse_font_switches(text, default_font)
+
+        for font_alias, text_seg in segments:
+            # Handle SST positioning codes (always emit, even if text is empty)
+            if font_alias in ('P1', 'P2'):
+                self.add_line("SUPERSCRIPT")
+                self._emit_text_with_newlines(text_seg, frm is not None)
+                continue
+            elif font_alias == 'P0':
+                self.add_line("NORMALSCRIPT")
+                self._emit_text_with_newlines(text_seg, frm is not None)
+                continue
+            elif font_alias == 'U0':
+                self.add_line("UNDERLINE(ON)")
+                self._emit_text_with_newlines(text_seg, frm is not None)
+                continue
+            elif font_alias == 'N0':
+                self.add_line("UNDERLINE(OFF)")
+                self._emit_text_with_newlines(text_seg, frm is not None)
+                continue
+
+            # Skip empty text segments for regular font switches
+            if not text_seg or text_seg.isspace():
+                continue
+
+            # Map font alias to DFA font name
+            if frm:
+                base_font, style = self._map_font_alias(font_alias, frm)
+            else:
+                base_font, style = font_alias.upper(), 'NORMAL'
+
+            self.add_line(f"FONT {base_font}")
+            self.add_line(style)
+
+            # Emit text — use Unicode substitution for Zapf Dingbats characters
+            if frm and self._is_dingbats_font(font_alias, frm):
+                self._emit_dingbats_text(text_seg)
+            else:
+                self._emit_text_with_newlines(text_seg, True)
+
+    def _emit_text_with_newlines(self, text_seg: str, emit_content: bool = True):
+        """Emit text segment, converting \\n to NEWLINE commands."""
+        if not text_seg or text_seg.isspace():
+            return
+        if not emit_content:
+            return
+
+        # Split on literal \n (two chars: backslash + n) for NEWLINE
+        parts = text_seg.split('\\n')
+        for j, part in enumerate(parts):
+            part_clean = part
+            if part_clean and not part_clean.isspace():
+                self.add_line(f"'{self._escape_dfa_quotes(part_clean)}'")
+            if j < len(parts) - 1:
+                self.add_line("NEWLINE")
 
     def _convert_xgfresdef(self, cmd: XeroxCommand, frm: XeroxFRM):
         """
@@ -3340,7 +3456,7 @@ class VIPPToDFAConverter:
         # Standalone shade styles: S1, S2, S3, S4 — border only (no color prefix)
         # Fill styles: R_S1, G_S1, B_S1, F_S1, LMED, MED, XDRK — filled, with color
         # CLIP: not a box style
-        is_line_style = style in ('LTHN', 'LTHK', 'LDSH', 'LDOT',
+        is_line_style = style in ('LT', 'LTHN', 'LTHK', 'LDSH', 'LDOT',
                                   'L_THN', 'L_THK', 'L_DSH', 'L_DOT',
                                   'S1', 'S2', 'S3', 'S4')
         # LMED in a pure line context (height <= 1.0) is a medium-weight line
@@ -3400,13 +3516,13 @@ class VIPPToDFAConverter:
         if is_line_style:
             # Line styles: emit THICKNESS <weight> TYPE <type> only — no COLOR, no SHADE
             line_thickness_map = {
-                'LTHN': 'THIN', 'L_THN': 'THIN',
-                'LTHK': 'THICK', 'L_THK': 'THICK',
-                'LDSH': 'MEDIUM', 'L_DSH': 'MEDIUM',
-                'LDOT': 'MEDIUM', 'L_DOT': 'MEDIUM',
-                'S1': 'MEDIUM', 'S2': 'MEDIUM', 'S3': 'MEDIUM', 'S4': 'MEDIUM',
+                'LT': '0.1 MM', 'LTHN': '0.1 MM', 'L_THN': '0.1 MM',
+                'LTHK': '0.8 MM', 'L_THK': '0.8 MM',
+                'LDSH': '0.3 MM', 'L_DSH': '0.3 MM',
+                'LDOT': '0.3 MM', 'L_DOT': '0.3 MM',
+                'S1': '0.3 MM', 'S2': '0.3 MM', 'S3': '0.3 MM', 'S4': '0.3 MM',
             }
-            thickness_keyword = line_thickness_map.get(style, 'MEDIUM')
+            thickness_keyword = line_thickness_map.get(style, '0.3 MM')
             if style in ('LDSH', 'L_DSH'):
                 line_type = 'DASHED'
             elif style in ('LDOT', 'L_DOT'):
@@ -3992,9 +4108,11 @@ class VIPPToDFAConverter:
             setlkf_pattern = r'\[\s*\[\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+\d+(?:\.\d+)?\s+\d+(?:\.\d+)?\s+\d+\s*\]\s*\]'
             matches = re.findall(setlkf_pattern, self.dbm.raw_content)
             if matches:
-                # Get the last match (last page layout)
-                last_match = matches[-1]
-                self.page_layout_position = (float(last_match[0]), float(last_match[1]))
+                # Get the first match (initial page layout frame)
+                # The first SETLKF defines the data area for the first section of pages.
+                # Later SETLKFs (for subsequent sections) are handled per-PREFIX-case.
+                first_match = matches[0]
+                self.page_layout_position = (float(first_match[0]), float(first_match[1]))
                 logger.info(f"Found SETPAGEDEF layout position from raw content: {self.page_layout_position}")
 
     def _parse_setpagedef_layout(self, params):
@@ -4166,21 +4284,34 @@ class VIPPToDFAConverter:
         self.add_line("    WIDTH 210 MM")
         self.add_line("    HEIGHT 297 MM")
         self.add_line("    DIRECTION ACROSS")
-        # FOOTER counts total pages (called once at end of document)
+        # FOOTER counts total pages (PP) during formatting pass
+        # For multi-FRM documents (3+), also snapshot VAR_CURFORM per page
+        # because PRINTFOOTER runs in the print pass where VAR_CURFORM has
+        # only its FINAL value — not the per-page value set during formatting.
+        is_multi_frm = self.frm_files and len(self.frm_files) > 2
         self.add_line("    FOOTER")
         self.add_line("        PP = PP + 1;")
+        if is_multi_frm:
+            self.add_line("        FRM_PAGE[PP] = VAR_CURFORM;")
         self.add_line("    FOOTEREND")
-        # PRINTFOOTER outputs page numbers (called for each page in buffer)
+        # PRINTFOOTER: Renders FRM page background + page numbering.
+        # FRM rendering happens in the print pass (PRINTFOOTER) because:
+        # 1. It has an independent cursor context (won't interfere with data positioning)
+        # 2. This matches VIPP SETFORM behavior where the form renders as a page background
         self.add_line("    PRINTFOOTER")
-        self.add_line("")
-
-        # Add form usage in PRINTFOOTER (moved from main DOCFORMAT)
-        # P increment placement depends on FRM count — handled inside the function
-        self.add_line("        /* Cycle through FRM files */")
-        self._generate_form_usage_in_printfooter()
-        self.add_line("")
-
-        # Page numbering
+        self.add_line("        P = P + 1;")
+        if is_multi_frm:
+            self.add_line("        /* Render the FRM page background (per-page array) */")
+            self.add_line("        IF ISTRUE(NOSPACE(FRM_PAGE[P])<>'');")
+            self.add_line("        THEN;")
+            self.add_line("            USE FORMAT REFERENCE(FRM_PAGE[P]) EXTERNAL;")
+            self.add_line("        ENDIF;")
+        elif self.frm_files:
+            self.add_line("        /* Render the FRM page background */")
+            self.add_line("        IF ISTRUE(NOSPACE(VAR_CURFORM)<>'');")
+            self.add_line("        THEN;")
+            self.add_line("            USE FORMAT REFERENCE(VAR_CURFORM) EXTERNAL;")
+            self.add_line("        ENDIF;")
         self.add_line("        /* Page numbering */")
         self.add_line("        OUTLINE")
         self.add_line("            POSITION RIGHT (0 MM)")
@@ -4205,16 +4336,23 @@ class VIPPToDFAConverter:
             self.add_line("    DIRECTION ACROSS")
             self.add_line("    FOOTER")
             self.add_line("        PP = PP + 1;")
+            if is_multi_frm:
+                self.add_line("        FRM_PAGE[PP] = VAR_CURFORM;")
             self.add_line("    FOOTEREND")
             self.add_line("    PRINTFOOTER")
-            self.add_line("")
-
-            # Add form usage in PRINTFOOTER for page 2 (same as page 1)
-            self.add_line("        /* Cycle through FRM files */")
-            self._generate_form_usage_in_printfooter()
-            self.add_line("")
-
-            # Page numbering
+            self.add_line("        P = P + 1;")
+            if is_multi_frm:
+                self.add_line("        /* Render the FRM page background (per-page array) */")
+                self.add_line("        IF ISTRUE(NOSPACE(FRM_PAGE[P])<>'');")
+                self.add_line("        THEN;")
+                self.add_line("            USE FORMAT REFERENCE(FRM_PAGE[P]) EXTERNAL;")
+                self.add_line("        ENDIF;")
+            elif self.frm_files:
+                self.add_line("        /* Render the FRM page background */")
+                self.add_line("        IF ISTRUE(NOSPACE(VAR_CURFORM)<>'');")
+                self.add_line("        THEN;")
+                self.add_line("            USE FORMAT REFERENCE(VAR_CURFORM) EXTERNAL;")
+                self.add_line("        ENDIF;")
             self.add_line("        /* Page numbering */")
             self.add_line("        OUTLINE")
             self.add_line("            POSITION RIGHT (0 MM)")
@@ -5000,22 +5138,27 @@ class VIPPToDFAConverter:
                         operator = param2.lower()
 
                     # Convert to DFA condition
+                    # Use $SL_LMAXY (last max Y from just-closed sublevel) because
+                    # the FRLEFT check is emitted OUTSIDE the OUTLINE block (at
+                    # DOCFORMAT level).  At that level $SL_MAXY is 0 (no active
+                    # sublevel), but $SL_LMAXY retains the max Y from the OUTLINE
+                    # that was just closed via ENDIO.
                     if operator in ['lt', '<']:
                         # FRLEFT 60 lt → page has less than 60mm left
                         # This means we're close to bottom of page
-                        condition = f"$SL_MAXY>$LP_HEIGHT-MM({threshold})"
+                        condition = f"$SL_LMAXY>$LP_HEIGHT-MM({threshold})"
                         return (condition, True)
                     elif operator in ['gt', '>']:
                         # FRLEFT 60 gt → page has more than 60mm left
-                        condition = f"$SL_MAXY<$LP_HEIGHT-MM({threshold})"
+                        condition = f"$SL_LMAXY<$LP_HEIGHT-MM({threshold})"
                         return (condition, True)
                     elif operator in ['ge', '>=']:
                         # FRLEFT 60 ge → page has at least 60mm left
-                        condition = f"$SL_MAXY<=$LP_HEIGHT-MM({threshold})"
+                        condition = f"$SL_LMAXY<=$LP_HEIGHT-MM({threshold})"
                         return (condition, True)
                     elif operator in ['le', '<=']:
                         # FRLEFT 60 le → page has at most 60mm left
-                        condition = f"$SL_MAXY>=$LP_HEIGHT-MM({threshold})"
+                        condition = f"$SL_LMAXY>=$LP_HEIGHT-MM({threshold})"
                         return (condition, True)
 
         return (None, False)
@@ -5305,6 +5448,7 @@ class VIPPToDFAConverter:
 
         generated_count = 0
         skipped_prefixes = []
+        is_first_docformat = True  # Track first PREFIX DOCFORMAT for PAGEBRK suppression
 
         for case_value, commands in self.dbm.case_blocks.items():
             if case_value == "{}":
@@ -5323,8 +5467,11 @@ class VIPPToDFAConverter:
             # Track that this PREFIX has a defined DOCFORMAT
             self.defined_prefixes.add(case_value)
 
-            # Generate case-specific processing
-            self._convert_case_commands(commands)
+            # Generate case-specific processing.
+            # For the first PREFIX case (document marker, e.g. MR): suppress the leading
+            # PAGEBRK because DFA's ENDGROUP/ENDDOCUMENT handles document boundaries.
+            self._convert_case_commands(commands, suppress_leading_pagebrk=is_first_docformat)
+            is_first_docformat = False
 
             self.dedent()
             self.add_line("")
@@ -5364,7 +5511,7 @@ class VIPPToDFAConverter:
         self.add_line("/* END OF STUB DOCFORMATS */")
         self.add_line("")
 
-    def _convert_case_commands(self, commands: List[XeroxCommand], start_font: str = "ARIAL08"):
+    def _convert_case_commands(self, commands: List[XeroxCommand], start_font: str = "ARIAL08", suppress_leading_pagebrk: bool = False):
         """Convert VIPP commands within a case block to DFA."""
         self.indent()
 
@@ -5384,11 +5531,18 @@ class VIPPToDFAConverter:
 
         # Track consumed commands for lookahead processing (IF/ELSE/ENDIF)
         i = 0
+        prev_cmd_was_pagebrk = False  # Track if previous command was PAGEBRK (to suppress NEWFRONT/NEWBACK double break)
+        leading_pagebrk_suppressed = False  # For suppress_leading_pagebrk: only suppress the FIRST PAGEBRK
         while i < len(commands):
             cmd = commands[i]
 
             # Map command name if possible
             dfa_cmd = self.COMMAND_MAPPINGS.get(cmd.name, cmd.name)
+
+            # Reset PAGEBRK tracking for non-PAGEBRK commands
+            # (PAGEBRK handler will set this to True; NEWFRONT/NEWBACK handlers will read it)
+            if cmd.name not in ('PAGEBRK', 'NEWFRONT', 'NEWBACK'):
+                prev_cmd_was_pagebrk = False
 
             # Skip comments or unsupported commands
             if cmd.name.startswith('%') or dfa_cmd.startswith('/'):
@@ -5471,6 +5625,7 @@ class VIPPToDFAConverter:
                 # Keeping SETLSP outside OUTLINE ensures subsequent SETVAR commands
                 # (from SETFORM, ++ operators etc.) are also emitted at DOCFORMAT level,
                 # not trapped inside the OUTLINE where they are invalid.
+
                 self.add_line("")
                 self.add_line("OUTLINE")
                 self.indent()
@@ -5567,7 +5722,7 @@ class VIPPToDFAConverter:
                 # level — not inside an OUTLINE block — because their bodies contain
                 # USE LOGICALPAGE and VAR assignments which are invalid inside OUTLINE.
                 # Detect FRLEFT by checking the IF command's parameters.
-                is_frleft_if = 'FRLEFT' in cmd.parameters
+                is_frleft_if = any('FRLEFT' in str(p) for p in cmd.parameters)
                 if is_frleft_if and outline_opened:
                     # Close the OUTLINE before emitting the page-break IF block
                     self.dedent()
@@ -5704,12 +5859,48 @@ class VIPPToDFAConverter:
                 continue
 
             # Skip SETPAGEDEF silently - already handled at docformat level
-            if cmd.name in ('SETLKF', 'SETPAGEDEF'):
+            if cmd.name == 'SETPAGEDEF':
+                i += 1
+                continue
+
+            # Handle SETLKF - position cursor at the data frame origin
+            # SETLKF defines the printable area where subsequent data goes.
+            # Emit a cursor-positioning OUTLINE so the next OUTLINE's NEXT/SAME
+            # starts from the correct Y position on the page.
+            if cmd.name == 'SETLKF':
+                if cmd.parameters:
+                    import re as _re
+                    values = _re.findall(r'(\d+(?:\.\d+)?)', str(cmd.parameters[0]))
+                    if len(values) >= 2:
+                        frame_x = float(values[0])
+                        frame_y = float(values[1])
+                        # Close any open OUTLINE first
+                        if outline_opened:
+                            self.dedent()
+                            self.add_line("ENDIO;")
+                            outline_opened = False
+                        # Emit cursor-positioning OUTLINE at frame origin
+                        self.add_line(f"/* SETLKF: data area at ({frame_x}, {frame_y}) */")
+                        self.add_line("OUTLINE")
+                        self.indent()
+                        self.add_line(f"POSITION ({frame_x} MM-$MR_LEFT) ({frame_y} MM-$MR_TOP);")
+                        self.dedent()
+                        self.add_line("ENDIO;")
                 i += 1
                 continue
 
             # Handle page break commands
             if cmd.name == 'PAGEBRK':
+                # suppress_leading_pagebrk: In VIPP DBM mode, the first PREFIX case (e.g. MR)
+                # starts with PAGEBRK NEWFRONT to separate documents. In DFA, document
+                # boundaries (ENDGROUP/ENDDOCUMENT) already handle page separation, so the
+                # first PAGEBRK in the first DOCFORMAT should be suppressed to avoid creating
+                # a blank page 1.
+                if suppress_leading_pagebrk and not leading_pagebrk_suppressed:
+                    leading_pagebrk_suppressed = True
+                    prev_cmd_was_pagebrk = True  # So following NEWFRONT is also suppressed
+                    i += 1
+                    continue
                 # PAGEBRK → USE LOGICALPAGE NEXT (unconditional page break).
                 # Must be at DOCFORMAT level, not inside an OUTLINE block.
                 # Close any open OUTLINE first so the page break is emitted at the right level.
@@ -5720,20 +5911,34 @@ class VIPPToDFAConverter:
                     self.add_line("ENDIO;")
                     outline_opened = False
                 self.add_line("USE LOGICALPAGE NEXT;")
+                prev_cmd_was_pagebrk = True
                 i += 1
                 continue
 
             if cmd.name == 'NEWFRONT':
-                # NEWFRONT → USE LOGICALPAGE NEXT
-                # NOTE: "SIDE FRONT" is not a valid qualifier for USE LOGICALPAGE commands.
-                self.add_line("USE LOGICALPAGE NEXT;")
+                # NEWFRONT after PAGEBRK: in VIPP "PAGEBRK NEWFRONT" is ONE operation — the
+                # PAGEBRK already emitted USE LOGICALPAGE NEXT, so NEWFRONT is suppressed.
+                # NEWFRONT standalone (no preceding PAGEBRK): force a new front page.
+                if not prev_cmd_was_pagebrk:
+                    if outline_opened:
+                        self.dedent()
+                        self.add_line("ENDIO;")
+                        outline_opened = False
+                    self.add_line("USE LOGICALPAGE NEXT;")
+                # else: PAGEBRK already emitted the page break — suppress this one
+                prev_cmd_was_pagebrk = False
                 i += 1
                 continue
 
             if cmd.name == 'NEWBACK':
-                # NEWBACK → USE LOGICALPAGE NEXT
-                # NOTE: "SIDE BACK" is not a valid qualifier for USE LOGICALPAGE commands.
-                self.add_line("USE LOGICALPAGE NEXT;")
+                # Same logic as NEWFRONT — suppress if preceded by PAGEBRK.
+                if not prev_cmd_was_pagebrk:
+                    if outline_opened:
+                        self.dedent()
+                        self.add_line("ENDIO;")
+                        outline_opened = False
+                    self.add_line("USE LOGICALPAGE NEXT;")
+                prev_cmd_was_pagebrk = False
                 i += 1
                 continue
 
@@ -5812,6 +6017,38 @@ class VIPPToDFAConverter:
         frleft_condition, is_frleft = self._convert_frleft_condition(clean_params)
 
         if is_frleft:
+            # FRLEFT + PAGEBRK = section transition → unconditional page break.
+            # In complex DBM architectures (like CASIO), FRM overlays render in
+            # PRINTFOOTER (print pass) while the FRLEFT check evaluates during the
+            # format pass.  The FRM overlay content fills most of the page, but
+            # $SL_LMAXY during formatting only reflects the dynamic data output —
+            # far less than the full page.  The FRLEFT condition therefore never
+            # fires, so we emit the body unconditionally.
+            # FRLEFT + NEWFRAME (without PAGEBRK) remains conditional — those are
+            # genuine overflow guards for dynamic content like transaction details.
+            has_pagebrk = cmd.children and any(c.name == 'PAGEBRK' for c in cmd.children)
+            if has_pagebrk:
+                self.add_line(f"/* FRLEFT section transition (unconditional) */")
+                self._convert_case_commands(cmd.children, current_font)
+                # Still need to consume ELSE/ENDIF siblings if present
+                consumed = 1
+                if commands is not None and idx >= 0:
+                    nesting_level = 0
+                    for j in range(idx + 1, len(commands)):
+                        cmd_name = commands[j].name
+                        if cmd_name == 'IF':
+                            nesting_level += 1
+                        elif cmd_name == 'ENDIF':
+                            if nesting_level == 0:
+                                consumed += (j - idx)
+                                break
+                            else:
+                                nesting_level -= 1
+                        elif cmd_name == 'ELSE' and nesting_level == 0:
+                            # Skip ELSE body too
+                            pass
+                return consumed
+
             # Use FRLEFT condition directly (already in DFA format)
             condition = frleft_condition
             needs_istrue = True
@@ -5847,14 +6084,24 @@ class VIPPToDFAConverter:
         # FRLEFT page-break IF blocks:
         # In VIPP, `IF FRLEFT N lt { PAGEBRK NEWFRONT (FRM.FRM) SETFORM }` means
         # "if less than N mm left on page, break to new front page and set FRM background."
-        # The parser often loses NEWFRONT (it's a VIPP modifier for PAGEBRK, not a standalone
-        # command in this context). We always emit USE LOGICALPAGE NEXT explicitly.
+        # Two cases:
+        #   (a) Children contain PAGEBRK → _convert_case_commands will emit USE LOGICALPAGE NEXT;
+        #       Do NOT emit pre-emptively (would double the break).
+        #   (b) Children contain NEWFRAME (but not PAGEBRK) → NEWFRAME is "advance to next frame"
+        #       in VIPP = a page overflow mechanism. Emit USE LOGICALPAGE NEXT; here since
+        #       _convert_case_commands emits a comment stub for NEWFRAME.
         # NOTE: "SIDE FRONT" is NOT valid in USE LOGICALPAGE commands — only in definitions.
-        if is_frleft:
-            self.indent()
-            self.add_line("/* Page overflow: force new page */")
-            self.add_line("USE LOGICALPAGE NEXT;")
-            self.dedent()
+        if is_frleft and cmd.children:
+            has_pagebrk = any(c.name == 'PAGEBRK' for c in cmd.children)
+            has_newframe = any(c.name == 'NEWFRAME' for c in cmd.children)
+            if has_newframe and not has_pagebrk:
+                # NEWFRAME-only overflow — emit page break here; _convert_case_commands will
+                # emit the comment stub for NEWFRAME itself.
+                self.indent()
+                self.add_line("/* Page overflow: NEWFRAME → USE LOGICALPAGE NEXT */")
+                self.add_line("USE LOGICALPAGE NEXT;")
+                self.dedent()
+            # else: PAGEBRK children will emit USE LOGICALPAGE NEXT; — no pre-emptive emission needed
 
         # Process children (IF body) if present
         if cmd.children:
@@ -6444,7 +6691,7 @@ class VIPPToDFAConverter:
 
         # Parse style parameter if present
         style = str(cmd.parameters[4]).upper() if len(cmd.parameters) >= 5 else None
-        is_line_style = style in ('LMED', 'LTHN', 'LTHK', 'LDSH', 'LDOT',
+        is_line_style = style in ('LT', 'LMED', 'LTHN', 'LTHK', 'LDSH', 'LDOT',
                                   'L_MED', 'L_THN', 'L_THK', 'L_DSH', 'L_DOT') if style else False
 
         # Determine positioning pattern
@@ -6468,11 +6715,11 @@ class VIPPToDFAConverter:
 
         if is_line_style:
             line_thickness_map = {
-                'LTHN': 'THIN', 'L_THN': 'THIN',
-                'LMED': 'MEDIUM', 'L_MED': 'MEDIUM',
-                'LTHK': 'THICK', 'L_THK': 'THICK',
+                'LT': '0.1 MM', 'LTHN': '0.1 MM', 'L_THN': '0.1 MM',
+                'LMED': '0.3 MM', 'L_MED': '0.3 MM',
+                'LTHK': '0.8 MM', 'L_THK': '0.8 MM',
             }
-            tk = line_thickness_map.get(style, 'MEDIUM')
+            tk = line_thickness_map.get(style, '0.3 MM')
             self.add_line(f"THICKNESS {tk} TYPE SOLID;")
         elif style:
             # Fill style — determine color and shade
@@ -6847,15 +7094,14 @@ class VIPPToDFAConverter:
             self.add_line(f"      IF P<1; THEN; USE FORMAT {first_form} EXTERNAL; ELSE; USE FORMAT {subseq_form} EXTERNAL; ENDIF;")
             self.add_line(f"      P = P + 1;")
         else:
-            # Multi-FRM pattern (3+ FRMs): use data-driven VAR_CURFORM selection.
-            # Each PREFIX DOCFORMAT sets VAR_CURFORM = 'FORMNAME' when it processes
-            # a SETFORM command. PRINTFOOTER reads VAR_CURFORM to select the correct
-            # background FRM for this physical page.
-            # VAR_CURFORM is initialized to '' in $_BEFOREDOC; if empty, use no FRM overlay.
-            # P is incremented here for page numbering only.
+            # Multi-FRM pattern (3+ FRMs): use per-page FRM_PAGE[] array.
+            # During formatting (FOOTER), each page snapshots VAR_CURFORM into FRM_PAGE[PP].
+            # During printing (PRINTFOOTER), FRM_PAGE[P] gives the correct form for each page.
+            # This is required because PRINTFOOTER runs in the print pass where VAR_CURFORM
+            # has only its FINAL value — not the per-page value set during formatting.
             self.add_line(f"      P = P + 1;")
-            self.add_line(f"      IF ISTRUE(NOSPACE(VAR_CURFORM) <> '');")
-            self.add_line(f"      THEN; USE FORMAT REFERENCE(VAR_CURFORM) EXTERNAL;")
+            self.add_line(f"      IF ISTRUE(NOSPACE(FRM_PAGE[P]) <> '');")
+            self.add_line(f"      THEN; USE FORMAT REFERENCE(FRM_PAGE[P]) EXTERNAL;")
             self.add_line(f"      ENDIF;")
 
     def _generate_variable_initialization(self):
@@ -7045,14 +7291,14 @@ class VIPPToDFAConverter:
         self.add_line("")
 
         # Add position correction variables for Xerox alignment
-        self.add_line("/* Correction for Xerox position */")
-        self.add_line("/* Correction = ($SL_MAXY - $SL_MINY)/4 */")
-        self.add_line("&CORFONT6 = -33;")
-        self.add_line("&CORFONT7 = -37.5;")
-        self.add_line("&CORFONT8 = -43.5;")
-        self.add_line("&CORFONT10 = -55.5;")
-        self.add_line("&CORFONT12 = -66;")
-        self.add_line("&CORSEGMENT = 33;")
+        self.add_line("/* Correction for Xerox position — VIPP and DFA share the same */")
+        self.add_line("/* absolute coordinate space; correction factors are 0 */")
+        self.add_line("&CORFONT6 = 0;")
+        self.add_line("&CORFONT7 = 0;")
+        self.add_line("&CORFONT8 = 0;")
+        self.add_line("&CORFONT10 = 0;")
+        self.add_line("&CORFONT12 = 0;")
+        self.add_line("&CORSEGMENT = 0;")
         self.add_line("")
 
         # Add variable initialization from DBM commands

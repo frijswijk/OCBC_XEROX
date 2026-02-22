@@ -1,6 +1,6 @@
 %!
 %%Title: CASIO.DBM
-%%Creator: Lian 
+%%Creator: Lian
 %%CreationDate: Thu Jul 30 2009, 17:08:10.
 %%WIZVAR:BEGIN
 %%WIZVAR PREFIX, FLD1, FLD2, FLD3, FLD4, FLD5, FLD6, FLD7
@@ -12,158 +12,151 @@
 
 XGF
 
-[ /DecimalPoint  46    % decimal delimiter in numeric data (default .) 
-  /NSign         45    % negative sign in numeric data (default: -) 
-  /FDecimalPoint 46    % decimal delimiter in format (default: .) 
-  /FNSign        45    % nefgative sign in format (default: -) 
-  /FPSign        43    % positive sign in format (default: +) 
-  /FPunctuation  44    % thousands delimiter in format (default: ,) 
-  /FDigit        35    % placeholder for digit in format (default: #) 
-  /FLZDigit      64    % placeholder for digit in format (default: @) 
-                       % that will be replaced by space if the digit  
-                       % is aleading zero  
+[ /DecimalPoint  46    % decimal delimiter in numeric data (default .)
+/NSign         45    % negative sign in numeric data (default: -)
+/FDecimalPoint 46    % decimal delimiter in format (default: .)
+/FNSign        45    % nefgative sign in format (default: -)
+/FPSign        43    % positive sign in format (default: +)
+/FPunctuation  44    % thousands delimiter in format (default: ,)
+/FDigit        35    % placeholder for digit in format (default: #)
+/FLZDigit      64    % placeholder for digit in format (default: @)
+% is aleading zero
 ] SETPARAMS
 
 % Start Of Initializations
 % ------------------------------------------------
-	/VARINI true			/INI		SETVAR
-	IF VARINI 
+/VARINI true			/INI		SETVAR
+IF VARINI
 
 { % Define Page Layout
 
-        MM SETUNIT
-        ORITL
-        PORT
-        04 SETLSP
-        %DUPLEX_on
-        210 297 SETPAGESIZE
+    MM SETUNIT
+    ORITL
+    PORT
+    04 SETLSP
+    210 297 SETPAGESIZE
 
-% Run Initialising Once Only
-	/VARINI			false				SETVAR
-      	  
-% Define More Than One Card Type
-	/VAR_MOC		  0		/INI		SETVAR
+    % Run Initialising Once Only
+    /VARINI			false				SETVAR
 
-% Define Summary Counter
-	/VAR_I1  		  0 	/INI 		SETVAR
-	/VAR_R1  		  0 	/INI 		SETVAR
-	/VAR_S1  		  0 	/INI 		SETVAR
-	/VAR_V1  		  0 	/INI 		SETVAR % for travel visa card 2019
+    % Define More Than One Card Type
+    /VAR_MOC		  0		/INI		SETVAR
 
-% Define Counter For PAGE NUMBER
-	/VAR_COUNTPAGE	  0		/INI		SETVAR
-	/VAR_COUNTI1	  0		/INI		SETVAR
-	/VAR_COUNTR1	  0		/INI		SETVAR
-	/VAR_COUNTS1  	  0		/INI		SETVAR
-	/VAR_COUNTV1  	  0		/INI		SETVAR % for travel visa card 2019
+    % Define Summary Counter
+    /VAR_I1  		  0 	/INI 		SETVAR
+    /VAR_R1  		  0 	/INI 		SETVAR
+    /VAR_S1  		  0 	/INI 		SETVAR
+    /VAR_V1  		  0 	/INI 		SETVAR % for travel visa card 2019
 
-% Define Counter for Currency Code and Location
-	/VAR_CLC          0   	/INI		SETVAR
-	/VAR_CCD          0   	/INI		SETVAR
+    % Define Counter For PAGE NUMBER
+    /VAR_COUNTPAGE	  0		/INI		SETVAR
+    /VAR_COUNTI1	  0		/INI		SETVAR
+    /VAR_COUNTR1	  0		/INI		SETVAR
+    /VAR_COUNTS1  	  0		/INI		SETVAR
+    /VAR_COUNTV1  	  0		/INI		SETVAR % for travel visa card 2019
 
-% Define Counter for Messages
-	/VAR_COUNTM3      0   	/INI        SETVAR
-	/VAR_COUNTM4      0   	/INI        SETVAR
-	
-% Define Counter for transaction description 
-   % modified on 270709 for transaction description
-   /VAR_COUNTTD       0  	/INI        SETVAR
+    % Define Counter for Currency Code and Location
+    /VAR_CLC          0   	/INI		SETVAR
+    /VAR_CCD          0   	/INI		SETVAR
 
-% Define Dynamic Lines To Form a Box
-	/VAR.Y1 		  05	SETVAR % Dynamic Horizontal Line
-	/VAR.Y2 	      00 	SETVAR % Dynamic Vertical Line
-	/VAR.Y3			 -02	SETVAR % Dynamic Shaded Boxes for Statement Messages
-	/VAR.Y4			  00	SETVAR % Dynamic Horizontal Line for YA
-	/VAR.Y5			  00	SETVAR % Dynamic Vertical Line for YA
-				
-% Define Reset Count Account
-	/VAR_RACC		0	/INI			SETVAR
-	
-% Define Counter For Data Overflow Header
-	/VAR_NF			0	/INI			SETVAR
+    % Define Counter for Messages
+    /VAR_COUNTM3      0   	/INI        SETVAR
+    /VAR_COUNTM4      0   	/INI        SETVAR
 
-% Define For Page Numbering
-	/VARtab			[[/VAR_pctot]]		SETVAR
-	/VARdoc			0					SETVAR
+    % modified on 270709 for transaction description
+    /VAR_COUNTTD       0  	/INI        SETVAR
 
-% Define For File Break
-	/VAR_brk		0		/INI		SETVAR
-	/VAR_brkcnt		0		/INI		SETVAR
-	/VAR_brkctl		true	/INI		SETVAR
-	
-% Flag for Y0
-	/VAR_Y0			0	/INI			SETVAR
+    % Define Dynamic Lines To Form a Box
+    /VAR.Y1 		  05	SETVAR % Dynamic Horizontal Line
+    /VAR.Y2 	      00 	SETVAR % Dynamic Vertical Line
+    /VAR.Y3			 -02	SETVAR % Dynamic Shaded Boxes for Statement Messages
+    /VAR.Y4			  00	SETVAR % Dynamic Horizontal Line for YA
+    /VAR.Y5			  00	SETVAR % Dynamic Vertical Line for YA
 
-% For YA
-	/VAR_COUNTYA			0	/INI			SETVAR
-	/VAR_ARRAY1F1 () /INI
-	/VAR_ARRAY2F1 () /INI
-	/VAR_ARRAY3F1 () /INI
-	/VAR_ARRAY4F1 () /INI
-	/VAR_ARRAY5F1 () /INI
-	/VAR_ARRAY6F1 () /INI
-	/VAR_ARRAY7F1 () /INI
+    % Define Reset Count Account
+    /VAR_RACC		0	/INI			SETVAR
 
-} ENDIF	% Closing for =>IF VARINI 
+    % Define Counter For Data Overflow Header
+    /VAR_NF			0	/INI			SETVAR
 
-% Begin Page - calculate / reset befor the start of page
+    % Define For Page Numbering
+    /VARtab			[[/VAR_pctot]]		SETVAR
+    /VARdoc			0					SETVAR
+
+    % Define For File Break
+    /VAR_brk		0		/INI		SETVAR
+    /VAR_brkcnt		0		/INI		SETVAR
+    /VAR_brkctl		true	/INI		SETVAR
+
+    % Flag for Y0
+    /VAR_Y0			0	/INI			SETVAR
+
+    /VAR_COUNTYA			0	/INI			SETVAR
+    /VAR_ARRAY1F1 () /INI
+    /VAR_ARRAY2F1 () /INI
+    /VAR_ARRAY3F1 () /INI
+    /VAR_ARRAY4F1 () /INI
+    /VAR_ARRAY5F1 () /INI
+    /VAR_ARRAY6F1 () /INI
+    /VAR_ARRAY7F1 () /INI
+
+} ENDIF	% Closing for =>IF VARINI
+
 % ------------------------------------------------------
 % Page Number Counter
 {
-  IF CPCOUNT 1 eq	
-	{ SKIPPAGE 
-	 /VAR_pctot ++ 
-	}
-		ELSE
-		
-		{ 
-		  /VAR_COUNTPAGE ++
-              /VAR_brkcnt ++
-		}	ENDIF 
- 
-    
- % Form For Page 4 And Onward
-  	IF VAR_COUNTPAGE 4 eq
-   	{
-     	IF VAR_COUNTI1 0 gt VAR_COUNTR1 0 gt or
-     	{      
-     	}
-     		ELSE
-     		{
-       			IF VAR_COUNTS1 0 gt
-       			{
-       			}
-       			
-       				ELSE
-       				
-       				{
-       				 %(CASIOF4.FRM) SETFORM
-       				}	ENDIF
-       				
-       		} ENDIF
-       		
-		}	ENDIF
+    IF CPCOUNT 1 eq
+    { SKIPPAGE
+        /VAR_pctot ++
+    }
+ELSE
 
-% Page 4 IPP, OCBC, Robinsons and M4 Counters
-IF CPCOUNT 2 eq VAR_COUNTPAGE 1 eq and
-	{
-		IF VAR_brkcnt 10000 gt
-			{
-				/VAR_brkcnt 0 SETVAR
-				/VAR_brk ++
-				/VAR_brkctl true SETVAR
-			} ENDIF
-	
-/VAR_COUNTI1 0 SETVAR
-/VAR_COUNTR1 0 SETVAR
-/VAR_COUNTS1 0 SETVAR
-/VAR_COUNTV1 0 SETVAR % travel visa card 2019
-/VAR_COUNTM4 0 SETVAR
+    {
+        /VAR_COUNTPAGE ++
+        /VAR_brkcnt ++
+    }	ENDIF
 
-} ENDIF
+    % Form For Page 4 And Onward
+    IF VAR_COUNTPAGE 4 eq
+    {
+        IF VAR_COUNTI1 0 gt VAR_COUNTR1 0 gt or
+        {
+        }
+    ELSE
+        {
+            IF VAR_COUNTS1 0 gt
+            {
+            }
 
-% Transaction Description Counter
-/VAR_COUNTTD 1 SETVAR % modified on 270709 for transaction description
+        ELSE
+
+            {
+            }	ENDIF
+
+        } ENDIF
+
+    }	ENDIF
+
+    % Page 4 IPP, OCBC, Robinsons and M4 Counters
+    IF CPCOUNT 2 eq VAR_COUNTPAGE 1 eq and
+    {
+        IF VAR_brkcnt 10000 gt
+        {
+            /VAR_brkcnt 0 SETVAR
+            /VAR_brk ++
+            /VAR_brkctl true SETVAR
+        } ENDIF
+
+        /VAR_COUNTI1 0 SETVAR
+        /VAR_COUNTR1 0 SETVAR
+        /VAR_COUNTS1 0 SETVAR
+        /VAR_COUNTV1 0 SETVAR % travel visa card 2019
+        /VAR_COUNTM4 0 SETVAR
+
+    } ENDIF
+
+    % Transaction Description Counter
+    /VAR_COUNTTD 1 SETVAR % modified on 270709 for transaction description
 
 } BEGINPAGE
 
@@ -205,229 +198,145 @@ IF CPCOUNT 2 eq VAR_COUNTPAGE 1 eq and
 /U0 	/UNDL 			  INDEXBAT
 /N0 	 null 			  INDEXBAT
 
-% Define Dynamic Elements for Boxes
 % ------------------------------------------------
 % Statement Date Box - prefix for B0
 /SDBX	{  02          00        84          08     LMED     DRAWB % Shaded Box
-           02          00        84       0.001     XDRK     DRAWB % First Horizontal Line
-           02         -08        84       0.001     XDRK     DRAWB % Second Horizontal Line
-		   02         -15        84       0.001     XDRK     DRAWB % Third Horizontal Line
-		   86          00     0.001          15     XDRK     DRAWB % Left Vertical Line
-		   44          00     0.001          15     XDRK     DRAWB % Middle Vertical Line
-		   02          00     0.001          15     XDRK     DRAWB % Right Vertical Line   
-		} XGFRESDEF		% Statement Date Box
+    02          00        84       0.001     XDRK     DRAWB % First Horizontal Line
+    02         -08        84       0.001     XDRK     DRAWB % Second Horizontal Line
+    02         -15        84       0.001     XDRK     DRAWB % Third Horizontal Line
+    86          00     0.001          15     XDRK     DRAWB % Left Vertical Line
+    44          00     0.001          15     XDRK     DRAWB % Middle Vertical Line
+    02          00     0.001          15     XDRK     DRAWB % Right Vertical Line
+} XGFRESDEF		% Statement Date Box
 
 % Cards Summary Box - prefix for D0
 /CSBX	{  00          00        193      13.5        MED     DRAWB % Top Shaded Box
-		  %00       -51.5       189        06         MED     DRAWB % Bottom Shaded Box	
-           00          00      0.001      50.5       XDRK     DRAWB % Left Vertical Line
-		   57       -13.5      0.001      36.7       XDRK     DRAWB % CA Vertical Line
-		   87.5        00      0.001      50.5       XDRK     DRAWB % CB Vertical Line
-		   118         00      0.001      50.5       XDRK     DRAWB % MP Vertical Line
-		   152         00      0.001      50.5       XDRK     DRAWB % PSP Vertical Line
-		   193         00      0.001      50.5       XDRK     DRAWB % Right Vertical Line
-		   00          00        193     0.001       XDRK     DRAWB % Top Horizontal Line
-	       00       -13.5        193     0.001       XDRK     DRAWB % Middle Horizontal Line
-	       00       -50.5        193     0.001       XDRK     DRAWB % TL Horizontal Line       
-		  %00       -57.5        189      0.01       XDRK     DRAWB % Bottom Horizontal Line
-		} XGFRESDEF		% Card Summary Box
+    00          00      0.001      50.5       XDRK     DRAWB % Left Vertical Line
+    57       -13.5      0.001      36.7       XDRK     DRAWB % CA Vertical Line
+    87.5        00      0.001      50.5       XDRK     DRAWB % CB Vertical Line
+    118         00      0.001      50.5       XDRK     DRAWB % MP Vertical Line
+    152         00      0.001      50.5       XDRK     DRAWB % PSP Vertical Line
+    193         00      0.001      50.5       XDRK     DRAWB % Right Vertical Line
+    00          00        193     0.001       XDRK     DRAWB % Top Horizontal Line
+    00       -13.5        193     0.001       XDRK     DRAWB % Middle Horizontal Line
+    00       -50.5        193     0.001       XDRK     DRAWB % TL Horizontal Line
+} XGFRESDEF		% Card Summary Box
 
 % Lucky Draw Box - prefix for M0
-/M0BX	{  00          00       193         10.3    LMED     DRAWB % Shaded Box	
-           00          00     0.001         16      XDRK     DRAWB % Left Vertical Line
-		   96          00     0.001         16      XDRK     DRAWB % Middle Vertical Line
-		   193         00     0.001         16      XDRK     DRAWB % Right Vertical Line
-		   00          00      193       0.001      XDRK     DRAWB % Top Horizontal Line
-	       00         -10.3    193       0.001      XDRK     DRAWB % Middle 1 Horizontal Line
-		   00         -16      193       0.001      XDRK     DRAWB % Bottom Horizontal Line
-		} XGFRESDEF		% Lucky Draw / Contest
-
-% Year End Summary Box - prefix for YR
-%/YRSB	{	00   -14    193     08     FBLACK     DRAWB % Shaded Box
-		   	%00    00      192    0.001     XDRK     DRAWB % Top Horizontal Line
-		   	%00   -35      192    0.001     XDRK     DRAWB % Bottom Horizontal Line  
-			
-%		} XGFRESDEF		% Year End Summary
+/M0BX	{  00          00       193         10.3    LMED     DRAWB % Shaded Box
+    00          00     0.001         16      XDRK     DRAWB % Left Vertical Line
+    96          00     0.001         16      XDRK     DRAWB % Middle Vertical Line
+    193         00     0.001         16      XDRK     DRAWB % Right Vertical Line
+    00          00      193       0.001      XDRK     DRAWB % Top Horizontal Line
+    00         -10.3    193       0.001      XDRK     DRAWB % Middle 1 Horizontal Line
+    00         -16      193       0.001      XDRK     DRAWB % Bottom Horizontal Line
+} XGFRESDEF		% Lucky Draw / Contest
 
 % Year End Summary Box - prefix for Y0
 /YESB	{	%0.1   -0.1    172.8     08     FBLACK     DRAWB % Shaded Box
-			% 20210427
-			-08   -0.1    193     08     FBLACK     DRAWB % Shaded Box
-		   	%00      00      192    0.001     XDRK     DRAWB % Top Horizontal Line
-		   	%00     -35      192    0.001     XDRK     DRAWB % Bottom Horizontal Line  
-	
-		} XGFRESDEF		% Year End Summary
+    % 20210427
+    -08   -0.1    193     08     FBLACK     DRAWB % Shaded Box
+
+} XGFRESDEF		% Year End Summary
 
 % Year End Payment Information - prefix for Y0
 /YSAB	{  %00          10     0.001         91      FBLACK   DRAWB % Left Vertical Line
-			00          06     0.001         54      FBLACK   DRAWB % Left Vertical Line
-           %193.2       06     0.001         91      FBLACK   DRAWB % Right Vertical Line
-           %173       	06     0.001         54      FBLACK   DRAWB % Right Vertical Line
-           % 20210427
-             193       	06     0.001         54      FBLACK   DRAWB % Right Vertical Line
-           % 00         -31      193       0.001      FBLACK   DRAWB % Top Horizontal Line
-           
-           % 20210427
-           % 00			  06		  173		0.001	 FBLACK	  DRAWB		   
-	         00			  06		  193		0.001	 FBLACK	  DRAWB
-	       % 00          -36.5        193       0.001    FBLACK   DRAWB % Middle 1 Horizontal Line
-	       % 20210427
-	       % 00           00    	  173       0.001    FBLACK   DRAWB % Middle 1 Horizontal Line
-		     00           00    	  193       0.001    FBLACK   DRAWB
-		   % 00          -42.5        193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 20210427
-		   % 00          -06          173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00          -06          193       0.001    FBLACK   DRAWB
-		   % 00          -49          193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 20210427
-		   % 00          -12          173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00          -12          193       0.001    FBLACK   DRAWB
-		   % 00          -55          193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 20210427
-		   % 00          -18          173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00          -18          193       0.001    FBLACK   DRAWB
-		   % 00          -61          193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 20210427
-		   % 00          -24          173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00          -24          193       0.001    FBLACK   DRAWB
-		   % 00          -67          193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 20210427
-		   % 00          -30          173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00          -30          193       0.001    FBLACK   DRAWB
-		   % 00          -73          193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 20210427
-		   % 00          -36          173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00          -36          193       0.001    FBLACK   DRAWB
-		   % 00          -79          193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 20210427
-		   % 00          -42          173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00          -42          193       0.001    FBLACK   DRAWB
-		   % 00          -85          193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 20210427
-		   % 00          -48          173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-			 00          -48          193       0.001    FBLACK   DRAWB
-			 
-		   %140        -31      0.001         54     FBLACK   DRAWB % Middle Vertical Line
-		   130          06      0.001         54     FBLACK   DRAWB % Middle Vertical Line   
-	
-		} XGFRESDEF		% Current Credit Limit Utilised
+    00          06     0.001         54      FBLACK   DRAWB % Left Vertical Line
+    % 20210427
+    193       	06     0.001         54      FBLACK   DRAWB % Right Vertical Line
+
+    % 20210427
+    00			  06		  193		0.001	 FBLACK	  DRAWB
+    % 20210427
+    00           00    	  193       0.001    FBLACK   DRAWB
+    % 20210427
+    00          -06          193       0.001    FBLACK   DRAWB
+    % 20210427
+    00          -12          193       0.001    FBLACK   DRAWB
+    % 20210427
+    00          -18          193       0.001    FBLACK   DRAWB
+    % 20210427
+    00          -24          193       0.001    FBLACK   DRAWB
+    % 20210427
+    00          -30          193       0.001    FBLACK   DRAWB
+    % 20210427
+    00          -36          193       0.001    FBLACK   DRAWB
+    % 20210427
+    00          -42          193       0.001    FBLACK   DRAWB
+    % 20210427
+    00          -48          193       0.001    FBLACK   DRAWB
+
+    130          06      0.001         54     FBLACK   DRAWB % Middle Vertical Line
+
+} XGFRESDEF		% Current Credit Limit Utilised
 
 % Year End Payment Information - prefix for Y1
 /YPIB	{    00         -06      0.001          96    FBLACK   DRAWB % Left Vertical Line
-           % 20210427
-           % 173        -06      0.001        91.5    FBLACK   DRAWB % Right Vertical Line
-             193        -06      0.001          96    FBLACK   DRAWB
-           %00           00        193       0.001    FBLACK   DRAWB % Top Horizontal Line
-           
-           % 20210427		   
-	       % 00         -12    	   173       0.001    FBLACK   DRAWB % Middle 1 Horizontal Line
-		   % 00         -17.3      173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 00         -22.5      173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 00         -63.8      173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 00         -87        173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 00         -80        173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 00         -97.5      173       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		  	 00         -12    	   193       0.001    FBLACK   DRAWB % Middle 1 Horizontal Line
-		     00         -17.3      193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00         -22.5      193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00         -63.8      193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00         -91        193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00         -82        193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		     00         -102       193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
+    % 20210427
+    193        -06      0.001          96    FBLACK   DRAWB
 
-		   % 00         -79        193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-		   % 00         -85        193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
-	
-		  % 20210427
-		  % 130        -06       0.001       16.5     FBLACK   DRAWB % Middle Vertical Line   
-		  % 58.5	   -64       0.001		 33.5  	  FBLACK   DRAWB
-		  % 115.5	   -64       0.001		 33.5  	  FBLACK   DRAWB
-		    130        -06       0.001       16.5     FBLACK   DRAWB % Middle Vertical Line   
-		    65  	   -64       0.001		 38  	  FBLACK   DRAWB
-		    130 	   -64       0.001		 38  	  FBLACK   DRAWB
-		  		
-		} XGFRESDEF		% Important Notice
+    % 20210427
+    00         -12    	   193       0.001    FBLACK   DRAWB % Middle 1 Horizontal Line
+    00         -17.3      193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
+    00         -22.5      193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
+    00         -63.8      193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
+    00         -91        193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
+    00         -82        193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
+    00         -102       193       0.001    FBLACK   DRAWB % Bottom Horizontal Line
 
+    % 20210427
+    130        -06       0.001       16.5     FBLACK   DRAWB % Middle Vertical Line
+    65  	   -64       0.001		 38  	  FBLACK   DRAWB
+    130 	   -64       0.001		 38  	  FBLACK   DRAWB
 
-% Define Dynamic Elements for Messages
-% ------------------------------------------------
-% modified on 250709
-%/M1		{ 
-%		  F4 
-%		  NL
-%		  17 MOVEHR (Kindly detach this portion and return it with your cheque made payable to **F5OCBC Card for **U0< YOUR NAME >**N0**F4.) VSUB 162 2 SHp
-		  %F5
-		  %VAR_CN1 VSUB 50 3 SHp
-		  %F2
-		  %(.) 50 3 SHp
-%		  NL
-%		  F4
-%		  17 MOVEHR
-%		  (Kindly call us at 1300-88-5000 or 03-8317 5000 to update your new address and contact number.) 162 2 SHp
-		  %NL
-%		  NL
-%		  FC
-%		  17 MOVEHR
-%		  (Sila leraikan bahagian ini dan kembalikan bersama cek anda yang dibayar ke **FBKad OCBC untuk **U0< NAMA ANDA >**N0 **F0.) VSUB 162 2 SHp
-		  %F5
-		  %VAR_CN1  50 3 SHp
-		  %F0
-		  %(.) 50 3 SHp
-		  %NL
-%		  FC
-%		  NL
-%		  17 MOVEHR
-%		  (Hubungi kami di 1300-88-5000 atau 03-8317 5000 untuk mengemaskini alamat baru dan nombor telefon anda.) 191 2 SHp
-%		} XGFRESDEF		% Dunning Message for Page 1
+} XGFRESDEF		% Important Notice
 
 % Define Dynamic Element for Proforated Line
 % ------------------------------------------------
 /PSPL	{  00      00      210   0.0001       B1     DRAWB % Proforated Line
-		} XGFRESDEF
-		
-% Define Dynamic Element for Summary
+} XGFRESDEF
+
 % ------------------------------------------------
 % IPP Summary Box - prefix for I1
-/IPBX	{  0.1   -0.1    191.9     07.9     LMED     DRAWB % Shaded Box 
-		   00      00    0.001       08     XDRK     DRAWB % Right Vertical Line
-		   192     00    0.001       08     XDRK     DRAWB % Left Vertical Line
-		   31      00    0.001       08     XDRK     DRAWB % 2nd Vertical Line
-		   99      00    0.001       08     XDRK     DRAWB % 3rd Vertical Line
-		   131     00    0.001       08     XDRK     DRAWB % 4th Vertical Line
-		   160     00    0.001       08     XDRK     DRAWB % 5th Vertical Line
-		   00      00      192    0.001     XDRK     DRAWB % Top Horizontal Line
-		   00     -08      192    0.001     XDRK     DRAWB % Bottom Horizontal Line   
-		} XGFRESDEF		% IPP Summary
-		
-% Robinson and OCBC Summary Box - prefix for R1 and S1
-/RSBX	{  0.1   -0.1    191.9     13.9     LMED     DRAWB % Shaded Box 
-		   00      00    0.001       14     XDRK     DRAWB % Right Vertical Line
-		   192     00    0.001       14     XDRK     DRAWB % Left Vertical Line
-		   31      00    0.001       14     XDRK     DRAWB % 2nd Vertical Line
-		   53.5    00    0.001       14     XDRK     DRAWB % 3rd Vertical Line
-		   74      00    0.001       14     XDRK     DRAWB % 4th Vertical Line
-		   98      00    0.001       14     XDRK     DRAWB % 5th Vertical Line
-		   123     00    0.001       14     XDRK     DRAWB % 6th Vertical Line
-		   142     00    0.001       14     XDRK     DRAWB % 7th Vertical Line
-		   159     00    0.001       14     XDRK     DRAWB % 8th Vertical Line
-		   175     00    0.001       14     XDRK     DRAWB % 9th Vertical Line
-		   00      00      192    0.001     XDRK     DRAWB % Top Horizontal Line
-		   00     -14      192    0.001     XDRK     DRAWB % Bottom Horizontal Line   
-		} XGFRESDEF		% OCBC$ & Robinsons$ Summary
+/IPBX	{  0.1   -0.1    191.9     07.9     LMED     DRAWB % Shaded Box
+    00      00    0.001       08     XDRK     DRAWB % Right Vertical Line
+    192     00    0.001       08     XDRK     DRAWB % Left Vertical Line
+    31      00    0.001       08     XDRK     DRAWB % 2nd Vertical Line
+    99      00    0.001       08     XDRK     DRAWB % 3rd Vertical Line
+    131     00    0.001       08     XDRK     DRAWB % 4th Vertical Line
+    160     00    0.001       08     XDRK     DRAWB % 5th Vertical Line
+    00      00      192    0.001     XDRK     DRAWB % Top Horizontal Line
+    00     -08      192    0.001     XDRK     DRAWB % Bottom Horizontal Line
+} XGFRESDEF		% IPP Summary
 
-% Define Dynamic Element for Summary
+% Robinson and OCBC Summary Box - prefix for R1 and S1
+/RSBX	{  0.1   -0.1    191.9     13.9     LMED     DRAWB % Shaded Box
+    00      00    0.001       14     XDRK     DRAWB % Right Vertical Line
+    192     00    0.001       14     XDRK     DRAWB % Left Vertical Line
+    31      00    0.001       14     XDRK     DRAWB % 2nd Vertical Line
+    53.5    00    0.001       14     XDRK     DRAWB % 3rd Vertical Line
+    74      00    0.001       14     XDRK     DRAWB % 4th Vertical Line
+    98      00    0.001       14     XDRK     DRAWB % 5th Vertical Line
+    123     00    0.001       14     XDRK     DRAWB % 6th Vertical Line
+    142     00    0.001       14     XDRK     DRAWB % 7th Vertical Line
+    159     00    0.001       14     XDRK     DRAWB % 8th Vertical Line
+    175     00    0.001       14     XDRK     DRAWB % 9th Vertical Line
+    00      00      192    0.001     XDRK     DRAWB % Top Horizontal Line
+    00     -14      192    0.001     XDRK     DRAWB % Bottom Horizontal Line
+} XGFRESDEF		% OCBC$ & Robinsons$ Summary
+
 % ------------------------------------------------
 % Travel Visa Card Summary Box - prefix for V1 2019
-/VPBX	{  0.1   -0.1    190.9     07.9     LMED     DRAWB % Shaded Box 
-		   00      00    0.001       08     XDRK     DRAWB % Right Vertical Line
-		   191     00    0.001       08     XDRK     DRAWB % Left Vertical Line
-		   45.5    00    0.001       08     XDRK     DRAWB % 2nd Vertical Line
-		   78.5    00    0.001       08     XDRK     DRAWB % 3rd Vertical Line
-		   117.5   00    0.001       08     XDRK     DRAWB % 4th Vertical Line
-		   155.5   00    0.001       08     XDRK     DRAWB % 5th Vertical Line
-		   00      00      191    0.001     XDRK     DRAWB % Top Horizontal Line
-		   00     -08      191    0.001     XDRK     DRAWB % Bottom Horizontal Line   
-		} XGFRESDEF		% Travel Visa Card Summary
+/VPBX	{  0.1   -0.1    190.9     07.9     LMED     DRAWB % Shaded Box
+    00      00    0.001       08     XDRK     DRAWB % Right Vertical Line
+    191     00    0.001       08     XDRK     DRAWB % Left Vertical Line
+    45.5    00    0.001       08     XDRK     DRAWB % 2nd Vertical Line
+    78.5    00    0.001       08     XDRK     DRAWB % 3rd Vertical Line
+    117.5   00    0.001       08     XDRK     DRAWB % 4th Vertical Line
+    155.5   00    0.001       08     XDRK     DRAWB % 5th Vertical Line
+    00      00      191    0.001     XDRK     DRAWB % Top Horizontal Line
+    00     -08      191    0.001     XDRK     DRAWB % Bottom Horizontal Line
+} XGFRESDEF		% Travel Visa Card Summary
 
 % Process PREFIX (CASE starts here)
 % ------------------------------------------------
@@ -436,2006 +345,1603 @@ CASE PREFIX
 % ------------------------------------------------
 (MR)	% starting of prefix for MR - Marker for MSM Printing
 {
-		% define page-break
-		%  IF PREFIX (MR) eq				   % new document
-	 %{ 
-		PAGEBRK NEWFRONT
-		[ [    08    25   190   255     0 ]] SETLKF
-		/VAR_COUNTTD 0 SETVAR
+    %{
+    PAGEBRK NEWFRONT
+    [ [    08    25   190   255     0 ]] SETLKF
+    /VAR_COUNTTD 0 SETVAR
 
-		%Reset Variables For YA
-		/VAR_COUNTYA 0 SETVAR
+    %Reset Variables For YA
+    /VAR_COUNTYA 0 SETVAR
 
-		% Reset Page Count 
- 		/VAR_COUNTPAGE 0 SETVAR			% reset page numbering counter
+    % Reset Page Count
+    /VAR_COUNTPAGE 0 SETVAR			% reset page numbering counter
 
-		% Initiate SETPAGENUMBER at 1st record of customer
-		IF CPCOUNT 1 eq					% new document
-		{ /VAR_pctot 0 SETVAR }			% reset page count
-		
-			ELSE
-			
-			{ % modified on 270709 for transaction description
-			  /VAR_COUNTTD 0 SETVAR 	% reset transaction description counter (34 lines)
-			  /VARdoc ++
-			   VARtab VARdoc GETITEM
-			   
-			 ( PAGE # OF $$VAR_pctot. ) VSUB 1 201.5 287 6 SETPAGENUMBER		
-		
-		} ENDIF
- %} ENDIF
-% Layout Definitions
-% ------------------------------------------------
+    IF CPCOUNT 1 eq					% new document
+    { /VAR_pctot 0 SETVAR }			% reset page count
 
-% Reset All Counters
-% ------------------------------------------------
-  		/VAR_I1      0   SETVAR
-  		/VAR_R1      0   SETVAR
- 		/VAR_S1      0   SETVAR
- 		/VAR_S1      0   SETVAR % for travel visa card 2019
- 		
- }
+ELSE
+
+    { % modified on 270709 for transaction description
+        /VAR_COUNTTD 0 SETVAR 	% reset transaction description counter (34 lines)
+        /VARdoc ++
+        VARtab VARdoc GETITEM
+
+        ( PAGE # OF $$VAR_pctot. ) VSUB 1 201.5 287 6 SETPAGENUMBER
+
+    } ENDIF
+
+    % Reset All Counters
+    % ------------------------------------------------
+    /VAR_I1      0   SETVAR
+    /VAR_R1      0   SETVAR
+    /VAR_S1      0   SETVAR
+    /VAR_S1      0   SETVAR % for travel visa card 2019
+
+}
 % -----------------------------------------------------------
 (A0)	% starting of prefix for A0 - File Header
-{ 
-  		/VAR_A0        PREFIX 	SETVAR	% prefix for new customer
-  		/VAR_CN1       FLD1   	SETVAR	% customer name 1
-  	   %/VAR_CN2       FLD2   	SETVAR	% customer name 2
-  		/VAR_AD1       FLD2   	SETVAR	% address line 1
-  		/VAR_AD2       FLD3   	SETVAR	% address line 2
-  		/VAR_AD3       FLD4   	SETVAR	% address line 3
-  		/VAR_AD4       FLD5   	SETVAR	% address line 4
-  		/VAR_AD5       FLD6     SETVAR  % address line 5
-  		/VAR_PCS       FLD7  	SETVAR	% postcode and state
-					
-		% Insert Customer Variables
-		%05 SETLSP
-		
-		%05 NL
-		  
-	    % - modified on 080709 by Lian
-	    %($$VAR_CN1.) VSUB BOOKMARK
-	        	    
-		/VAR_RACC	0 SETVAR
-		/VAR_Y0	0 SETVAR
-		
-		(CASIOF.FRM)  SETFORM
+{
+    /VAR_A0        PREFIX 	SETVAR	% prefix for new customer
+    /VAR_CN1       FLD1   	SETVAR	% customer name 1
+    /VAR_AD1       FLD2   	SETVAR	% address line 1
+    /VAR_AD2       FLD3   	SETVAR	% address line 2
+    /VAR_AD3       FLD4   	SETVAR	% address line 3
+    /VAR_AD4       FLD5   	SETVAR	% address line 4
+    /VAR_AD5       FLD6     SETVAR  % address line 5
+    /VAR_PCS       FLD7  	SETVAR	% postcode and state
+
+    % - modified on 080709 by Lian
+
+    /VAR_RACC	0 SETVAR
+    /VAR_Y0	0 SETVAR
+
+    (CASIOF.FRM)  SETFORM
 
 }
 % ------------------------------------------------
 % stating of prefix for YA - Year End cards
 (YA)
 {
-		/VAR_YA		   PREFIX	SETVAR	% prefix for year end cards
-		/VAR_YCT	   FLD1		SETVAR	% card type
-		/VAR_YCN	   FLD2		SETVAR
-		/VAR_YCS	   FLD3		SETVAR
-		
-		/VAR.Y4	 00	ADD
-		/VAR.Y5	 00	ADD
+    /VAR_YA		   PREFIX	SETVAR	% prefix for year end cards
+    /VAR_YCT	   FLD1		SETVAR	% card type
+    /VAR_YCN	   FLD2		SETVAR
+    /VAR_YCS	   FLD3		SETVAR
 
-	
-		IF VAR_YA (YA) eq
-		{	
-			(CASIOS.FRM) SETFORM
-	
-			/VAR_COUNTYA ++ 
-			IF VAR_COUNTYA 1 eq
-			{
-			/VAR_ARRAY1F1 () SETVAR
-			/VAR_ARRAY2F1 () SETVAR
-			/VAR_ARRAY3F1 () SETVAR
-			/VAR_ARRAY4F1 () SETVAR
-			/VAR_ARRAY5F1 () SETVAR
-			/VAR_ARRAY6F1 () SETVAR
-			/VAR_ARRAY7F1 () SETVAR	
-			}
-			ENDIF
- 		
-		F7			
-		%05 SETLSP
+    /VAR.Y4	 00	ADD
+    /VAR.Y5	 00	ADD
 
-		%12 MOVEH VAR_YCT VSUB SH
-		%100 MOVEH VAR_YCN VSUB SH
-		%140 MOVEH VAR_YCS VSUB SH
+    IF VAR_YA (YA) eq
+    {
+        (CASIOS.FRM) SETFORM
 
-		% Assign YA Variables Here
-		 IF VAR_COUNTYA 1 eq	
-		  {  	  
-		  /VAR_ARRAY1F1 FLD1 SETVAR
-		  }
-		 ENDIF
-		 IF VAR_COUNTYA 2 eq
-		  {
-		  /VAR_ARRAY2F1 FLD1 SETVAR
-		  }
-		 ENDIF
-		 IF VAR_COUNTYA 3 eq
-		  {
-		  /VAR_ARRAY3F1 FLD1 SETVAR
-		  }
-		 ENDIF
-		 IF VAR_COUNTYA 4 eq
-		  {
-		  /VAR_ARRAY4F1 FLD1 SETVAR
-		  }
-		 ENDIF
-		 IF VAR_COUNTYA 5 eq
-		  {
-		  /VAR_ARRAY5F1 FLD1 SETVAR
-		  }
-		 ENDIF
-		 IF VAR_COUNTYA 6 eq
-		  {
-		  /VAR_ARRAY6F1 FLD1 SETVAR
-		  }
-		 ENDIF
-		 IF VAR_COUNTYA 7 eq
-		  {
-		  /VAR_ARRAY7F1 FLD1 SETVAR
-		  }
-		 ENDIF
+        /VAR_COUNTYA ++
+        IF VAR_COUNTYA 1 eq
+        {
+            /VAR_ARRAY1F1 () SETVAR
+            /VAR_ARRAY2F1 () SETVAR
+            /VAR_ARRAY3F1 () SETVAR
+            /VAR_ARRAY4F1 () SETVAR
+            /VAR_ARRAY5F1 () SETVAR
+            /VAR_ARRAY6F1 () SETVAR
+            /VAR_ARRAY7F1 () SETVAR
+        }
+    ENDIF
 
-	
-  		} ENDIF
+        F7
+
+        % Assign YA Variables Here
+        IF VAR_COUNTYA 1 eq
+        {
+            /VAR_ARRAY1F1 FLD1 SETVAR
+        }
+    ENDIF
+        IF VAR_COUNTYA 2 eq
+        {
+            /VAR_ARRAY2F1 FLD1 SETVAR
+        }
+    ENDIF
+        IF VAR_COUNTYA 3 eq
+        {
+            /VAR_ARRAY3F1 FLD1 SETVAR
+        }
+    ENDIF
+        IF VAR_COUNTYA 4 eq
+        {
+            /VAR_ARRAY4F1 FLD1 SETVAR
+        }
+    ENDIF
+        IF VAR_COUNTYA 5 eq
+        {
+            /VAR_ARRAY5F1 FLD1 SETVAR
+        }
+    ENDIF
+        IF VAR_COUNTYA 6 eq
+        {
+            /VAR_ARRAY6F1 FLD1 SETVAR
+        }
+    ENDIF
+        IF VAR_COUNTYA 7 eq
+        {
+            /VAR_ARRAY7F1 FLD1 SETVAR
+        }
+    ENDIF
+
+    } ENDIF
 
 }
 % ------------------------------------------------
 % starting of prefix for Y0 - Year End Summary Page
-(Y0) 
+(Y0)
 {
-		/VAR_Y0        PREFIX 	SETVAR	% prefix for Year End Summary
-		/VAR_SAAF      FLD1   	SETVAR	% summary account activity for year
-		/VAR_SCCL	   FLD2		SETVAR	% current credit limit utilize
-		/VAR_SCCD	   FLD3		SETVAR	% current credit limit utilize - DR/CR
-		/VAR_STPS	   FLD4		SETVAR	% total purchases
-		/VAR_STPD	   FLD5		SETVAR	% total purchases - DR/CR
-		/VAR_STCR	   FLD6		SETVAR	% total cash rebates earned
-		/VAR_STCD	   FLD7		SETVAR	% total cash rebates earned - DR/CR
-		/VAR_STIC	   FLD8		SETVAR	% total interest charged
-		/VAR_STID	   FLD9		SETVAR	% total interest charged - DR/CR 
-		/VAR_STRE	   FLD10	SETVAR	% total cash rebates on interest earned
-		/VAR_STRD	   FLD11	SETVAR	% total cash rebates on interest earned -DR/CR
-		/VAR_STFC	   FLD12	SETVAR	% total fees charged
-		/VAR_STFD	   FLD13	SETVAR	% total fees charged - DR/CR
-		/VAR_STFW	   FLD14	SETVAR	% total fee waivers earned
-		/VAR_STWD	   FLD15	SETVAR	% total fee waivers earned - DR/CR
-		/VAR_STBT	   FLD16	SETVAR	% total balance transfers
-		/VAR_STBD	   FLD17	SETVAR	% total balance transfers - DR/CR
-		/VAR_STCA	   FLD18	SETVAR	% total cash advances
-		/VAR_STAD	   FLD19	SETVAR	% total cash advances - DR/CR
+    /VAR_Y0        PREFIX 	SETVAR	% prefix for Year End Summary
+    /VAR_SAAF      FLD1   	SETVAR	% summary account activity for year
+    /VAR_SCCL	   FLD2		SETVAR	% current credit limit utilize
+    /VAR_SCCD	   FLD3		SETVAR	% current credit limit utilize - DR/CR
+    /VAR_STPS	   FLD4		SETVAR	% total purchases
+    /VAR_STPD	   FLD5		SETVAR	% total purchases - DR/CR
+    /VAR_STCR	   FLD6		SETVAR	% total cash rebates earned
+    /VAR_STCD	   FLD7		SETVAR	% total cash rebates earned - DR/CR
+    /VAR_STIC	   FLD8		SETVAR	% total interest charged
+    /VAR_STID	   FLD9		SETVAR	% total interest charged - DR/CR
+    /VAR_STRE	   FLD10	SETVAR	% total cash rebates on interest earned
+    /VAR_STRD	   FLD11	SETVAR	% total cash rebates on interest earned -DR/CR
+    /VAR_STFC	   FLD12	SETVAR	% total fees charged
+    /VAR_STFD	   FLD13	SETVAR	% total fees charged - DR/CR
+    /VAR_STFW	   FLD14	SETVAR	% total fee waivers earned
+    /VAR_STWD	   FLD15	SETVAR	% total fee waivers earned - DR/CR
+    /VAR_STBT	   FLD16	SETVAR	% total balance transfers
+    /VAR_STBD	   FLD17	SETVAR	% total balance transfers - DR/CR
+    /VAR_STCA	   FLD18	SETVAR	% total cash advances
+    /VAR_STAD	   FLD19	SETVAR	% total cash advances - DR/CR
 
-		/VAR.Y4	 0	ADD
-		/VAR.Y5	 0	ADD
+    /VAR.Y4	 0	ADD
+    /VAR.Y5	 0	ADD
 
-		%Reset Counter For YA
-		/VAR_COUNTYA 0 SETVAR
-		
-		IF VAR_Y0 (Y0) eq 
-		{ 	
-			MM SETUNIT
-			ORITL
-			PORT
-			03 SETLSP
+    %Reset Counter For YA
+    /VAR_COUNTYA 0 SETVAR
 
-			(CASIOS.FRM) SETFORM
-			/VAR_Y0 ++
-			
-			FI
-			W
-			42.19 NL
-			% 89 MOVEH
-			% 20210427
-			  80 MOVEH
-			($$VAR_SAAF.  (RM)) VSUB SH
-	
-			B
-			%08 NL
-			%19 NL
-			05 NL	
-			% insert suplementary card
-			FK
-			B
-			06 SETLSP										
-			%06 NL
-			%-04 NL
-						
-			% Place 1st YA Variables Here
-			IF VAR_ARRAY1F1 () ne
-			{
-			%15 NL
-			% 20210427
-			%10.5	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			%183.3	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 00    VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			  VAR_ARRAY1F1 SH
-			  NL
-			} ENDIF
-			
-			% PLACE 2ND YA VARIABLES  HERE
-			IF VAR_ARRAY2F1 () ne
-			{
-			% 20210427
-			%10.5	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			%183.3	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 00	    VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			  VAR_ARRAY2F1 SH
-			  NL	
-			} ENDIF
-		
-			% PLACE 3RD YA VARIABLES  HERE
-			IF VAR_ARRAY3F1 () ne
-			{
-			% 20210427
-			%10.5	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			%183.3	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 00 	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			  VAR_ARRAY3F1 SH
-			  NL
-			} ENDIF
-			
-			% PLACE 4TH YA VARIABLES  HERE
-			IF VAR_ARRAY4F1 () ne
-			{
-			% 20210427
-			%10.5	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			%183.3	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 00 	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			  VAR_ARRAY4F1 SH
-			  NL
-			} ENDIF
-			
-			% PLACE 5TH YA VARIABLES  HERE
-			IF VAR_ARRAY5F1 () ne
-			{
-			% 20210427
-			%10.5	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			%183.3	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 00 	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB			 
-			
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			  VAR_ARRAY5F1 SH
-			  NL	
-			} ENDIF
-			
-			% PLACE 6TH YA VARIABLES  HERE
-			IF VAR_ARRAY6F1 () ne
-			{
-			% 20210427
-			%10.5	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			%183.3	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 00 	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			  VAR_ARRAY6F1 SH
-			  NL
-			} ENDIF
-			
-			% PLACE 7TH YA VARIABLES  HERE
-			IF VAR_ARRAY7F1 () ne
-			{
-			% 20210427
-			%10.5	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			%183.3	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 00 	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
-			 
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			  VAR_ARRAY7F1 SH
-			  NL
-			} ENDIF
-			
-			NL
-			% 18.5 MOVEH
-			% 20210427
-			  08 MOVEH
-			 (YSAB)SCALL
-			
-			-06 NL
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			 (Current Credit Limit Utilised) SH 
-			%150 MOVEH  (RM) VSUB SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_SCCL.) VSUB SHr
-			% 182 MOVEH  ($$VAR_SCCD.) VSUB SH
-			  180 MOVEHR ($$VAR_SCCL.) VSUB SHr
-			  190 MOVEH  ($$VAR_SCCD.) VSUB SH
-						
-			NL
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			 (Total Purchases/Debits) SH 
-			%150 MOVEH  (RM) VSUB SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_STPS.) VSUB SHr
-			% 182 MOVEH  ($$VAR_STPD.) VSUB SH
-			  180 MOVEHR ($$VAR_STPS.) VSUB SHr
-			  190 MOVEH  ($$VAR_STPD.) VSUB SH
-			
-			NL
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			 (Total Cash Rebates Earned/Credits) SH 
-			%150 MOVEH  (RM) VSUB SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_STCR.) VSUB SHr
-			% 182 MOVEH  ($$VAR_STCD.) VSUB SH
-			  180 MOVEHR ($$VAR_STCR.) VSUB SHr
-			  190 MOVEH  ($$VAR_STCD.) VSUB SH
+    IF VAR_Y0 (Y0) eq
+    {
+        MM SETUNIT
+        ORITL
+        PORT
+        03 SETLSP
 
-			NL
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			 (Total Interest Charged) SH 
-			%150 MOVEH  (RM) VSUB SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_STIC.) VSUB SHr
-			% 182 MOVEH  ($$VAR_STID.) VSUB SH
-			  180 MOVEHR ($$VAR_STIC.) VSUB SHr
-			  190 MOVEH  ($$VAR_STID.) VSUB SH
-			
-			NL
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			 (Total Cash Rebates on Interest Earned) SH 
-			%150 MOVEH  (RM) VSUB SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_STRE.) VSUB SHr
-			% 182 MOVEH  ($$VAR_STRD.) VSUB SH
-			  180 MOVEHR ($$VAR_STRE.) VSUB SHr
-			  190 MOVEH  ($$VAR_STRD.) VSUB SH
+        (CASIOS.FRM) SETFORM
+        /VAR_Y0 ++
 
-			NL
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			 (Total Fees Charged) SH 
-			%150 MOVEH  (RM) VSUB SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_STFC.) VSUB SHr
-			% 182 MOVEH  ($$VAR_STFD.) VSUB SH
-			  180 MOVEHR ($$VAR_STFC.) VSUB SHr
-			  190 MOVEH  ($$VAR_STFD.) VSUB SH
-			
-			NL
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			 (Total Fee Waivers Earned) SH 
-			%150 MOVEH  (RM) VSUB SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_STFW.) VSUB SHr
-			% 182 MOVEH  ($$VAR_STWD.) VSUB SH
-			  180 MOVEHR ($$VAR_STFW.) VSUB SHr
-			  190 MOVEH  ($$VAR_STWD.) VSUB SH
-			
-			NL
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			 (Total Balance Transfer) SH 
-			%150 MOVEH  (RM) VSUB SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_STBT.) VSUB SHr
-			% 182 MOVEH  ($$VAR_STBD.) VSUB SH
-			  180 MOVEHR ($$VAR_STBT.) VSUB SHr
-			  190 MOVEH  ($$VAR_STBD.) VSUB SH
-			  
-			
-			NL
-			% 21 MOVEH
-			% 20210427
-			  12 MOVEH
-			 (Total Cash Advances) SH 
-			%150 MOVEH  (RM) VSUB SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_STCA.) VSUB SHr
-			% 182 MOVEH  ($$VAR_STAD.) VSUB SH
-			  180 MOVEHR ($$VAR_STCA.) VSUB SHr
-			  190 MOVEH  ($$VAR_STAD.) VSUB SH
-			  	 	
-			08 NL
-	    	%10.5 MOVEHR
-	    	
-	    	% 20210427
-	    	  08 MOVEHR
-			  (YESB)SCALL  	 	
-			
-			01.5 NL
-			% 20210427
-			% 21 MOVEH
-			  12 MOVEH  W
-			  FI (Payment Information (RM)) VSUB SH  	 	
-			
-			B
-			% 20210427
-			% 18.5 MOVEH
-			  08 MOVEH
-			 (YPIB)SCALL   	 	
-			  	 	
-			} ENDIF
+        FI
+        W
+        42.19 NL
+        % 20210427
+        80 MOVEH
+        ($$VAR_SAAF.  (RM)) VSUB SH
 
+        B
+        05 NL
+        % insert suplementary card
+        FK
+        B
+        06 SETLSP
 
-		/VAR_RACC	0 SETVAR
+        % Place 1st YA Variables Here
+        IF VAR_ARRAY1F1 () ne
+        {
+            % 20210427
+            00    VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+            192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+
+            % 20210427
+            12 MOVEH
+            VAR_ARRAY1F1 SH
+            NL
+        } ENDIF
+
+        % PLACE 2ND YA VARIABLES  HERE
+        IF VAR_ARRAY2F1 () ne
+        {
+            % 20210427
+            00	    VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+            192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+
+            % 20210427
+            12 MOVEH
+            VAR_ARRAY2F1 SH
+            NL
+        } ENDIF
+
+        % PLACE 3RD YA VARIABLES  HERE
+        IF VAR_ARRAY3F1 () ne
+        {
+            % 20210427
+            00 	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+            192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+
+            % 20210427
+            12 MOVEH
+            VAR_ARRAY3F1 SH
+            NL
+        } ENDIF
+
+        % PLACE 4TH YA VARIABLES  HERE
+        IF VAR_ARRAY4F1 () ne
+        {
+            % 20210427
+            00 	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+            192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+
+            % 20210427
+            12 MOVEH
+            VAR_ARRAY4F1 SH
+            NL
+        } ENDIF
+
+        % PLACE 5TH YA VARIABLES  HERE
+        IF VAR_ARRAY5F1 () ne
+        {
+            % 20210427
+            00 	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+            192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+
+            % 20210427
+            12 MOVEH
+            VAR_ARRAY5F1 SH
+            NL
+        } ENDIF
+
+        % PLACE 6TH YA VARIABLES  HERE
+        IF VAR_ARRAY6F1 () ne
+        {
+            % 20210427
+            00 	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+            192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+
+            % 20210427
+            12 MOVEH
+            VAR_ARRAY6F1 SH
+            NL
+        } ENDIF
+
+        % PLACE 7TH YA VARIABLES  HERE
+        IF VAR_ARRAY7F1 () ne
+        {
+            % 20210427
+            00 	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+            192.9	VAR.Y5	0.1	 05.8	FBLACK	DRAWB
+
+            % 20210427
+            12 MOVEH
+            VAR_ARRAY7F1 SH
+            NL
+        } ENDIF
+
+        NL
+        % 20210427
+        08 MOVEH
+        (YSAB)SCALL
+
+        -06 NL
+        % 20210427
+        12 MOVEH
+        (Current Credit Limit Utilised) SH
+        % 20210427
+        180 MOVEHR ($$VAR_SCCL.) VSUB SHr
+        190 MOVEH  ($$VAR_SCCD.) VSUB SH
+
+        NL
+        % 20210427
+        12 MOVEH
+        (Total Purchases/Debits) SH
+        % 20210427
+        180 MOVEHR ($$VAR_STPS.) VSUB SHr
+        190 MOVEH  ($$VAR_STPD.) VSUB SH
+
+        NL
+        % 20210427
+        12 MOVEH
+        (Total Cash Rebates Earned/Credits) SH
+        % 20210427
+        180 MOVEHR ($$VAR_STCR.) VSUB SHr
+        190 MOVEH  ($$VAR_STCD.) VSUB SH
+
+        NL
+        % 20210427
+        12 MOVEH
+        (Total Interest Charged) SH
+        % 20210427
+        180 MOVEHR ($$VAR_STIC.) VSUB SHr
+        190 MOVEH  ($$VAR_STID.) VSUB SH
+
+        NL
+        % 20210427
+        12 MOVEH
+        (Total Cash Rebates on Interest Earned) SH
+        % 20210427
+        180 MOVEHR ($$VAR_STRE.) VSUB SHr
+        190 MOVEH  ($$VAR_STRD.) VSUB SH
+
+        NL
+        % 20210427
+        12 MOVEH
+        (Total Fees Charged) SH
+        % 20210427
+        180 MOVEHR ($$VAR_STFC.) VSUB SHr
+        190 MOVEH  ($$VAR_STFD.) VSUB SH
+
+        NL
+        % 20210427
+        12 MOVEH
+        (Total Fee Waivers Earned) SH
+        % 20210427
+        180 MOVEHR ($$VAR_STFW.) VSUB SHr
+        190 MOVEH  ($$VAR_STWD.) VSUB SH
+
+        NL
+        % 20210427
+        12 MOVEH
+        (Total Balance Transfer) SH
+        % 20210427
+        180 MOVEHR ($$VAR_STBT.) VSUB SHr
+        190 MOVEH  ($$VAR_STBD.) VSUB SH
+
+        NL
+        % 20210427
+        12 MOVEH
+        (Total Cash Advances) SH
+        % 20210427
+        180 MOVEHR ($$VAR_STCA.) VSUB SHr
+        190 MOVEH  ($$VAR_STAD.) VSUB SH
+
+        08 NL
+
+        % 20210427
+        08 MOVEHR
+        (YESB)SCALL
+
+        01.5 NL
+        % 20210427
+        12 MOVEH  W
+        FI (Payment Information (RM)) VSUB SH
+
+        B
+        % 20210427
+        08 MOVEH
+        (YPIB)SCALL
+
+    } ENDIF
+
+    /VAR_RACC	0 SETVAR
 }
 % ------------------------------------------------
 (Y1)
 {
-		/VAR_Y1        PREFIX 	SETVAR	% prefix for year end summary payment information
-		/VAR_PCBD      FLD1   	SETVAR	% curent balance due
-		/VAR_PCBC      FLD2   	SETVAR	% curent balance due - DR/CR
-		/VAR_PMPD      FLD3   	SETVAR	% minimum payment due
-		/VAR_PMPC      FLD4   	SETVAR	% minimum payment due - DR/CR
-		/VAR_PPDE      FLD5   	SETVAR	% payment due date
-		/VAR_PPDC      FLD6   	SETVAR	% payment due date - DR/CR
-		/VAR_INPC      FLD7   	SETVAR	% penalty %
-		/VAR_INMP      FLD8   	SETVAR	% minumum penalty 
-		/VAR_INXP      FLD9   	SETVAR	% maximum penalty
-		/VAR_INTP      FLD10   	SETVAR	% time to pay off balance via minimum payment
-		/VAR_INET      FLD11   	SETVAR	% estimated total via minimum payment
-		/VAR_INCP      FLD12   	SETVAR	% constant payment
-		/VAR_INCA      FLD13   	SETVAR	% time to pay off balance via constant amount
-		/VAR_INEA      FLD14   	SETVAR	% estimated total via constant amount
-		/VAR_INSV      FLD15   	SETVAR	% savings
+    /VAR_Y1        PREFIX 	SETVAR	% prefix for year end summary payment information
+    /VAR_PCBD      FLD1   	SETVAR	% curent balance due
+    /VAR_PCBC      FLD2   	SETVAR	% curent balance due - DR/CR
+    /VAR_PMPD      FLD3   	SETVAR	% minimum payment due
+    /VAR_PMPC      FLD4   	SETVAR	% minimum payment due - DR/CR
+    /VAR_PPDE      FLD5   	SETVAR	% payment due date
+    /VAR_PPDC      FLD6   	SETVAR	% payment due date - DR/CR
+    /VAR_INPC      FLD7   	SETVAR	% penalty %
+    /VAR_INMP      FLD8   	SETVAR	% minumum penalty
+    /VAR_INXP      FLD9   	SETVAR	% maximum penalty
+    /VAR_INTP      FLD10   	SETVAR	% time to pay off balance via minimum payment
+    /VAR_INET      FLD11   	SETVAR	% estimated total via minimum payment
+    /VAR_INCP      FLD12   	SETVAR	% constant payment
+    /VAR_INCA      FLD13   	SETVAR	% time to pay off balance via constant amount
+    /VAR_INEA      FLD14   	SETVAR	% estimated total via constant amount
+    /VAR_INSV      FLD15   	SETVAR	% savings
 
-		IF VAR_Y1 (Y1) eq
-		{
-  			
-  			05 SETLSP
-  			FK				
-			B
-			07.5 NL
-			% 20210427
-			% 21 MOVEH
-			  12 MOVEH
-			 (Current Balance Due) SH 
-			%150 MOVEH  (RM) SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_PCBD.) VSUB SHr
-			% 182 MOVEH  ($$VAR_PCBC.) VSUB SH
-			  180 MOVEHR ($$VAR_PCBD.) VSUB SHr
-			  190 MOVEH  ($$VAR_PCBC.) VSUB SH
-			
-			NL
-			% 20210427
-			% 21 MOVEH
-			  12 MOVEH
-			  (Minimum Payment Due) SH
-			%150 MOVEH  (RM) SH
-			% 20210427
-			% 173 MOVEHR ($$VAR_PMPD.) VSUB SHr
-			% 182 MOVEH  ($$VAR_PMPC.) VSUB SH
-			  180 MOVEHR ($$VAR_PMPD.) VSUB SHr
-			  190 MOVEH  ($$VAR_PMPC.) VSUB SH	
-			
-			NL
-			% 20210427
-			% 21 MOVEH
-			  12 MOVEH
-			 (Payment Due Date) SH
-			% 173 MOVEHR ($$VAR_PPDE.) VSUB SHr
-			  180 MOVEHR ($$VAR_PPDE.) VSUB SHr
-			
-			FI
-			% 06 NL
-			% 20210427
-			  08 NL
-			% 21 MOVEH
-			  12 MOVEH
-			  U0
-			 (Important Notice ) SH
-			
-			N0
-			% 05.5 NL
-			% 20210427
-			  06 NL
-			% 21 MOVEH
-			  12 MOVEH
-			  Z1 <6E> SH 
-			
-			FI
-			0.5 NL
-			% 20210427
-			% 25 MOVEH
-			  16 MOVEH
-			%12 MOVEH
-			% (Late Payment Warning: If we do not receive your minimum payment by the date stated above, you may have to pay a penalty of $$VAR_PPDC. of the total outstanding balance as at statement date or a minimum of RM$$VAR_INPC., whichever is higher, up to a maximum of RM$$VAR_INMP..) VSUB 163 3 SHp
-			  (Late Payment Warning: If we do not receive your minimum payment by the date stated above, you may have to pay a penalty of $$VAR_PPDC. of the total outstanding balance as at statement date or a minimum of RM$$VAR_INPC., whichever is higher, up to a maximum of RM$$VAR_INMP..) VSUB 180 3 SHp
+    IF VAR_Y1 (Y1) eq
+    {
 
-			%07 NL
-			% 04 NL
-			% 20210427
-			  07 NL
-			% 21 MOVEH
-			  12 MOVEH
-			  Z1 <6E> SH
-			
-			%0.3 NL
-			FI
-			% 20210427
-			  0 NL
-			% 25 MOVEH
-			  16 MOVEH
-			%12 MOVEH
-			% (Minimum Payment Warning: If you make only the minimum payment each period, you will pay more in interest and it will take you longer to pay off your balance. For example:) VSUB 163 3 SHp
-			  (Minimum Payment Warning: If you make only the minimum payment each period, you will pay more in interest and it will take you longer to pay off your balance. For example:) VSUB 180 3 SHp
-		
-			% 06 NL
-			% 20210427
-			  12 NL
-			% 21 MOVEH
-			  12 MOVEH
-			  (If you make no additional charges using this card and each month you pay....) 55 3 SHp
-			
-			-10 NL
-			78 MOVEH
-			(You will pay off the balance shown on this statement in about.....) 55  3 SHp
-		
-			-10 NL
-			% 20210427
-			% 135 MOVEH
-			  142 MOVEH
-			(And you will end up paying an estimated total of interest of.....) 55 0 SHp
-			
-			FK
-			%11.5 NL
-			% 06.5 NL
-			% 20210427
-			  08 NL
-			% 21 MOVEH
-			  12 MOVEH
-			 (Only the minimum payment) SH
-			
-			FK
-			%80 MOVEH
-			105 MOVEH
-			($$VAR_INXP.) VSUB SHc
-			
-			%165 MOVEH
-			%(RM) SH
-			
-			FK
-			%200 MOVEH
-			165 MOVEH
-			($$VAR_INTP.) VSUB SHc
-			
-			FK
-			% 20210427
-			% 07 NL
-			  08 NL
-			%12 MOVEH
-			40 MOVEH
-			($$VAR_INET.) VSUB SHc
-			
-			%80 MOVEH
-			105 MOVEH
-			($$VAR_INCP.) VSUB SHc
-			
-			%165 MOVEH
-			%(RM) SH
-			
-			%200 MOVEH
-			165 MOVEH
-			($$VAR_INCA.) VSUB SHc
-			
-			04 NL
-			%145 MOVEH
-			165 MOVEH
-			((savings=$$VAR_INEA.)) VSUB SHc
-			
-			% 20210604 by Lian
-			08 NL
-			08 MOVEH F4
-			(The computations are based on 5% minimum payment of the monthly outstanding balance or RM50, whichever is higher, at a financial charge of 18% p.a. provided no new retail transactions. This calculation is based on 30 days a month.) 193 3 SHp 
-				
-			%200 MOVEH
-			%($$VAR_INEA.) VSUB SHr
-			  10 NL
+        05 SETLSP
+        FK
+        B
+        07.5 NL
+        % 20210427
+        12 MOVEH
+        (Current Balance Due) SH
+        % 20210427
+        180 MOVEHR ($$VAR_PCBD.) VSUB SHr
+        190 MOVEH  ($$VAR_PCBC.) VSUB SH
 
-  		  	IF FRLEFT 60 lt
-  			{
-  				PAGEBRK
-  				NEWFRONT
-				(CASIOF.FRM) SETFORM
-						
-  			} ENDIF
+        NL
+        % 20210427
+        12 MOVEH
+        (Minimum Payment Due) SH
+        % 20210427
+        180 MOVEHR ($$VAR_PMPD.) VSUB SHr
+        190 MOVEH  ($$VAR_PMPC.) VSUB SH
 
+        NL
+        % 20210427
+        12 MOVEH
+        (Payment Due Date) SH
+        180 MOVEHR ($$VAR_PPDE.) VSUB SHr
 
-		} ENDIF
-			
+        FI
+        % 20210427
+        08 NL
+        12 MOVEH
+        U0
+        (Important Notice ) SH
 
-		/VAR_RACC	0 SETVAR
+        N0
+        % 20210427
+        06 NL
+        12 MOVEH
+        Z1 <6E> SH
+
+        FI
+        0.5 NL
+        % 20210427
+        16 MOVEH
+        (Late Payment Warning: If we do not receive your minimum payment by the date stated above, you may have to pay a penalty of $$VAR_PPDC. of the total outstanding balance as at statement date or a minimum of RM$$VAR_INPC., whichever is higher, up to a maximum of RM$$VAR_INMP..) VSUB 180 3 SHp
+
+        % 20210427
+        07 NL
+        12 MOVEH
+        Z1 <6E> SH
+
+        FI
+        % 20210427
+        0 NL
+        16 MOVEH
+        (Minimum Payment Warning: If you make only the minimum payment each period, you will pay more in interest and it will take you longer to pay off your balance. For example:) VSUB 180 3 SHp
+
+        % 20210427
+        12 NL
+        12 MOVEH
+        (If you make no additional charges using this card and each month you pay....) 55 3 SHp
+
+        -10 NL
+        78 MOVEH
+        (You will pay off the balance shown on this statement in about.....) 55  3 SHp
+
+        -10 NL
+        % 20210427
+        142 MOVEH
+        (And you will end up paying an estimated total of interest of.....) 55 0 SHp
+
+        FK
+        % 20210427
+        08 NL
+        12 MOVEH
+        (Only the minimum payment) SH
+
+        FK
+        105 MOVEH
+        ($$VAR_INXP.) VSUB SHc
+
+        FK
+        165 MOVEH
+        ($$VAR_INTP.) VSUB SHc
+
+        FK
+        % 20210427
+        08 NL
+        40 MOVEH
+        ($$VAR_INET.) VSUB SHc
+
+        105 MOVEH
+        ($$VAR_INCP.) VSUB SHc
+
+        165 MOVEH
+        ($$VAR_INCA.) VSUB SHc
+
+        04 NL
+        165 MOVEH
+        ((savings=$$VAR_INEA.)) VSUB SHc
+
+        % 20210604 by Lian
+        08 NL
+        08 MOVEH F4
+        (The computations are based on 5% minimum payment of the monthly outstanding balance or RM50, whichever is higher, at a financial charge of 18% p.a. provided no new retail transactions. This calculation is based on 30 days a month.) 193 3 SHp
+
+        10 NL
+
+        IF FRLEFT 60 lt
+        {
+            PAGEBRK
+            NEWFRONT
+            (CASIOF.FRM) SETFORM
+
+        } ENDIF
+
+    } ENDIF
+
+    /VAR_RACC	0 SETVAR
 
 }
 % ------------------------------------------------
 (Y2)
 {
-		/VAR_Y2        PREFIX 	SETVAR	% 
-	
+    /VAR_Y2        PREFIX 	SETVAR	%
+
 }
 % ------------------------------------------------
 (B0)	% starting of prefix for B0 - Credit Card Account Summary
-{ 			
-		/VAR_B0		PREFIX		SETVAR	% prefix for account summary
-		/VAR_DC1	FLD1		SETVAR	% dr/cr amount for lsb
-		/VAR_LSB	FLD2		SETVAR	% last statement balance
-		/VAR_DC2	FLD3		SETVAR	% dr/cr amount for pcd
-		/VAR_PCD	FLD4		SETVAR	% purchase / debits
-		/VAR_DC3	FLD5		SETVAR	% dr/cr amount for cas
-		/VAR_CAS	FLD6		SETVAR	% cash advances
-		/VAR_DC4	FLD7		SETVAR	% dr/cr amount for ips
-		/VAR_IPS	FLD8		SETVAR	% ips
-		/VAR_DC5	FLD9		SETVAR	% dr/cr amount for fcs
-		/VAR_FCS	FLD10		SETVAR	% fees / charges
-		/VAR_DC6	FLD11		SETVAR	% dr/cr amount for pyt
-		/VAR_PYT	FLD12		SETVAR	% payments
-		/VAR_DC7	FLD13		SETVAR	% dr/cr amount for cdt
-		/VAR_CDT	FLD14		SETVAR	% credits
-		/VAR_DC8	FLD15		SETVAR	% dr/cr amount for sbd
-		/VAR_SBD	FLD16		SETVAR	% statement balance due
-		/VAR_DC9	FLD17		SETVAR	% dr/cr amount for cmp
-		/VAR_CMP	FLD18		SETVAR	% current minimum payment A
-		/VAR_DC10	FLD19		SETVAR	% dr/cr amount for omp
-		/VAR_OMP	FLD20 		SETVAR	% overdue minimum payment B
-		/VAR_DC11	FLD21		SETVAR	% dr/cr amount for tpd
-		/VAR_TPD	FLD22		SETVAR	% total payment A + B 
-		/VAR_SMD	FLD23		SETVAR	% statement date
-		/VAR_PDD	FLD24		SETVAR	% payment due date	
-		
-		IF VAR_brkctl
-		{
-		($$VAR_SMD. $$VAR_brk.) VSUB BOOKMARK
-		/VAR_brkctl false SETVAR
-		}
-		ENDIF	
-		
-		% Insert Summary Text
-		F5
-		03 SETLSP
-		
-		%02 NL
-		04 NL
-		150 MOVEHR
-		(Your Credit Card Account Summary (RM)) SHc
-		
-		FC
-		NL
-		150 MOVEHR
-		(Ringkasan Akaun Kad Kredit Anda (RM))    SHc
+{
+    /VAR_B0		PREFIX		SETVAR	% prefix for account summary
+    /VAR_DC1	FLD1		SETVAR	% dr/cr amount for lsb
+    /VAR_LSB	FLD2		SETVAR	% last statement balance
+    /VAR_DC2	FLD3		SETVAR	% dr/cr amount for pcd
+    /VAR_PCD	FLD4		SETVAR	% purchase / debits
+    /VAR_DC3	FLD5		SETVAR	% dr/cr amount for cas
+    /VAR_CAS	FLD6		SETVAR	% cash advances
+    /VAR_DC4	FLD7		SETVAR	% dr/cr amount for ips
+    /VAR_IPS	FLD8		SETVAR	% ips
+    /VAR_DC5	FLD9		SETVAR	% dr/cr amount for fcs
+    /VAR_FCS	FLD10		SETVAR	% fees / charges
+    /VAR_DC6	FLD11		SETVAR	% dr/cr amount for pyt
+    /VAR_PYT	FLD12		SETVAR	% payments
+    /VAR_DC7	FLD13		SETVAR	% dr/cr amount for cdt
+    /VAR_CDT	FLD14		SETVAR	% credits
+    /VAR_DC8	FLD15		SETVAR	% dr/cr amount for sbd
+    /VAR_SBD	FLD16		SETVAR	% statement balance due
+    /VAR_DC9	FLD17		SETVAR	% dr/cr amount for cmp
+    /VAR_CMP	FLD18		SETVAR	% current minimum payment A
+    /VAR_DC10	FLD19		SETVAR	% dr/cr amount for omp
+    /VAR_OMP	FLD20 		SETVAR	% overdue minimum payment B
+    /VAR_DC11	FLD21		SETVAR	% dr/cr amount for tpd
+    /VAR_TPD	FLD22		SETVAR	% total payment A + B
+    /VAR_SMD	FLD23		SETVAR	% statement date
+    /VAR_PDD	FLD24		SETVAR	% payment due date
 
-		% Insert Text and Account Summary Variables
-		07.5 NL
-		112 MOVEHR
-		F7
-	    (Last Statement Balance)		 SH
-		
-		F7
-		189  MOVEHR   VAR_DC1				 SHr
-		183  MOVEHR   VAR_LSB (@@@,@@@,@@@,@@#.##) FORMAT SHr
-		
-		F7
-		06.5  NL
-		112  MOVEHR
-		(+       Purchase/Debits)		 SH
-		
-		F7
-		189  MOVEHR  VAR_DC2				 SHr
-		183  MOVEHR	 VAR_PCD (@@@,@@@,@@@,@@#.##) FORMAT SHr
-		
-		F7
-		06.5  NL
-		112  MOVEHR
-		F7
-		(         Cash Advances)		 SH
-		
-		F7
-		189  MOVEHR  VAR_DC3				 SHr
-		183  MOVEHR	 VAR_CAS (@@@,@@@,@@@,@@#.##) FORMAT SHr
-		
-		F7
-		06.5  NL
-		112 MOVEHR
-		(         IPP)					 SH
-		
-		F7
-		189  MOVEHR  VAR_DC4				 SHr
-		183  MOVEHR  VAR_IPS (@@@,@@@,@@@,@@#.##) FORMAT SHr
-		
-		F7
-		06.5  NL
-		112 MOVEHR
-		(         Fees/Charges)			 SH
+    IF VAR_brkctl
+    {
+        ($$VAR_SMD. $$VAR_brk.) VSUB BOOKMARK
+        /VAR_brkctl false SETVAR
+    }
+ENDIF
 
-		F7
-		189  MOVEHR   VAR_DC5				 SHr
-		183  MOVEHR   VAR_FCS (@@@,@@@,@@@,@@#.##) FORMAT SHr
-		
-		F7
-		06.5  NL
-		112 MOVEHR
-		(-        Payments)				 SH
-		
-		F7
-		189  MOVEHR   VAR_DC6				 SHr
-		183  MOVEHR	  VAR_PYT (@@@,@@@,@@@,@@#.##) FORMAT SHr		
-		
-		F7
-		06.5  NL
-		112 MOVEHR
-		%(         Credits)				 SH
-		% 2011-09-26
-		(         Credits/Rebates)				 SH
-		
-		F7
-		189   MOVEHR   VAR_DC7				 SHr
-		183   MOVEHR   VAR_CDT (@@@,@@@,@@@,@@#.##) FORMAT SHr	
-		
-		F6
-		06.5  NL
-		112 MOVEHR
-		(Statement Balance Due)			 SH
-		
-		F6
-		189   MOVEHR   VAR_DC8				 SHr
-		183   MOVEHR   VAR_SBD (@@@,@@@,@@@,@@#.##) FORMAT SHr		
-		
-		% modified on 220709
-		%08  NL
-		%F4
-		%(Current Min. Payment Due (A))	 SH
-		%F7
-		%192.5 MOVEH   VAR_DC9				 SH
-		%191   MOVEH	VAR_CMP (@@@,@@@,@@@,@@#.##) FORMAT SHr	
-		
-		%05  NL
-		%F4
-		%(Overdue Min. Payment Due (B))	 SH
-		%F7
-		%192.5 MOVEH   VAR_DC10			 SH
-		%191   MOVEH	VAR_OMP (@@@,@@@,@@@,@@#.##) FORMAT SHr	
-		
-		%05  NL
-		%F5
-		%(Total Min. Payment Due (A+B))	 SH
-		%F6
-		%192.5 MOVEH   VAR_DC11			 SH
-		%191   MOVEH	VAR_TPD (@@@,@@@,@@@,@@#.##) FORMAT SHr		
-		
-		%28 NL
-		F6
-		06.8 NL
-		112 MOVEHR
-		(Statement Date) SH
-		
-		FC
-		NL
-		112 MOVEHR
-		(Tarikh Penyata) SH
-		
-		F7
-		-03 NL
-		112 MOVEHR
-		189 MOVEHR	VAR_SMD SHr	
-		
-		F6
-		07.5 NL
-		112 MOVEHR
-		(Payment Due Date) SH
-		
-		FC
-		NL
-		112 MOVEHR
-		(Tarikh Akhir Pembayaran) SH
-	   				
-	%	IF VAR_PDD (IMMEDIATE) eq
-	%	{		
-	%	-03 NL
-	%	 F6
-	%	 189 MOVEHR VAR_PDD SHr
-		   
-		   % Insert the word 'WITHOUT PREJUDICE' if IMMEDIATE display at Payment Due Date
-		   %  F5
-		   % -79.5 NL
-		   % 193.3 MOVEHR
-		%	 ("WITHOUT PREJUDICE") SHr
-		   
-		   % Insert the word 'Payments Accepted 'Without Prejudice' if IMMEDIATE display at Payment Due Date
-		%	190.3 NL
-		%	193.3 MOVEHR
-		%	 (Payments Accepted 'Without Prejudice') SHr   }
-	    
-	     %ELSE
-		 % {  
-		     % Payment Due Date
-		 %    -03 NL
-		 %    F6
-		 %    197 MOVEH VAR_PDD	SHr 
-		%  }
-	%	} ENDIF
-		
-		   -03 NL
-		    F6
-		    197 MOVEH VAR_PDD	SHr 
-		
-	
-		/VAR_RACC	0 SETVAR
+    % Insert Summary Text
+    F5
+    03 SETLSP
+
+    04 NL
+    150 MOVEHR
+    (Your Credit Card Account Summary (RM)) SHc
+
+    FC
+    NL
+    150 MOVEHR
+    (Ringkasan Akaun Kad Kredit Anda (RM))    SHc
+
+    % Insert Text and Account Summary Variables
+    07.5 NL
+    112 MOVEHR
+    F7
+    (Last Statement Balance)		 SH
+
+    F7
+    189  MOVEHR   VAR_DC1				 SHr
+    183  MOVEHR   VAR_LSB (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    F7
+    06.5  NL
+    112  MOVEHR
+    (+       Purchase/Debits)		 SH
+
+    F7
+    189  MOVEHR  VAR_DC2				 SHr
+    183  MOVEHR	 VAR_PCD (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    F7
+    06.5  NL
+    112  MOVEHR
+    F7
+    (         Cash Advances)		 SH
+
+    F7
+    189  MOVEHR  VAR_DC3				 SHr
+    183  MOVEHR	 VAR_CAS (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    F7
+    06.5  NL
+    112 MOVEHR
+    (         IPP)					 SH
+
+    F7
+    189  MOVEHR  VAR_DC4				 SHr
+    183  MOVEHR  VAR_IPS (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    F7
+    06.5  NL
+    112 MOVEHR
+    (         Fees/Charges)			 SH
+
+    F7
+    189  MOVEHR   VAR_DC5				 SHr
+    183  MOVEHR   VAR_FCS (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    F7
+    06.5  NL
+    112 MOVEHR
+    (-        Payments)				 SH
+
+    F7
+    189  MOVEHR   VAR_DC6				 SHr
+    183  MOVEHR	  VAR_PYT (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    F7
+    06.5  NL
+    112 MOVEHR
+    % 2011-09-26
+    (         Credits/Rebates)				 SH
+
+    F7
+    189   MOVEHR   VAR_DC7				 SHr
+    183   MOVEHR   VAR_CDT (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    F6
+    06.5  NL
+    112 MOVEHR
+    (Statement Balance Due)			 SH
+
+    F6
+    189   MOVEHR   VAR_DC8				 SHr
+    183   MOVEHR   VAR_SBD (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    % modified on 220709
+
+    F6
+    06.8 NL
+    112 MOVEHR
+    (Statement Date) SH
+
+    FC
+    NL
+    112 MOVEHR
+    (Tarikh Penyata) SH
+
+    F7
+    -03 NL
+    112 MOVEHR
+    189 MOVEHR	VAR_SMD SHr
+
+    F6
+    07.5 NL
+    112 MOVEHR
+    (Payment Due Date) SH
+
+    FC
+    NL
+    112 MOVEHR
+    (Tarikh Akhir Pembayaran) SH
+
+    %  }
+
+    -03 NL
+    F6
+    197 MOVEH VAR_PDD	SHr
+
+    /VAR_RACC	0 SETVAR
 
 }
 % ------------------------------------------------
 (C0)	% Available Credit Limit
-{ 
-		/VAR_C0		PREFIX		SETVAR	% prefix for credit limit
-		/VAR_CCL	FLD1		SETVAR	% combined credit limit
-		/VAR_ACL	FLD2		SETVAR	% available cedit limit
-		/VAR_CAL2	FLD3		SETVAR
-	
-		% Insert Credit Limit Text 
-		F5
-		03 SETLSP
-		
-	   -17 NL
-		39 MOVEHR
-		(Your Available Credit Limit (RM)) SHc
-	
-		FC
-		NL
-		39 MOVEHR
-		(Had Kredit Boleh Guna (RM)) SHc		
-	
-		% Insert Credit Limits Text and Variables
-		F7
-		08 NL
-	    % 2011-09-26
-	    %07 NL
-	    04 MOVEHR
-	    (Combined Credit Limit)	SH
-	    
-	    F7
-		78 MOVEHR	VAR_CCL SHr	
-		
-		F7
-	    05 NL
-	    04  MOVEHR
-	    (Available Credit Limit) SH
-	    
-	    F7
-		78 MOVEHR	VAR_ACL  SHr	
+{
+    /VAR_C0		PREFIX		SETVAR	% prefix for credit limit
+    /VAR_CCL	FLD1		SETVAR	% combined credit limit
+    /VAR_ACL	FLD2		SETVAR	% available cedit limit
+    /VAR_CAL2	FLD3		SETVAR
 
-		% 2011-09-26
-		%F7
-		%05 NL
-		%04 MOVEHR
-	    %(Cash Advance Limit) SH
-	    
-	    % 2011-09-26
-	    F7
-		78 MOVEHR	VAR_CAL2  SHr	    
+    % Insert Credit Limit Text
+    F5
+    03 SETLSP
 
-		/VAR_RACC	0 SETVAR	
-		%-03 NL
-		01 NL
+    -17 NL
+    39 MOVEHR
+    (Your Available Credit Limit (RM)) SHc
+
+    FC
+    NL
+    39 MOVEHR
+    (Had Kredit Boleh Guna (RM)) SHc
+
+    % Insert Credit Limits Text and Variables
+    F7
+    08 NL
+    % 2011-09-26
+    04 MOVEHR
+    (Combined Credit Limit)	SH
+
+    F7
+    78 MOVEHR	VAR_CCL SHr
+
+    F7
+    05 NL
+    04  MOVEHR
+    (Available Credit Limit) SH
+
+    F7
+    78 MOVEHR	VAR_ACL  SHr
+
+    % 2011-09-26
+    F7
+    78 MOVEHR	VAR_CAL2  SHr
+
+    /VAR_RACC	0 SETVAR
+    01 NL
 }
 % ------------------------------------------------
 (M0)	% Contest Message
-{ 
-		/VAR_M0		PREFIX		SETVAR % prefix for contest tiff image
-		/VAR_ETM	FLD1		SETVAR % luxury condo for this month
-		/VAR_CCE	FLD2		SETVAR % total number earned
+{
+    /VAR_M0		PREFIX		SETVAR % prefix for contest tiff image
+    /VAR_ETM	FLD1		SETVAR % luxury condo for this month
+    /VAR_CCE	FLD2		SETVAR % total number earned
 
-		% Draw Box for Lucky Draw / Contest
-		% ------------------------------------------------
-		IF PREFIX (M0) eq
-		{
-		03.3 SETLSP
-		08.5 NL
-	    00 MOVEHR
-	    %08 10 MOVETO
-		(M0BX)SCALL
+    % Draw Box for Lucky Draw / Contest
+    % ------------------------------------------------
+    IF PREFIX (M0) eq
+    {
+        03.3 SETLSP
+        08.5 NL
+        00 MOVEHR
+        (M0BX)SCALL
 
-		F5
-		03 SETLSP
-		%58 110 MOVETO
-		02.5 NL
-		47 MOVEHR
-		(Luxury Condo Contest Chances Earned This Month) 88 2 SHp
+        F5
+        03 SETLSP
+        02.5 NL
+        47 MOVEHR
+        (Luxury Condo Contest Chances Earned This Month) 88 2 SHp
 
-		F5
-		%152.5 110 MOVETO
-		142 MOVEHR
-		(Total No. of Luxury Condo Contest Chances Earned) 88 2 SHp
-	
-		FC
-		NL
-		47 MOVEHR
-		(Peluang Diperolehi Untuk Memenangi Pertandingan Kondo Mewah) 88 2 SHp
-		
-		142 MOVEHR
-		(Jumlah Keseluruhan Peluang Diperolehi Untuk Memenangi Kondo) 88 2 SHp
-		
-		06.7 NL
-		43 MOVEHR
-		F6
-		VAR_ETM SHc
-		
-		140 MOVEHR
-		F6
-		VAR_CCE SHc		
-		
-		-21 NL
-		
-		ELSE
-		
-		} ENDIF	
+        F5
+        142 MOVEHR
+        (Total No. of Luxury Condo Contest Chances Earned) 88 2 SHp
 
-		/VAR_RACC 0 SETVAR
-		
+        FC
+        NL
+        47 MOVEHR
+        (Peluang Diperolehi Untuk Memenangi Pertandingan Kondo Mewah) 88 2 SHp
+
+        142 MOVEHR
+        (Jumlah Keseluruhan Peluang Diperolehi Untuk Memenangi Kondo) 88 2 SHp
+
+        06.7 NL
+        43 MOVEHR
+        F6
+        VAR_ETM SHc
+
+        140 MOVEHR
+        F6
+        VAR_CCE SHc
+
+        -21 NL
+
+    ELSE
+
+    } ENDIF
+
+    /VAR_RACC 0 SETVAR
+
 }
 % ------------------------------------------------
 (T1)	% Marketing Tiff Image File
-{ 
-		/VAR_T1		PREFIX		SETVAR % prefix for tiff image file
-		
-				
+{
+    /VAR_T1		PREFIX		SETVAR % prefix for tiff image file
+
 }
 % ------------------------------------------------
 (M1)	% Dunning Message
-{ 
-		/VAR_M1		PREFIX		SETVAR	% prefix for marketing message
-		/VAR_M11	FLD1		SETVAR	% prefix for marketing message
-		/VAR_M12	FLD2		SETVAR	% prefix for marketing message
-		/VAR_M13	FLD3		SETVAR	% prefix for marketing message
-		/VAR_M14	FLD4		SETVAR	% prefix for marketing message
-		
-		% Insert Dunning Message
-		%03.3 SETLSP
-		% 20210427
-		03.2 SETLSP
-		%57 NL
-		
-		%FD
-		%U0
-		%(Notice on Paying Only Minimum Monthly Repayment) [ 190 20 1.2 ] 3 SHp
-		%N0
-		%FE
-		%NL
-		%(The amount of interest that you have to pay and the time it takes to repay your balance in full will increase if only the minimum monthly payment is made. Please refer to Table 1 at the back page which illustrates the amount of interest incurred and the repayment period, under different outstanding amount scenarios if you continue to pay only the minimum amount. The minimum monthly payment due is computed based on 5% balance outstanding or RM50, whichever is higher, at the applicable Tiered Interest charge. Please refer to overleaf for details.) [ 190  20 1.2 ] 3 SHp
-		%NL
-		%FF
-		%U0
-		%(Notis Jika Hanya Membayar Bayaran Minimum Bulanan) [ 190 20 1.2 ] 3 SHp
-		%N0
-		%FG
-		%NL
-		%(Jumlah faedah yang harus dibayar dan tempoh yang diambil untuk menjelaskan keseluruhan baki belum jelas anda akan bertambah jika anda hanya membayar bayaran minimum bulanan. Sila rujuk kepada Jadual 1 di muka surat belakang bagi gambaran jumlah faedah yang dikenakan dan tempoh pembayaran balik, bagi senario-senario baki belum jelas yang berbeza jika anda hanya membayar bayaran minimum secara berterusan. Pengiraan adalah berdasarkan 5% bayaran minimum atau RM50, yang mana lebih tinggi, mengikut Kadar Faedah Bertingkat Semasa. Sila rujuk di belakang untuk butiran lanjut.) [ 190  20 1.2 ] 3 SHp
-		
-		%06.5 NL
-	   %-10 MOVEHR
-		%(PSPL) SCALL
-		
-		% Insert Cutter
-		%24 202.7 MOVETO
-	    %05 NL
-		%14 MOVEHR
-		%(SCISSORS.TIF) 0.06 0 ICALL
-		%%Z <22> 180 S1 0 SHX
-		
-		% Insert Cards Summary Text
-		%10 210.5 MOVETO
-		%06 NL
-		%00 MOVEHR
-		%(**F5Payment Slip / **FCSlip Pembayaran) 0 SHmf
-		
-		% Insert Cards Summary Box
-		%04.5 NL
-		%(CSBX) SCALL
-		
-		% Insert Summary Header - Card Account
-		%116 NL
-		
-		% 2011-09-26
-		%116.3 NL
-		%117.8 NL
-		% 20210427
-		114 NL
-		45 MOVEHR
-		F5
-		(Card Account) SHc
+{
+    /VAR_M1		PREFIX		SETVAR	% prefix for marketing message
+    /VAR_M11	FLD1		SETVAR	% prefix for marketing message
+    /VAR_M12	FLD2		SETVAR	% prefix for marketing message
+    /VAR_M13	FLD3		SETVAR	% prefix for marketing message
+    /VAR_M14	FLD4		SETVAR	% prefix for marketing message
 
-		% Insert Current Balance
-		%103  MOVEHR
-		% 20210427
-		102.7 MOVEHR
-		(Current Balance (RM)) SHc
-		
-		% Insert Minimum Payment
-		135 MOVEHR
-		(Minimum Payment (RM)) SHc
-		
-		% Insert Please State Payment
-		172.5 MOVEHR
-		(Please State Payment Amount For Each Account) 36 2 SHp
-		
-		% Insert Akaun Kad
-		%NL
-		45 MOVEHR
-		FC
-		(Akaun Kad) SHc
-		
-		% Insert Baki Semasa
-		103  MOVEHR
-		(Baki Semasa (RM)) SHc
-		
-		% Insert Bayaran Minima
-		135 MOVEHR
-		(Bayaran Minima (RM)) SHc
-		
-		% Insert Sila Catat Amaun Bayaran Untuk Setiap Akaun
-		NL
-		172.5 MOVEHR
-		(Sila Catat Amaun Bayaran Untuk Setiap Akaun) VSUB 38 2 SHp
-		
-		0.5 NL
-		/VAR_RACC 0 SETVAR
-		%8.3 223.5 MOVETO %Yoong KS (dont delete)
-		
-		% 2011-09-26
-		-01 NL
+    % 20210427
+    03.2 SETLSP
+
+    % Insert Cutter
+%%Z <22> 180 S1 0 SHX
+
+    % 20210427
+    114 NL
+    45 MOVEHR
+    F5
+    (Card Account) SHc
+
+    % 20210427
+    102.7 MOVEHR
+    (Current Balance (RM)) SHc
+
+    % Insert Minimum Payment
+    135 MOVEHR
+    (Minimum Payment (RM)) SHc
+
+    % Insert Please State Payment
+    172.5 MOVEHR
+    (Please State Payment Amount For Each Account) 36 2 SHp
+
+    % Insert Akaun Kad
+    45 MOVEHR
+    FC
+    (Akaun Kad) SHc
+
+    % Insert Baki Semasa
+    103  MOVEHR
+    (Baki Semasa (RM)) SHc
+
+    % Insert Bayaran Minima
+    135 MOVEHR
+    (Bayaran Minima (RM)) SHc
+
+    % Insert Sila Catat Amaun Bayaran Untuk Setiap Akaun
+    NL
+    172.5 MOVEHR
+    (Sila Catat Amaun Bayaran Untuk Setiap Akaun) VSUB 38 2 SHp
+
+    0.5 NL
+    /VAR_RACC 0 SETVAR
+
+    % 2011-09-26
+    -01 NL
 
 }
 % ------------------------------------------------
 (D0)	% Summary Account
 {
-		/VAR_D0		PREFIX		SETVAR	% prefix for cards summary
-		/VAR_CAT	FLD1		SETVAR	% prefix for card account type
-		/VAR_CAN	FLD2		SETVAR	% prefix for card account name
-		/VAR_ACB	FLD3		SETVAR	% prefix for current balance
-		/VAR_AMP	FLD4		SETVAR	% prefix for minimum payment
-		/VAR_APS	FLD5		SETVAR	% prefix for please state paymant amount
-		
-		F4
-		%05 NL 
-		
-		% 2011-09-26
-		05 NL
-		01.5    MOVEHR   VAR_CAT   VSUB SH
-		58.5    MOVEHR   VAR_CAN   VSUB SH
-	   %101     MOVEHR   (RM)      VSUB SH
-		116.5   MOVEHR   VAR_ACB   (@@@,@@@,@@@,@@#.##) FORMAT SHr
-	   %127     MOVEHR   (RM)      VSUB SH
-		150.5   MOVEHR   VAR_AMP   (@@@,@@@,@@@,@@#.##) FORMAT SHr
+    /VAR_D0		PREFIX		SETVAR	% prefix for cards summary
+    /VAR_CAT	FLD1		SETVAR	% prefix for card account type
+    /VAR_CAN	FLD2		SETVAR	% prefix for card account name
+    /VAR_ACB	FLD3		SETVAR	% prefix for current balance
+    /VAR_AMP	FLD4		SETVAR	% prefix for minimum payment
+    /VAR_APS	FLD5		SETVAR	% prefix for please state paymant amount
 
-		/VAR_RACC	0 SETVAR
-		
+    F4
+
+    % 2011-09-26
+    05 NL
+    01.5    MOVEHR   VAR_CAT   VSUB SH
+    58.5    MOVEHR   VAR_CAN   VSUB SH
+    116.5   MOVEHR   VAR_ACB   (@@@,@@@,@@@,@@#.##) FORMAT SHr
+    150.5   MOVEHR   VAR_AMP   (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    /VAR_RACC	0 SETVAR
+
 }
 %  -----------------------------------------------
 (D1)	% Card Summary Total
 {
-		/VAR_D1		PREFIX		SETVAR	% prefix for total card summary
-		/VAR_TCB	FLD1		SETVAR	% prefix for total curent balance
-		/VAR_TMP	FLD2		SETVAR	% prefix for total minimum payment
+    /VAR_D1		PREFIX		SETVAR	% prefix for total card summary
+    /VAR_TCB	FLD1		SETVAR	% prefix for total curent balance
+    /VAR_TMP	FLD2		SETVAR	% prefix for total minimum payment
 
-		% Insert Total / Jumlah
-		%F5
-		%84 266.5 MOVETO
-		%(Total) SH
-		%F3
-		%( / Jumlah ) SH
-		
-		% Insert Total Variables for Current Balance
-		%F5
-		%26 MOVEHR
-		%(RM) SH
-		%50 MOVEHR
-		%VAR_TCB  (@@@,@@@,@@@,@@#.##) FORMAT SHr
-
-		% Insert Total Variables for Minimum Payment
-		%52 MOVEHR
-		%(RM) SH
-		%76 MOVEHR
-		%VAR_TMP  (@@@,@@@,@@@,@@#.##) FORMAT SHr
-
-		%/VAR_RACC	0 SETVAR
+    % Insert Total Variables for Minimum Payment
 
 }
 % ------------------------------------------------
 (M2)	% Note Message for Page 1
 { 		% Define Form Insertion for Page 2
 
-		/VAR_M2		PREFIX		SETVAR	% prefix for note message
-		/VAR_M21	FLD1		SETVAR	% prefix for note message
-		/VAR_M22	FLD2		SETVAR	% prefix for note message
-		/VAR_M23	FLD3		SETVAR	% prefix for note message
-		/VAR_M24	FLD4		SETVAR	% prefix for note message
+    /VAR_M2		PREFIX		SETVAR	% prefix for note message
+    /VAR_M21	FLD1		SETVAR	% prefix for note message
+    /VAR_M22	FLD2		SETVAR	% prefix for note message
+    /VAR_M23	FLD3		SETVAR	% prefix for note message
+    /VAR_M24	FLD4		SETVAR	% prefix for note message
 
-		PAGEBRK
-		%NL
-		%print T&C in case
-		%(T&C.ps) CACHE SETFORM
-		
-		% 20210427
-		  (CASIO_TNC.FRM) SETFORM
-		  
-		/VAR_Y0 ++
+    PAGEBRK
 
-		NL
-		
-		PAGEBRK
-		[ [    12.5    50   184   178     0 ]] SETLKF
-		
-		%-05 NL
-		
-		% Insert conditional Logic for the data flow
-		% IF FRLEFT LSP'*'3 lt { PAGEBRK NL } ELSE { NL } ENDIF
+    % 20210427
+    (CASIO_TNC.FRM) SETFORM
+
+    /VAR_Y0 ++
+
+    NL
+
+    PAGEBRK
+    [ [    12.5    50   184   178     0 ]] SETLKF
+
+    % Insert conditional Logic for the data flow
 }
 % ------------------------------------------------
 (E0)	% Monthly Transaction Description
-{ 
-		/VAR_E0		PREFIX		SETVAR	% prefix for monthly transaction details
-		/VAR_CCT	FLD1		SETVAR	% prefix for credit card type
-		/VAR_CCN	FLD2		SETVAR	% prefix for credit card number
-		/VAR_CHN	FLD3		SETVAR	% prefix for cardholder's name
-		/VAR_LMT    FLD4        SETVAR  % prefix for limit
-	  
-	   %/VAR_MOC	 1			ADD
-	   %/VAR_FCD	 1			SETVAR
-       % modified on 270709 for transaction description
-        /VAR_COUNTTD 1			ADD 
+{
+    /VAR_E0		PREFIX		SETVAR	% prefix for monthly transaction details
+    /VAR_CCT	FLD1		SETVAR	% prefix for credit card type
+    /VAR_CCN	FLD2		SETVAR	% prefix for credit card number
+    /VAR_CHN	FLD3		SETVAR	% prefix for cardholder's name
+    /VAR_LMT    FLD4        SETVAR  % prefix for limit
 
-		(CASIOF3.FRM) SETFORM
+    % modified on 270709 for transaction description
+    /VAR_COUNTTD 1			ADD
 
-		IF VAR_COUNTTD 34 gt
-  		{NEWFRAME 05 NL
-		%/VAR_COUNTTD 1 SETVAR at BEGINPAGE
-		}
-		ENDIF
-		
-		IF VAR_COUNTTD 1 eq
-  		{% 05 NL
-		}
-		ELSE
-		{05 NL}
-		ENDIF		
-		
-		
-		F5		
-		38 MOVEHR
-		%($$VAR_COUNTTD. $$VAR_CCT.  $$VAR_CCN.  $$VAR_CHN.) VSUB 146 3 SHp	
-		($$VAR_CCT.  $$VAR_CCN.  $$VAR_CHN.) VSUB 146 3 SHp	
+    (CASIOF3.FRM) SETFORM
 
-		%R
-		%155  MOVEHR ($$VAR_COUNTTD.) VSUB 5 3 SHp
-		%B
-	
-		% Insert limit - modified on 080709
-		185 MOVEHR
-		VAR_LMT SHr
-	
-		/VAR_RACC	0 SETVAR
-		%02 NL
-		IF FRLEFT 6.5 lt 
-  			{ NEWFRAME 
-  			%05 NL
-  			} 
-  		ENDIF			
+    IF VAR_COUNTTD 34 gt
+    {NEWFRAME 05 NL
+    }
+ENDIF
+
+    IF VAR_COUNTTD 1 eq
+    {% 05 NL
+    }
+ELSE
+    {05 NL}
+ENDIF
+
+    F5
+    38 MOVEHR
+    ($$VAR_CCT.  $$VAR_CCN.  $$VAR_CHN.) VSUB 146 3 SHp
+
+    % Insert limit - modified on 080709
+    185 MOVEHR
+    VAR_LMT SHr
+
+    /VAR_RACC	0 SETVAR
+    IF FRLEFT 6.5 lt
+    { NEWFRAME
+    }
+ENDIF
 }
 % ------------------------------------------------
 (E1)	% Balance Last Month
-{  
-		/VAR_E1		PREFIX		SETVAR	% prefix for balance of last month
-		/VAR_BLM	FLD1		SETVAR	% prefix for balance of last month
-		/VAR_DCR	FLD2		SETVAR	% prefix for blm card number
-		/VAR_AMT	FLD3		SETVAR	% prefix for blm customer name
-		/VAR_RIP    FLD4        SETVAR  % prefix for blm retail interest
-		
-		/VAR_COUNTTD 1			ADD     % modified on 270709 for transaction description
+{
+    /VAR_E1		PREFIX		SETVAR	% prefix for balance of last month
+    /VAR_BLM	FLD1		SETVAR	% prefix for balance of last month
+    /VAR_DCR	FLD2		SETVAR	% prefix for blm card number
+    /VAR_AMT	FLD3		SETVAR	% prefix for blm customer name
+    /VAR_RIP    FLD4        SETVAR  % prefix for blm retail interest
 
-		IF VAR_COUNTTD 34 gt
-  		{NEWFRAME 
-		%/VAR_COUNTTD 1 SETVAR at BEGINPAGE
-		}
-		ENDIF
-		
-		03 SETLSP
-		F5
-		05  NL
-		%R
-		%173  MOVEHR ($$VAR_COUNTTD.) VSUB 5 3 SHp
-		%B
-		38  MOVEHR VAR_BLM  0  SHp
-		158 MOVEHR VAR_DCR  0  SHp
-		185 MOVEHR VAR_AMT (@@@,@@@,@@@,@@#.##) FORMAT SHr
-		
-		05 NL
-		% modified on 270709 for transaction description
-		/VAR_COUNTTD 1			ADD     
-		
-		IF VAR_COUNTTD 34 gt
-  		{NEWFRAME 05 NL
-		%/VAR_COUNTTD 1 SETVAR at BEGINPAGE
-		}
-		ENDIF
-		%R
-		%170  MOVEHR ($$VAR_COUNTTD.) VSUB 5 3 SHp
-		%B
-		F4
-		38  MOVEHR VAR_RIP  0  SHp
+    /VAR_COUNTTD 1			ADD     % modified on 270709 for transaction description
 
-		/VAR_RACC	0 SETVAR
-		IF FRLEFT 6.5 lt 
-  			{ NEWFRAME 
-  			%05 NL
-  			} 
-  		ENDIF
+    IF VAR_COUNTTD 34 gt
+    {NEWFRAME
+    }
+ENDIF
+
+    03 SETLSP
+    F5
+    05  NL
+    38  MOVEHR VAR_BLM  0  SHp
+    158 MOVEHR VAR_DCR  0  SHp
+    185 MOVEHR VAR_AMT (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    05 NL
+    % modified on 270709 for transaction description
+    /VAR_COUNTTD 1			ADD
+
+    IF VAR_COUNTTD 34 gt
+    {NEWFRAME 05 NL
+    }
+ENDIF
+    F4
+    38  MOVEHR VAR_RIP  0  SHp
+
+    /VAR_RACC	0 SETVAR
+    IF FRLEFT 6.5 lt
+    { NEWFRAME
+    }
+ENDIF
 }
 % ------------------------------------------------
 (E2)	% Transaction Details
 {
-		/VAR_E2		PREFIX		SETVAR	% prefix for transaction description
-		/VAR_TSD	FLD1		SETVAR	% prefix for transaction date
-		/VAR_PGD	FLD2		SETVAR	% prefix for posting date
-		/VAR_TND	FLD3		SETVAR	% prefix for transaction description
-		/VAR_CIT    FLD4		SETVAR  % prefix for location
-		/VAR_CTC	FLD5		SETVAR  % prefix for location code
-		/VAR_CRD	FLD6		SETVAR	% prefix for cr/dr
-		/VAR_TDA	FLD7		SETVAR	% prefix for amount
-		/VAR_CCD    FLD9        SETVAR	% pefix for foreign currency
-		/VAR_CER	FLD10		SETVAR	% prefix for foreign currency exchange rate
-		
-		/VAR_COUNTTD 1			ADD     % modified on 270709 for transaction description
-	
-		IF VAR_COUNTTD 34 gt
-  		{NEWFRAME -01 NL
-		%/VAR_COUNTTD 1 SETVAR at BEGINPAGE
-		}
-		ENDIF
-		
-		03 SETLSP
-		
-		F4
-		05 NL
-		%	00  MOVEHR VAR_TSD  SH
-		%	20  MOVEHR VAR_PGD  SH
-		%	40  MOVEHR VAR_TND 112 3 SHp
-		%		NL
-		%	40  MOVEHR VAR_LOC 1 SHp
-		%	-0  NL
-	
-		%	158 MOVEHR VAR_CRD  SH
-		%	185 MOVEHR VAR_TDA (@@@,@@@,@@@,@@#.##) FORMAT SHr
-		%	95  MOVEHR VAR_LOC  SH
-		%	140 MOVEHR VAR_CCD  SH	
-       
-        IF VAR_CCD () eq VAR_CCD (MY) eq or
-        {
-			F4
-			%01.5 NL
-			%01.3 NL % modified on 270709
-			0.5 NL
-			%R
-			%140  MOVEHR ($$VAR_COUNTTD.) VSUB 5 3 SHp
-			%B
-			01   MOVEHR VAR_TSD VSUB SH
-			20   MOVEHR VAR_PGD VSUB SH
-			38   MOVEHR VAR_TND VSUB SH
-			88   MOVEHR VAR_CIT VSUB SH
-			118  MOVEHR VAR_CTC VSUB SH
-			158  MOVEHR VAR_CRD VSUB SH
-			185  MOVEHR VAR_TDA (@@@,@@@,@@@,@@#.##) FORMAT SHr
-        
-        }
-        ELSE
-        {
-			F4
-			%01.5 NL
-			%01.3 NL % modified on 270709
-			0.5 NL
-			%R
-			%0  MOVEHR ($$VAR_COUNTTD.) VSUB 5 3 SHp
-			%B
-			01   MOVEHR VAR_TSD VSUB SH
-			20   MOVEHR VAR_PGD VSUB SH
-			38   MOVEHR VAR_TND VSUB SH
-			88   MOVEHR VAR_CIT VSUB SH
-			118  MOVEHR VAR_CTC VSUB SH
-			158  MOVEHR VAR_CRD VSUB SH
-			185  MOVEHR VAR_TDA (@@@,@@@,@@@,@@#.##) FORMAT SHr
-		    
-		    04   NL
-		    /VAR_COUNTTD 1 ADD
-		    
-		    IF VAR_COUNTTD 34 gt
-  			{NEWFRAME NL
-			%/VAR_COUNTTD 1 SETVAR at BEGINPAGE
-			}
-			ENDIF
-			%R
-			%0  MOVEHR ($$VAR_COUNTTD.) VSUB 5 3 SHp
-			%B
-		    88   MOVEHR ($$VAR_CCD.) VSUB SH
-		    148  MOVEHR VAR_CER (@@@,@@@,@@@,@@#.##) FORMAT SHr
-       
-        }
-        ENDIF 
+    /VAR_E2		PREFIX		SETVAR	% prefix for transaction description
+    /VAR_TSD	FLD1		SETVAR	% prefix for transaction date
+    /VAR_PGD	FLD2		SETVAR	% prefix for posting date
+    /VAR_TND	FLD3		SETVAR	% prefix for transaction description
+    /VAR_CIT    FLD4		SETVAR  % prefix for location
+    /VAR_CTC	FLD5		SETVAR  % prefix for location code
+    /VAR_CRD	FLD6		SETVAR	% prefix for cr/dr
+    /VAR_TDA	FLD7		SETVAR	% prefix for amount
+    /VAR_CCD    FLD9        SETVAR	% pefix for foreign currency
+    /VAR_CER	FLD10		SETVAR	% prefix for foreign currency exchange rate
 
-		/VAR_RACC	0 SETVAR
-		IF FRLEFT 6.5 lt 
-  			{ NEWFRAME 
-  			%05 NL
-  			} 
-  		ENDIF
+    /VAR_COUNTTD 1			ADD     % modified on 270709 for transaction description
+
+    IF VAR_COUNTTD 34 gt
+    {NEWFRAME -01 NL
+    }
+ENDIF
+
+    03 SETLSP
+
+    F4
+    05 NL
+
+    IF VAR_CCD () eq VAR_CCD (MY) eq or
+    {
+        F4
+        0.5 NL
+        01   MOVEHR VAR_TSD VSUB SH
+        20   MOVEHR VAR_PGD VSUB SH
+        38   MOVEHR VAR_TND VSUB SH
+        88   MOVEHR VAR_CIT VSUB SH
+        118  MOVEHR VAR_CTC VSUB SH
+        158  MOVEHR VAR_CRD VSUB SH
+        185  MOVEHR VAR_TDA (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    }
+ELSE
+    {
+        F4
+        0.5 NL
+        01   MOVEHR VAR_TSD VSUB SH
+        20   MOVEHR VAR_PGD VSUB SH
+        38   MOVEHR VAR_TND VSUB SH
+        88   MOVEHR VAR_CIT VSUB SH
+        118  MOVEHR VAR_CTC VSUB SH
+        158  MOVEHR VAR_CRD VSUB SH
+        185  MOVEHR VAR_TDA (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+        04   NL
+        /VAR_COUNTTD 1 ADD
+
+        IF VAR_COUNTTD 34 gt
+        {NEWFRAME NL
+        }
+    ENDIF
+        88   MOVEHR ($$VAR_CCD.) VSUB SH
+        148  MOVEHR VAR_CER (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    }
+ENDIF
+
+    /VAR_RACC	0 SETVAR
+    IF FRLEFT 6.5 lt
+    { NEWFRAME
+    }
+ENDIF
 
 }
 % ------------------------------------------------
 (E3)	% New Balance
 {
-		/VAR_E3		PREFIX		SETVAR	% prefix for new balance and subtotal
-		/VAR_TNB	FLD3		SETVAR	% prefix for new balance
-		/VAR_TCD	FLD4		SETVAR	% prefix for dr/cr
-		/VAR_TAT	FLD5		SETVAR	% prefix for amount for new balance
-		/VAR_TST	FLD6		SETVAR	% prefix for subtotal
-		/VAR_TDC	FLD7		SETVAR	% prefix for dr/cr
-		/VAR_TAM	FLD8		SETVAR	% prefix for amount for subtotal
-	
-		%05 NL
-		
-		%No New balance, Got Subtotal
-		%IF VAR_TST () ne VAR_TNB () eq and
-		%{
-		%F5
-		%148 MOVEHR VAR_TST  SHr
-		%158 MOVEHR VAR_TDC  SH
-		%185 MOVEHR VAR_TAM  SHr
-		%}
-		%ELSE
-		%{ %Got New balance, No Subtotal
-		%  IF VAR_TST () eq VAR_TNB () ne and
-		%  {
-		%  F5
-		%  152 MOVEHR VAR_TNB  SHr
-		%  158 MOVEHR VAR_TCD  SH
-		%  185 MOVEHR VAR_TAT  SHr
-		%  }
-		%  ELSE
-		%  {
-		%  F5
-		%  152 MOVEHR VAR_TNB  SHr
-		%  158 MOVEHR VAR_TCD  SH
-		%  185 MOVEHR VAR_TAT  SHr
-		%  NL
-		%  152 MOVEHR VAR_TST  SHr
-		%  158 MOVEHR VAR_TDC  SH
-		%  185 MOVEHR VAR_TAM  SHr
-		%  }
-		%  ENDIF
-				
-		%}
-		%ENDIF
-		
-		05 NL
-		
-		/VAR_COUNTTD 1 ADD      % modified on 270709 for transaction description
-		
-		IF VAR_COUNTTD 34 gt
-  		{NEWFRAME 05 NL
-		%/VAR_COUNTTD 1 SETVAR at BEGINPAGE
-		}
-		ENDIF
-		
-		F5
-		%R
-		%120  MOVEHR ($$VAR_COUNTTD.) VSUB 5 3 SHp
-		%B
-		148 MOVEHR VAR_TNB  SHr
-		158 MOVEHR VAR_TCD  SH
-		185 MOVEHR VAR_TAT  SHr
-		
-		/VAR_RACC	0 SETVAR
-		IF FRLEFT 6.5 lt 
-  			{ NEWFRAME 
-  			%05 NL
-  			} 
-  		ENDIF
+    /VAR_E3		PREFIX		SETVAR	% prefix for new balance and subtotal
+    /VAR_TNB	FLD3		SETVAR	% prefix for new balance
+    /VAR_TCD	FLD4		SETVAR	% prefix for dr/cr
+    /VAR_TAT	FLD5		SETVAR	% prefix for amount for new balance
+    /VAR_TST	FLD6		SETVAR	% prefix for subtotal
+    /VAR_TDC	FLD7		SETVAR	% prefix for dr/cr
+    /VAR_TAM	FLD8		SETVAR	% prefix for amount for subtotal
+
+    %}
+
+    05 NL
+
+    /VAR_COUNTTD 1 ADD      % modified on 270709 for transaction description
+
+    IF VAR_COUNTTD 34 gt
+    {NEWFRAME 05 NL
+    }
+ENDIF
+
+    F5
+    148 MOVEHR VAR_TNB  SHr
+    158 MOVEHR VAR_TCD  SH
+    185 MOVEHR VAR_TAT  SHr
+
+    /VAR_RACC	0 SETVAR
+    IF FRLEFT 6.5 lt
+    { NEWFRAME
+    }
+ENDIF
 }
 % ------------------------------------------------
 (M3)	% Dunning Message
 {
-		/VAR_M3		PREFIX		SETVAR	% prefix for dunning message
-		/VAR_M31	FLD1		SETVAR	% prefix for first message line
-		/VAR_M32	FLD2		SETVAR	% prefix for second message line
-		/VAR_M33	FLD3		SETVAR	% prefix for third message line
-		/VAR_M34	FLD4		SETVAR	% prefix for fourth message line
-		/VAR_M35	FLD5		SETVAR
-		/VAR_M36	FLD6		SETVAR
-		/VAR_M37	FLD7		SETVAR
-		/VAR_M38	FLD8		SETVAR
-		
-		/VAR_COUNTM3 ++
-		
-		04 SETLSP
-		05 NL
-		FB
-	%	40 MOVEHR VAR_M31 [ 107 50 1 ] 3 SHp
-	%	04 NL
-	%	40 MOVEHR VAR_M32 [ 107 50 1 ] 3 SHp
-	%	04 NL
-	%	40 MOVEHR VAR_M33 [ 107 50 1 ] 3 SHp
-	%	04 NL
-	%	40 MOVEHR VAR_M34 [ 107 50 1 ] 3 SHp
-		
-	%	40 MOVEHR
-	%	VAR_M31  VSUB 3  SHp
-	%	( )      VSUB 3  SHp
-	%	VAR_M32  VSUB 3  SHp
-	
-		/VAR_COUNTTD 2 ADD         % modified on 270709 for transaction description
-		
-		IF VAR_COUNTTD 34 gt
-  		{NEWFRAME 05 NL
-		%/VAR_COUNTTD 1 SETVAR at BEGINPAGE
-		}
-		ENDIF
-		%R
-		%160  MOVEHR ($$VAR_COUNTTD.) VSUB 5 3 SHp
-		%B
-		38 MOVEHR
-		%($$VAR_M31. $$VAR_M32. $$VAR_M33. $$VAR_M34. $$VAR_M35. $$VAR_M36. $$VAR_M37. $$VAR_M38.) VSUB 112  3  SHp
-		%($$VAR_COUNTTD. $$VAR_M32. $$VAR_M33. $$VAR_M34. $$VAR_M35. $$VAR_M36. $$VAR_M37. $$VAR_M38.) VSUB 110  3  SHp
-		($$VAR_M32. $$VAR_M33. $$VAR_M34. $$VAR_M35. $$VAR_M36. $$VAR_M37. $$VAR_M38.) VSUB 110  3  SHp
+    /VAR_M3		PREFIX		SETVAR	% prefix for dunning message
+    /VAR_M31	FLD1		SETVAR	% prefix for first message line
+    /VAR_M32	FLD2		SETVAR	% prefix for second message line
+    /VAR_M33	FLD3		SETVAR	% prefix for third message line
+    /VAR_M34	FLD4		SETVAR	% prefix for fourth message line
+    /VAR_M35	FLD5		SETVAR
+    /VAR_M36	FLD6		SETVAR
+    /VAR_M37	FLD7		SETVAR
+    /VAR_M38	FLD8		SETVAR
 
-		03 NL
-		/VAR_RACC	0 SETVAR
+    /VAR_COUNTM3 ++
+
+    04 SETLSP
+    05 NL
+    FB
+
+    /VAR_COUNTTD 2 ADD         % modified on 270709 for transaction description
+
+    IF VAR_COUNTTD 34 gt
+    {NEWFRAME 05 NL
+    }
+ENDIF
+    38 MOVEHR
+    ($$VAR_M32. $$VAR_M33. $$VAR_M34. $$VAR_M35. $$VAR_M36. $$VAR_M37. $$VAR_M38.) VSUB 110  3  SHp
+
+    03 NL
+    /VAR_RACC	0 SETVAR
 
 }
 % ------------------------------------------------
 (T2)	% Marketing Tiff Image for Page 3
 {
-		/VAR_T2		PREFIX		SETVAR % prefix for marketing tiff image
-		/VAR_T21	FLD1		SETVAR % prefix for marketing tiff image 
-		
-		PAGEBRK
-		
-		% Insert Form For Layout 4	
-		(CASIOB.FRM) SETFORM
-		[ [ 11    20   182   235   00 ]	] SETLKF
+    /VAR_T2		PREFIX		SETVAR % prefix for marketing tiff image
+    /VAR_T21	FLD1		SETVAR % prefix for marketing tiff image
+
+    PAGEBRK
+
+    % Insert Form For Layout 4
+    (CASIOB.FRM) SETFORM
+    [ [ 11    20   182   235   00 ]	] SETLKF
 
 }
 % ------------------------------------------------
 (I1)	% IPP Summary
 {
-		/VAR_I1 	PREFIX		SETVAR	% prefix for IPP Summary
-		/VAR_ICN	FLD1		SETVAR	% prefix for card number
-		/VAR_IMN	FLD2		SETVAR	% prefix for merchant name
-		/VAR_IPA	FLD3		SETVAR	% prefix for principal amount
-		/VAR_IMU	FLD4		SETVAR	% prefix for months unbilled
-		/VAR_IAU	FLD5		SETVAR	% prefix for amount unbilled
+    /VAR_I1 	PREFIX		SETVAR	% prefix for IPP Summary
+    /VAR_ICN	FLD1		SETVAR	% prefix for card number
+    /VAR_IMN	FLD2		SETVAR	% prefix for merchant name
+    /VAR_IPA	FLD3		SETVAR	% prefix for principal amount
+    /VAR_IMU	FLD4		SETVAR	% prefix for months unbilled
+    /VAR_IAU	FLD5		SETVAR	% prefix for amount unbilled
 
-  		/VAR.Y1 	0 			ADD
-  		/VAR.Y2 	0 			ADD
-		/VAR_COUNTI1 ++
-		
-		IF VAR_COUNTI1 1 eq
-		{
-			01 NL
-			F6
-			% Insert IPP Header Text 
-			00  MOVEHR (**F5OCBC Instalment Payment Plan (IPP) Summary / **FCRingkasan Transaksi IPP OCBC) 0 SHmf
-		
-			% Insert Header
-			05 NL
-			(IPBX) SCALL
-			
-			F5
-			1.3 NL
-			15  MOVEHR (Card Number) SHc
-			65  MOVEHR (Merchant Name) SHc
-			115 MOVEHR (Principal Amount (RM)) SHc
-			145 MOVEHR (Months Unbilled) SHc
-			176.3 MOVEHR (Amount Unbilled (RM)) SHc
-			
-			03 NL
-			FC
-			15  MOVEHR (Nombor Kad) SHc
-			65  MOVEHR (Nama Peniaga) SHc
-			115 MOVEHR (Amaun Prinsipal (RM)) SHc
-			145 MOVEHR (Baki Bulan Belum Dibil) SHc
-			176.3 MOVEHR (Amaun Belum Dibil (RM)) SHc
-		
-			0.5 NL
-		}	ENDIF
+    /VAR.Y1 	0 			ADD
+    /VAR.Y2 	0 			ADD
+    /VAR_COUNTI1 ++
 
-		03.3 NL
-		00 MOVEHR			  
-	    00    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Left
-     	31    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for CN & MN
-     	99    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MN & PA
-     	131   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for PA & MU
-       	160   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MU & AU
-     	192   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Right
-     
-      	00    VAR.Y1  192  0.001  XDRK  DRAWB				% Horizontal Line
+    IF VAR_COUNTI1 1 eq
+    {
+        01 NL
+        F6
+        % Insert IPP Header Text
+        00  MOVEHR (**F5OCBC Instalment Payment Plan (IPP) Summary / **FCRingkasan Transaksi IPP OCBC) 0 SHmf
 
-		F4
-		01.5 NL
-		01.5  MOVEHR  VAR_ICN   SH						
-		%0.5 NL
-		32    MOVEHR  VAR_IMN   SH							
-		129   MOVEHR  VAR_IPA  (@@@,@@@,@@@,@@#.##) FORMAT SHr 
-		146   MOVEHR  VAR_IMU   SHc						
-		190   MOVEHR  VAR_IAU  (@@@,@@@,@@@,@@#.##) FORMAT SHr	
-		
-		/VAR_RACC	0 SETVAR
+        % Insert Header
+        05 NL
+        (IPBX) SCALL
+
+        F5
+        1.3 NL
+        15  MOVEHR (Card Number) SHc
+        65  MOVEHR (Merchant Name) SHc
+        115 MOVEHR (Principal Amount (RM)) SHc
+        145 MOVEHR (Months Unbilled) SHc
+        176.3 MOVEHR (Amount Unbilled (RM)) SHc
+
+        03 NL
+        FC
+        15  MOVEHR (Nombor Kad) SHc
+        65  MOVEHR (Nama Peniaga) SHc
+        115 MOVEHR (Amaun Prinsipal (RM)) SHc
+        145 MOVEHR (Baki Bulan Belum Dibil) SHc
+        176.3 MOVEHR (Amaun Belum Dibil (RM)) SHc
+
+        0.5 NL
+    }	ENDIF
+
+    03.3 NL
+    00 MOVEHR
+    00    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Left
+    31    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for CN & MN
+    99    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MN & PA
+    131   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for PA & MU
+    160   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MU & AU
+    192   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Right
+
+    00    VAR.Y1  192  0.001  XDRK  DRAWB				% Horizontal Line
+
+    F4
+    01.5 NL
+    01.5  MOVEHR  VAR_ICN   SH
+    32    MOVEHR  VAR_IMN   SH
+    129   MOVEHR  VAR_IPA  (@@@,@@@,@@@,@@#.##) FORMAT SHr
+    146   MOVEHR  VAR_IMU   SHc
+    190   MOVEHR  VAR_IAU  (@@@,@@@,@@@,@@#.##) FORMAT SHr
+
+    /VAR_RACC	0 SETVAR
 }
 % ------------------------------------------------
 (S1)	% OCBC Summary
 {
-		/VAR_S1 	PREFIX		SETVAR	% prefix for ocbc summary
-		/VAR_SCN	FLD1		SETVAR	% prefix for card number
-		/VAR_SPE	FLD2		SETVAR	% prefix for points earned
-		/VAR_SEP	FLD3		SETVAR	% prefix for 	
-		/VAR_SPB    FLD4        SETVAR  % prefix for
-		/VAR_SUE	FLD5		SETVAR	% prefix for
-		/VAR_SAP	FLD6		SETVAR	% 
-		/VAR_SED	FLD7		SETVAR	% 
-		/VAR_SML	FLD8		SETVAR	% 
-		/VAR_STL	FLD9		SETVAR	% 
-		
-	 	/VAR.Y1 	0 			ADD
-  		/VAR.Y2 	0 			ADD
+    /VAR_S1 	PREFIX		SETVAR	% prefix for ocbc summary
+    /VAR_SCN	FLD1		SETVAR	% prefix for card number
+    /VAR_SPE	FLD2		SETVAR	% prefix for points earned
+    /VAR_SEP	FLD3		SETVAR	% prefix for
+    /VAR_SPB    FLD4        SETVAR  % prefix for
+    /VAR_SUE	FLD5		SETVAR	% prefix for
+    /VAR_SAP	FLD6		SETVAR	%
+    /VAR_SED	FLD7		SETVAR	%
+    /VAR_SML	FLD8		SETVAR	%
+    /VAR_STL	FLD9		SETVAR	%
 
-		/VAR_COUNTS1 ++
-		IF VAR_COUNTS1 1 eq
-		{
-			07 NL
-			00  MOVEHR (**F5OCBC$ Summary / **F3Ringkasan OCBC$) 0 SHmf
-	
-			% Insert Header
-			05 NL
-			(RSBX) SCALL
-		
-			F5
-			01.3 NL
-			15     MOVEHR (Card Number) SHc
-			
-			42     MOVEHR (Points Earned) SHc
-			03  NL
-			42     MOVEHR (This Month) SHc
-		
-			-03 NL
-			64     MOVEHR (Extra Points) SHc
-			03  NL
-			64     MOVEHR (Earned) SHc
-			
-			-03 NL
-			86     MOVEHR (Points Brought) SHc
-			03  NL
-			86     MOVEHR (Forward) SHc
-			
-			-03 NL
-			110.5  MOVEHR (Used / Expired) SHc
-			03  NL
-			110.5  MOVEHR (Points) SHc
-			
-			-03 NL
-			132.5  MOVEHR (Avail Points) SHc
-			150.5  MOVEHR (Expiry Date) SHc
-			
-			167    MOVEHR (Extended) SHc
-			03 NL
-			167    MOVEHR (Points) SHc
-			
-			-03 NL
-			183.5  MOVEHR (Expiry Date) SHc
-			
-			04 NL
-			FC
-			15     MOVEHR (Nombor Kad) SHc
-			
-			02.5 NL
-			42     MOVEHR (Mata Diperolehi) SHc
-			03 NL			
-			42     MOVEHR (Bulan Ini) SHc
-			
-			-03 NL
-			64     MOVEHR (Mata Tambahan) SHc
-			03 NL
-			64     MOVEHR (Diperolehi) SHc
-			
-			-03 NL
-			86     MOVEHR (Mata Dibawa) SHc
-			03 NL
-			86     MOVEHR (Ke Hadapan) SHc
-			
-			-03 NL
-			110.5  MOVEHR (Mata Yang Telah) SHc
-			03 NL
-			110.5  MOVEHR (Digunakan / Luput) SHc
-			
-		    -06 NL
-			132.5  MOVEHR (Jumlah Mata) SHc
-			03 NL
-			132.5  MOVEHR (Terkini) SHc
-			
-		    -03 NL
-			150.5  MOVEHR (Tarikh Luput) SHc
-			
-			02.5 NL
-			167    MOVEHR (Mata) SHc
-			03 NL
-			167    MOVEHR (Lanjutan) SHc
-			
-		    -05.5 NL
-			183.5  MOVEHR (Tarikh Luput) SHc
-				
-		05 NL		
-		}	ENDIF
+    /VAR.Y1 	0 			ADD
+    /VAR.Y2 	0 			ADD
 
-		03.6 NL
-		F4
-		00 MOVEHR			  
-	    00    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Left
-     	31    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for CN & MN
-     	53.5  VAR.Y2  0.001   05  XDRK  DRAWB
-     	74    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MN & PA
-     	98    VAR.Y2  0.001   05  XDRK  DRAWB
-     	123   VAR.Y2  0.001   05  XDRK  DRAWB
-     	142   VAR.Y2  0.001   05  XDRK  DRAWB
-     	159   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for PA & MU
-       	175   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MU & AU
-     	192   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Right
-     
-      	00    VAR.Y1  192  0.001  XDRK  DRAWB
-      	
-      	01.5 NL		
-		01.5   MOVEHR VAR_SCN  SH
-		52.5   MOVEHR VAR_SPE  (@@@,@@@,@@@,@@#) FORMAT SHr
-		73     MOVEHR VAR_SEP  (@@@,@@@,@@@,@@#) FORMAT SHr
-		97     MOVEHR VAR_SPB  (@@@,@@@,@@@,@@#) FORMAT SHr
-		122    MOVEHR VAR_SUE  (@@@,@@@,@@@,@@#) FORMAT SHr
-		141    MOVEHR VAR_SAP  (@@@,@@@,@@@,@@#) FORMAT SHr
-		144    MOVEHR VAR_SED  SH
-		174    MOVEHR VAR_SML  (@@@,@@@,@@@,@@#) FORMAT SHr
-		176.5  MOVEHR VAR_STL  SH
+    /VAR_COUNTS1 ++
+    IF VAR_COUNTS1 1 eq
+    {
+        07 NL
+        00  MOVEHR (**F5OCBC$ Summary / **F3Ringkasan OCBC$) 0 SHmf
 
-		/VAR_RACC	0 SETVAR
-	
+        % Insert Header
+        05 NL
+        (RSBX) SCALL
+
+        F5
+        01.3 NL
+        15     MOVEHR (Card Number) SHc
+
+        42     MOVEHR (Points Earned) SHc
+        03  NL
+        42     MOVEHR (This Month) SHc
+
+        -03 NL
+        64     MOVEHR (Extra Points) SHc
+        03  NL
+        64     MOVEHR (Earned) SHc
+
+        -03 NL
+        86     MOVEHR (Points Brought) SHc
+        03  NL
+        86     MOVEHR (Forward) SHc
+
+        -03 NL
+        110.5  MOVEHR (Used / Expired) SHc
+        03  NL
+        110.5  MOVEHR (Points) SHc
+
+        -03 NL
+        132.5  MOVEHR (Avail Points) SHc
+        150.5  MOVEHR (Expiry Date) SHc
+
+        167    MOVEHR (Extended) SHc
+        03 NL
+        167    MOVEHR (Points) SHc
+
+        -03 NL
+        183.5  MOVEHR (Expiry Date) SHc
+
+        04 NL
+        FC
+        15     MOVEHR (Nombor Kad) SHc
+
+        02.5 NL
+        42     MOVEHR (Mata Diperolehi) SHc
+        03 NL
+        42     MOVEHR (Bulan Ini) SHc
+
+        -03 NL
+        64     MOVEHR (Mata Tambahan) SHc
+        03 NL
+        64     MOVEHR (Diperolehi) SHc
+
+        -03 NL
+        86     MOVEHR (Mata Dibawa) SHc
+        03 NL
+        86     MOVEHR (Ke Hadapan) SHc
+
+        -03 NL
+        110.5  MOVEHR (Mata Yang Telah) SHc
+        03 NL
+        110.5  MOVEHR (Digunakan / Luput) SHc
+
+        -06 NL
+        132.5  MOVEHR (Jumlah Mata) SHc
+        03 NL
+        132.5  MOVEHR (Terkini) SHc
+
+        -03 NL
+        150.5  MOVEHR (Tarikh Luput) SHc
+
+        02.5 NL
+        167    MOVEHR (Mata) SHc
+        03 NL
+        167    MOVEHR (Lanjutan) SHc
+
+        -05.5 NL
+        183.5  MOVEHR (Tarikh Luput) SHc
+
+        05 NL
+    }	ENDIF
+
+    03.6 NL
+    F4
+    00 MOVEHR
+    00    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Left
+    31    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for CN & MN
+    53.5  VAR.Y2  0.001   05  XDRK  DRAWB
+    74    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MN & PA
+    98    VAR.Y2  0.001   05  XDRK  DRAWB
+    123   VAR.Y2  0.001   05  XDRK  DRAWB
+    142   VAR.Y2  0.001   05  XDRK  DRAWB
+    159   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for PA & MU
+    175   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MU & AU
+    192   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Right
+
+    00    VAR.Y1  192  0.001  XDRK  DRAWB
+
+    01.5 NL
+    01.5   MOVEHR VAR_SCN  SH
+    52.5   MOVEHR VAR_SPE  (@@@,@@@,@@@,@@#) FORMAT SHr
+    73     MOVEHR VAR_SEP  (@@@,@@@,@@@,@@#) FORMAT SHr
+    97     MOVEHR VAR_SPB  (@@@,@@@,@@@,@@#) FORMAT SHr
+    122    MOVEHR VAR_SUE  (@@@,@@@,@@@,@@#) FORMAT SHr
+    141    MOVEHR VAR_SAP  (@@@,@@@,@@@,@@#) FORMAT SHr
+    144    MOVEHR VAR_SED  SH
+    174    MOVEHR VAR_SML  (@@@,@@@,@@@,@@#) FORMAT SHr
+    176.5  MOVEHR VAR_STL  SH
+
+    /VAR_RACC	0 SETVAR
 
 }
 % ------------------------------------------------
 (R1)	% OCBC Robinson Summary
 {
-		/VAR_R1 	PREFIX		SETVAR	% prefix for robinsons summary
-		/VAR_RCN	FLD1		SETVAR	% prefix for card number
-		/VAR_RPE	FLD2		SETVAR	% prefix for points earned
-		/VAR_REP	FLD3		SETVAR	% prefix for extra points earned
-		/VAR_RPB	FLD4		SETVAR	% prefix for points brought forward
-		/VAR_RUE	FLD5		SETVAR	% prefix for used / expired points
-		/VAR_RAP	FLD6		SETVAR	% prefix for avail points
-		/VAR_RED	FLD7		SETVAR	% prefix for expiry date
-		/VAR_RML	FLD8		SETVAR	% prefix for extended points
-		/VAR_RTL	FLD9		SETVAR	% prefix for expiry date
+    /VAR_R1 	PREFIX		SETVAR	% prefix for robinsons summary
+    /VAR_RCN	FLD1		SETVAR	% prefix for card number
+    /VAR_RPE	FLD2		SETVAR	% prefix for points earned
+    /VAR_REP	FLD3		SETVAR	% prefix for extra points earned
+    /VAR_RPB	FLD4		SETVAR	% prefix for points brought forward
+    /VAR_RUE	FLD5		SETVAR	% prefix for used / expired points
+    /VAR_RAP	FLD6		SETVAR	% prefix for avail points
+    /VAR_RED	FLD7		SETVAR	% prefix for expiry date
+    /VAR_RML	FLD8		SETVAR	% prefix for extended points
+    /VAR_RTL	FLD9		SETVAR	% prefix for expiry date
 
-		/VAR.Y1 	0 			ADD
-  		/VAR.Y2 	0 			ADD
-		/VAR_COUNTR1 ++
+    /VAR.Y1 	0 			ADD
+    /VAR.Y2 	0 			ADD
+    /VAR_COUNTR1 ++
 
-		IF VAR_COUNTR1 1 eq
-		{
-			07 NL
-			
-			% Insert IPP Header Text
-			00     MOVEHR (**F5Robinsons$ Summary / **F3Ringkasan Robinsons$)  0 SHmf
-	
-			% Insert Header
-			05 NL
-			(RSBX) SCALL
-		
-			F5
-			1.3 NL
-			15     MOVEHR (Card Number) SHc
-			
-			42     MOVEHR (Points Earned) SHc
-			03  NL
-			42     MOVEHR (This Month) SHc
-		
-			-03 NL
-			64     MOVEHR (Extra Points) SHc
-			03  NL
-			64     MOVEHR (Earned) SHc
-			
-			-03 NL
-			86     MOVEHR (Points Brought) SHc
-			03  NL
-			86     MOVEHR (Forward) SHc
-			
-			-03 NL
-			110.5  MOVEHR (Used / Expired) SHc
-			03  NL
-			110.5  MOVEHR (Points) SHc
-			
-			-03 NL
-			132.5  MOVEHR (Avail Points) SHc
-			150.5  MOVEHR (Expiry Date) SHc
-			
-			167    MOVEHR (Extended) SHc
-			03 NL
-			167    MOVEHR (Points) SHc
-			
-			-03 NL
-			183.5  MOVEHR (Expiry Date) SHc
-			
-			03 NL
-			FC
-			15     MOVEHR (Nombor Kad) SHc
-			
-			03 NL
-			42     MOVEHR (Mata Diperolehi) SHc
-			03 NL			
-			42     MOVEHR (Bulan Ini) SHc
-			
-			-03 NL
-			64     MOVEHR (Mata Tambahan) SHc
-			03 NL
-			64     MOVEHR (Diperolehi) SHc
-			
-			-03 NL
-			86     MOVEHR (Mata Dibawa) SHc
-			03 NL
-			86     MOVEHR (Ke Hadapan) SHc
-			
-			-03 NL
-			110.5  MOVEHR (Mata Yang Telah) SHc
-			03 NL
-			110.5  MOVEHR (Digunakan / Luput) SHc
-			
-		    -06 NL
-			132.5  MOVEHR (Jumlah Mata) SHc
-			03 NL
-			132.5  MOVEHR (Terkini) SHc
-			
-			-03 NL
-			150.5  MOVEHR (Tarikh Luput) SHc
-			
-			03 NL
-			167    MOVEHR (Mata) SHc
-			03 NL
-			167    MOVEHR (Lanjutan) SHc
-			
-			-06 NL
-			183.5  MOVEHR (Tarikh Luput) SHc
-				
-		05.5 NL		
-		}	ENDIF
+    IF VAR_COUNTR1 1 eq
+    {
+        07 NL
 
-		03.5 NL
-		F4
-		00 MOVEHR			  
-	    00    VAR.Y2  0.001   05  XDRK  DRAWB				
-     	31    VAR.Y2  0.001   05  XDRK  DRAWB				
-     	53.5  VAR.Y2  0.001   05  XDRK  DRAWB
-     	74    VAR.Y2  0.001   05  XDRK  DRAWB			
-     	98    VAR.Y2  0.001   05  XDRK  DRAWB
-     	123   VAR.Y2  0.001   05  XDRK  DRAWB
-     	142   VAR.Y2  0.001   05  XDRK  DRAWB
-     	159   VAR.Y2  0.001   05  XDRK  DRAWB			
-       	175   VAR.Y2  0.001   05  XDRK  DRAWB			
-     	192   VAR.Y2  0.001   05  XDRK  DRAWB				
-     
-      	00    VAR.Y1  192  0.001  XDRK  DRAWB
-	
-		01.5 NL
-		01.5   MOVEHR VAR_RCN    SH
-		52.5   MOVEHR VAR_RPE   (@@@,@@@,@@@,@@#) FORMAT SHr
-		73     MOVEHR VAR_REP   (@@@,@@@,@@@,@@#) FORMAT SHr
-		97     MOVEHR VAR_RPB   (@@@,@@@,@@@,@@#) FORMAT SHr
-		122    MOVEHR VAR_RUE   (@@@,@@@,@@@,@@#) FORMAT SHr
-		141    MOVEHR VAR_RAP   (@@@,@@@,@@@,@@#) FORMAT SHr
-		144    MOVEHR VAR_RED    SH
-		174    MOVEHR VAR_RML   (@@@,@@@,@@@,@@#) FORMAT SHr
-		176.5  MOVEHR VAR_RTL    SH
-		
-		/VAR_RACC	0 	SETVAR
-	
+        % Insert IPP Header Text
+        00     MOVEHR (**F5Robinsons$ Summary / **F3Ringkasan Robinsons$)  0 SHmf
+
+        % Insert Header
+        05 NL
+        (RSBX) SCALL
+
+        F5
+        1.3 NL
+        15     MOVEHR (Card Number) SHc
+
+        42     MOVEHR (Points Earned) SHc
+        03  NL
+        42     MOVEHR (This Month) SHc
+
+        -03 NL
+        64     MOVEHR (Extra Points) SHc
+        03  NL
+        64     MOVEHR (Earned) SHc
+
+        -03 NL
+        86     MOVEHR (Points Brought) SHc
+        03  NL
+        86     MOVEHR (Forward) SHc
+
+        -03 NL
+        110.5  MOVEHR (Used / Expired) SHc
+        03  NL
+        110.5  MOVEHR (Points) SHc
+
+        -03 NL
+        132.5  MOVEHR (Avail Points) SHc
+        150.5  MOVEHR (Expiry Date) SHc
+
+        167    MOVEHR (Extended) SHc
+        03 NL
+        167    MOVEHR (Points) SHc
+
+        -03 NL
+        183.5  MOVEHR (Expiry Date) SHc
+
+        03 NL
+        FC
+        15     MOVEHR (Nombor Kad) SHc
+
+        03 NL
+        42     MOVEHR (Mata Diperolehi) SHc
+        03 NL
+        42     MOVEHR (Bulan Ini) SHc
+
+        -03 NL
+        64     MOVEHR (Mata Tambahan) SHc
+        03 NL
+        64     MOVEHR (Diperolehi) SHc
+
+        -03 NL
+        86     MOVEHR (Mata Dibawa) SHc
+        03 NL
+        86     MOVEHR (Ke Hadapan) SHc
+
+        -03 NL
+        110.5  MOVEHR (Mata Yang Telah) SHc
+        03 NL
+        110.5  MOVEHR (Digunakan / Luput) SHc
+
+        -06 NL
+        132.5  MOVEHR (Jumlah Mata) SHc
+        03 NL
+        132.5  MOVEHR (Terkini) SHc
+
+        -03 NL
+        150.5  MOVEHR (Tarikh Luput) SHc
+
+        03 NL
+        167    MOVEHR (Mata) SHc
+        03 NL
+        167    MOVEHR (Lanjutan) SHc
+
+        -06 NL
+        183.5  MOVEHR (Tarikh Luput) SHc
+
+        05.5 NL
+    }	ENDIF
+
+    03.5 NL
+    F4
+    00 MOVEHR
+    00    VAR.Y2  0.001   05  XDRK  DRAWB
+    31    VAR.Y2  0.001   05  XDRK  DRAWB
+    53.5  VAR.Y2  0.001   05  XDRK  DRAWB
+    74    VAR.Y2  0.001   05  XDRK  DRAWB
+    98    VAR.Y2  0.001   05  XDRK  DRAWB
+    123   VAR.Y2  0.001   05  XDRK  DRAWB
+    142   VAR.Y2  0.001   05  XDRK  DRAWB
+    159   VAR.Y2  0.001   05  XDRK  DRAWB
+    175   VAR.Y2  0.001   05  XDRK  DRAWB
+    192   VAR.Y2  0.001   05  XDRK  DRAWB
+
+    00    VAR.Y1  192  0.001  XDRK  DRAWB
+
+    01.5 NL
+    01.5   MOVEHR VAR_RCN    SH
+    52.5   MOVEHR VAR_RPE   (@@@,@@@,@@@,@@#) FORMAT SHr
+    73     MOVEHR VAR_REP   (@@@,@@@,@@@,@@#) FORMAT SHr
+    97     MOVEHR VAR_RPB   (@@@,@@@,@@@,@@#) FORMAT SHr
+    122    MOVEHR VAR_RUE   (@@@,@@@,@@@,@@#) FORMAT SHr
+    141    MOVEHR VAR_RAP   (@@@,@@@,@@@,@@#) FORMAT SHr
+    144    MOVEHR VAR_RED    SH
+    174    MOVEHR VAR_RML   (@@@,@@@,@@@,@@#) FORMAT SHr
+    176.5  MOVEHR VAR_RTL    SH
+
+    /VAR_RACC	0 	SETVAR
 
 }
 % ------------------------------------------------
 (V1)	% Travel Card Summary
 {
-		/VAR_V1 	PREFIX		SETVAR	% prefix for travel visa card summary 15.1
-		/VAR_VCN	FLD1		SETVAR	% prefix for card number 15.2
-		/VAR_VBP	FLD2		SETVAR	% prefix for bonus point earned 15.3
-		/VAR_VEB	FLD3		SETVAR	% prefix for extra bonus point earned 15.4
-		/VAR_VBF	FLD4		SETVAR	% prefix for bonus point brought forward 15.5
-		/VAR_VRB	FLD5		SETVAR	% prefix for redeem/expired Bonus point 15.6
-		/VAR_VAB	FLD6		SETVAR	% prefix for available bonus point 15.7
-		/VAR_VDE	FLD7		SETVAR	% prefix for bonus point Expiry date 15.8
-		/VAR_VEP	FLD8		SETVAR	% prefix for extended bonus point 15.9
-		/VAR_VEE	FLD9		SETVAR	% prefix for extended point expiry date 15.10
-		/VAR_VID	FLD10		SETVAR	% prefix for bonus program ID description 15.11
-		/VAR_VSD	FLD11		SETVAR	% prefix for statement start date (English)15.12
-		/VAR_VED	FLD12		SETVAR	% prefix for statement end date (English) 15.13
-		
-  		/VAR.Y1 	0 			ADD
-  		/VAR.Y2 	0 			ADD
-		/VAR_COUNTV1 ++
-			
-		IF VAR_COUNTV1 1 eq
-		{
-			% 20210427
-			  08.5 NL
-			%07 NL
-			%10 NL
-			F6
-			% Insert Voyage Header Text 
-			00  MOVEHR (**F5Your Consolidated Rewards For the Period $$VAR_VSD. to $$VAR_VED..) VSUB 0 SHmf
-			03 NL
-			(**FCGanjaran Keseluruhan Anda Untuk Tempoh $$VAR_VSD. hingga $$VAR_VED..) VSUB 0 SHmf
-		
-			% Insert Header
-			06 NL
-			(VPBX) SCALL
-			
-			F5
-			1.3 NL
-			1.5     MOVEHR (Rewards) SH
-			48      MOVEHR (Opening Balance) SH
-			81      MOVEHR (Earned This Period) SH
-			120     MOVEHR (Redeemed This Period) SH
-			158     MOVEHR (Available Balance) SH
-			
-			03 NL
-			FC
-			1.5     MOVEHR (Ganjaran) SH
-			48      MOVEHR (Baki Pembukaan) SH
-			81      MOVEHR (Diperolehi Dalam Tempoh Ini) SH
-			120     MOVEHR (Ditebus Dalam Tempoh Ini) SH
-			158     MOVEHR (Baki Terkini) SH
-		
-			0.5 NL
-			
-		}	ENDIF
+    /VAR_V1 	PREFIX		SETVAR	% prefix for travel visa card summary 15.1
+    /VAR_VCN	FLD1		SETVAR	% prefix for card number 15.2
+    /VAR_VBP	FLD2		SETVAR	% prefix for bonus point earned 15.3
+    /VAR_VEB	FLD3		SETVAR	% prefix for extra bonus point earned 15.4
+    /VAR_VBF	FLD4		SETVAR	% prefix for bonus point brought forward 15.5
+    /VAR_VRB	FLD5		SETVAR	% prefix for redeem/expired Bonus point 15.6
+    /VAR_VAB	FLD6		SETVAR	% prefix for available bonus point 15.7
+    /VAR_VDE	FLD7		SETVAR	% prefix for bonus point Expiry date 15.8
+    /VAR_VEP	FLD8		SETVAR	% prefix for extended bonus point 15.9
+    /VAR_VEE	FLD9		SETVAR	% prefix for extended point expiry date 15.10
+    /VAR_VID	FLD10		SETVAR	% prefix for bonus program ID description 15.11
+    /VAR_VSD	FLD11		SETVAR	% prefix for statement start date (English)15.12
+    /VAR_VED	FLD12		SETVAR	% prefix for statement end date (English) 15.13
 
-		%03.3 NL
-		03 NL
-		00 MOVEHR			  
-	    00      VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Left
-     	45.5    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for CN & MN
-     	78.5    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MN & PA
-     	117.5   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for PA & MU
-       	155.5   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MU & AU
-     	191     VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Right
-     
-      	00      VAR.Y1  191  0.001  XDRK  DRAWB				% Horizontal Line
+    /VAR.Y1 	0 			ADD
+    /VAR.Y2 	0 			ADD
+    /VAR_COUNTV1 ++
 
-		F4
-		01.5 NL
-		01.5    MOVEHR  VAR_VID   SH						
-		%0.5 NL
-		48      MOVEHR  VAR_VBF   SH							
-		%129    MOVEHR  VAR_VBP  (@@@,@@@,@@@,@@#.##) FORMAT SHr 
-		81      MOVEHR  VAR_VBP   SH 
-		120     MOVEHR  VAR_VRB   SH						
-		%190    MOVEHR  VAR_VAB  (@@@,@@@,@@@,@@#.##) FORMAT SHr	
-		158     MOVEHR  VAR_VAB   SH	
-		
-		%0.5 NL
-		
-		/VAR_RACC	0 SETVAR
-	
+    IF VAR_COUNTV1 1 eq
+    {
+        % 20210427
+        08.5 NL
+        F6
+        % Insert Voyage Header Text
+        00  MOVEHR (**F5Your Consolidated Rewards For the Period $$VAR_VSD. to $$VAR_VED..) VSUB 0 SHmf
+        03 NL
+        (**FCGanjaran Keseluruhan Anda Untuk Tempoh $$VAR_VSD. hingga $$VAR_VED..) VSUB 0 SHmf
+
+        % Insert Header
+        06 NL
+        (VPBX) SCALL
+
+        F5
+        1.3 NL
+        1.5     MOVEHR (Rewards) SH
+        48      MOVEHR (Opening Balance) SH
+        81      MOVEHR (Earned This Period) SH
+        120     MOVEHR (Redeemed This Period) SH
+        158     MOVEHR (Available Balance) SH
+
+        03 NL
+        FC
+        1.5     MOVEHR (Ganjaran) SH
+        48      MOVEHR (Baki Pembukaan) SH
+        81      MOVEHR (Diperolehi Dalam Tempoh Ini) SH
+        120     MOVEHR (Ditebus Dalam Tempoh Ini) SH
+        158     MOVEHR (Baki Terkini) SH
+
+        0.5 NL
+
+    }	ENDIF
+
+    03 NL
+    00 MOVEHR
+    00      VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Left
+    45.5    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for CN & MN
+    78.5    VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MN & PA
+    117.5   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for PA & MU
+    155.5   VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for MU & AU
+    191     VAR.Y2  0.001   05  XDRK  DRAWB				% Vertical Line for Right
+
+    00      VAR.Y1  191  0.001  XDRK  DRAWB				% Horizontal Line
+
+    F4
+    01.5 NL
+    01.5    MOVEHR  VAR_VID   SH
+    48      MOVEHR  VAR_VBF   SH
+    81      MOVEHR  VAR_VBP   SH
+    120     MOVEHR  VAR_VRB   SH
+    158     MOVEHR  VAR_VAB   SH
+
+    /VAR_RACC	0 SETVAR
+
 }
 % ------------------------------------------------
 (M4)	% Statement Messages
 {
-		/VAR_M4		PREFIX		SETVAR	% prefix for statement message
-		/VAR_M41	FLD1		SETVAR	% prefix for statemtn message
-		/VAR_M42	FLD2		SETVAR	% prefix for statetement message
-		/VAR_M43	FLD3		SETVAR	% prefix for statement message
-		/VAR_M44	FLD4		SETVAR	% prefix for statment message
-	 	/VAR_M45    FLD5        SETVAR
-	 	/VAR_M46    FLD6        SETVAR
-	 	/VAR_M47    FLD7        SETVAR
-	 	/VAR_M48    FLD8        SETVAR
-	 
-	 	/VAR.Y1 	0 			ADD
-  		/VAR.Y2 	0 			ADD
+    /VAR_M4		PREFIX		SETVAR	% prefix for statement message
+    /VAR_M41	FLD1		SETVAR	% prefix for statemtn message
+    /VAR_M42	FLD2		SETVAR	% prefix for statetement message
+    /VAR_M43	FLD3		SETVAR	% prefix for statement message
+    /VAR_M44	FLD4		SETVAR	% prefix for statment message
+    /VAR_M45    FLD5        SETVAR
+    /VAR_M46    FLD6        SETVAR
+    /VAR_M47    FLD7        SETVAR
+    /VAR_M48    FLD8        SETVAR
 
-		/VAR_COUNTM4 ++
-		IF VAR_COUNTM4 1 eq
-		{
-			
-			09 NL
-			%12 205 MOVETO
-			00 00 191 11 LT DRAWB
-			 				% Vertical Line for Left
-			
-			F5
-			03 NL
-			%12 210 MOVETO
-			03 MOVEHR (**F5Please Note / **FCPerhatian) 0 SHmf
-			
-			03 NL
-			
-		}	ENDIF
-	 		 
-		05.5 NL
-		
-		00    VAR.Y3  191   20  LT  DRAWB
-		03 MOVEHR Z1 <76> SH 
-		
-		F5
-		%09 MOVEHR VAR_M41 187 0 SHp
-		%03.5 NL
-		%09 MOVEHR VAR_M42 187 3 SHp
-		%09 MOVEHR VAR_M43 187 3 SHp
-		%09 MOVEHR VAR_M44 187 3 SHp
-		%09 MOVEHR VAR_M45 187 3 SHp
-		%09 MOVEHR VAR_M46 187 3 SHp
-		%09 MOVEHR VAR_M47 187 3 SHp
-		%09 MOVEHR VAR_M48 187 3 SHp
-		
-		09 MOVEHR ($$VAR_M41.) VSUB  175  3 SHp
-		
-		04 NL
-		F4
-		03.5 SETLSP
-		11 MOVEHR ($$VAR_M42. $$VAR_M43. $$VAR_M44. $$VAR_M45. $$VAR_M46. $$VAR_M47. $$VAR_M48.) VSUB 175 3 SHp
-		
-		
-		/VAR_RACC	0 SETVAR
-		
+    /VAR.Y1 	0 			ADD
+    /VAR.Y2 	0 			ADD
+
+    /VAR_COUNTM4 ++
+    IF VAR_COUNTM4 1 eq
+    {
+
+        09 NL
+        00 00 191 11 LT DRAWB
+        % Vertical Line for Left
+
+        F5
+        03 NL
+        03 MOVEHR (**F5Please Note / **FCPerhatian) 0 SHmf
+
+        03 NL
+
+    }	ENDIF
+
+    05.5 NL
+
+    00    VAR.Y3  191   20  LT  DRAWB
+    03 MOVEHR Z1 <76> SH
+
+    F5
+
+    09 MOVEHR ($$VAR_M41.) VSUB  175  3 SHp
+
+    04 NL
+    F4
+    03.5 SETLSP
+    11 MOVEHR ($$VAR_M42. $$VAR_M43. $$VAR_M44. $$VAR_M45. $$VAR_M46. $$VAR_M47. $$VAR_M48.) VSUB 175 3 SHp
+
+    /VAR_RACC	0 SETVAR
+
 }
 % ------------------------------------------------
 (1)		% Page Break
 {
 
-% Store Number of Pages for Current Document
-		IF CPCOUNT 1 eq
-			{ /VARtab [[VAR_pctot]] ADD }
-		ENDIF
-
-
+    % Store Number of Pages for Current Document
+    IF CPCOUNT 1 eq
+    { /VARtab [[VAR_pctot]] ADD }
+ENDIF
 
 } ENDCASE
-
 
 % ------------------------------------------------
 % OMR Logic Inset Here If Any
 {
-
-
 
 } ENDPAGE
 
