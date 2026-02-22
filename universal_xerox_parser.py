@@ -4299,19 +4299,32 @@ class VIPPToDFAConverter:
         # 1. It has an independent cursor context (won't interfere with data positioning)
         # 2. This matches VIPP SETFORM behavior where the form renders as a page background
         self.add_line("    PRINTFOOTER")
-        self.add_line("        P = P + 1;")
         if is_multi_frm:
+            # Multi-FRM: increment P FIRST so FRM_PAGE[P] indexes the correct page.
+            self.add_line("        P = P + 1;")
             self.add_line("        /* Render the FRM page background (per-page array) */")
             self.add_line("        IF ISTRUE(NOSPACE(FRM_PAGE[P])<>'');")
             self.add_line("        THEN;")
             self.add_line("            USE FORMAT REFERENCE(FRM_PAGE[P]) EXTERNAL;")
             self.add_line("        ENDIF;")
         elif self.frm_files:
-            self.add_line("        /* Render the FRM page background */")
-            self.add_line("        IF ISTRUE(NOSPACE(VAR_CURFORM)<>'');")
-            self.add_line("        THEN;")
-            self.add_line("            USE FORMAT REFERENCE(VAR_CURFORM) EXTERNAL;")
-            self.add_line("        ENDIF;")
+            # 1-2 FRM: check BEFORE incrementing so IF P<1 correctly targets the first page.
+            # P starts at 0 (reset in $_BEFOREDOC); first call → P=0 < 1 → first-page FRM.
+            frm_sorted = sorted(self.frm_files.keys())
+            frm_names = [''.join(c for c in os.path.splitext(f)[0].upper() if c.isalnum() or c == '_')
+                         for f in frm_sorted]
+            if len(frm_names) >= 2:
+                first_form = next((f for f in frm_names if f.endswith('F')), frm_names[0])
+                subseq_form = next((f for f in frm_names if f.endswith('S')), frm_names[-1])
+                self.add_line("        /* Render the FRM page background (2-FRM: first / subsequent) */")
+                self.add_line(f"        IF P<1; THEN; USE FORMAT {first_form} EXTERNAL; ELSE; USE FORMAT {subseq_form} EXTERNAL; ENDIF;")
+            else:
+                frm_name = frm_names[0]
+                self.add_line("        /* Render the FRM page background */")
+                self.add_line(f"        USE FORMAT {frm_name} EXTERNAL;")
+            self.add_line("        P = P + 1;")
+        else:
+            self.add_line("        P = P + 1;")
         self.add_line("        /* Page numbering */")
         self.add_line("        OUTLINE")
         self.add_line("            POSITION RIGHT (0 MM)")
@@ -4340,19 +4353,29 @@ class VIPPToDFAConverter:
                 self.add_line("        FRM_PAGE[PP] = VAR_CURFORM;")
             self.add_line("    FOOTEREND")
             self.add_line("    PRINTFOOTER")
-            self.add_line("        P = P + 1;")
             if is_multi_frm:
+                self.add_line("        P = P + 1;")
                 self.add_line("        /* Render the FRM page background (per-page array) */")
                 self.add_line("        IF ISTRUE(NOSPACE(FRM_PAGE[P])<>'');")
                 self.add_line("        THEN;")
                 self.add_line("            USE FORMAT REFERENCE(FRM_PAGE[P]) EXTERNAL;")
                 self.add_line("        ENDIF;")
             elif self.frm_files:
-                self.add_line("        /* Render the FRM page background */")
-                self.add_line("        IF ISTRUE(NOSPACE(VAR_CURFORM)<>'');")
-                self.add_line("        THEN;")
-                self.add_line("            USE FORMAT REFERENCE(VAR_CURFORM) EXTERNAL;")
-                self.add_line("        ENDIF;")
+                frm_sorted = sorted(self.frm_files.keys())
+                frm_names = [''.join(c for c in os.path.splitext(f)[0].upper() if c.isalnum() or c == '_')
+                             for f in frm_sorted]
+                if len(frm_names) >= 2:
+                    first_form = next((f for f in frm_names if f.endswith('F')), frm_names[0])
+                    subseq_form = next((f for f in frm_names if f.endswith('S')), frm_names[-1])
+                    self.add_line("        /* Render the FRM page background (2-FRM: first / subsequent) */")
+                    self.add_line(f"        IF P<1; THEN; USE FORMAT {first_form} EXTERNAL; ELSE; USE FORMAT {subseq_form} EXTERNAL; ENDIF;")
+                else:
+                    frm_name = frm_names[0]
+                    self.add_line("        /* Render the FRM page background */")
+                    self.add_line(f"        USE FORMAT {frm_name} EXTERNAL;")
+                self.add_line("        P = P + 1;")
+            else:
+                self.add_line("        P = P + 1;")
             self.add_line("        /* Page numbering */")
             self.add_line("        OUTLINE")
             self.add_line("            POSITION RIGHT (0 MM)")
