@@ -5260,10 +5260,11 @@ class VIPPToDFAConverter:
         self.add_line("ENDIO;")
         self.add_line("")
 
-        # Check if line is NOT document separator
+        # Check if line is NOT document separator and NOT %%EOF
+        # %%EOF may appear as a literal line in the data stream (VIPP preamble style)
         if self.dfa_config.enable_document_boundaries:
             separator = self.input_config.document_separator
-            self.add_line(f"IF LINE1<>'{separator}';")
+            self.add_line(f"IF ISTRUE(LINE1 <> '{separator}' AND LINE1 <> '%%EOF');")
         else:
             # If no document boundaries, always process
             self.add_line("IF 1;")
@@ -5290,6 +5291,9 @@ class VIPPToDFAConverter:
             self.add_line("/* Here the output of the document... */")
             self.add_line("ENDGROUP 'DOC';")
             self.add_line("")
+            self.add_line("/* Only read ahead if this was a '1' separator, not %%EOF itself */")
+            self.add_line("IF ISTRUE(LINE1 <> '%%EOF'); THEN;")
+            self.indent()
             self.add_line("/* Check if next record is EOF only */")
             self.add_line("RECORD INPUTREC")
             self.indent()
@@ -5301,6 +5305,8 @@ class VIPPToDFAConverter:
             self.add_line("IF LINE1<>'%%EOF'; THEN;")
             self.indent()
             self.add_line("SKIPRECORD -1;")
+            self.dedent()
+            self.add_line("ENDIF;")
             self.dedent()
             self.add_line("ENDIF;")
             self.add_line("")
@@ -5323,17 +5329,7 @@ class VIPPToDFAConverter:
         self.add_line("N = 0;")
         self.add_line("")
 
-        # Declare separator variable
-        delimiter = self.input_config.delimiter
-        # Escape delimiter for DFA syntax if needed
-        if delimiter == "'":
-            delimiter_literal = '"\'"'
-        else:
-            delimiter_literal = f"'{delimiter}'"
-
-        self.add_line("/* Delimiter for field extraction */")
-        self.add_line(f"&SEP = {delimiter_literal};")
-        self.add_line("")
+        # &SEP is set once in $_BEFOREFIRSTDOC from the PREFIX header line — do NOT re-assign here
 
         # Now extract fields using EXTRACTALL with &SEP
         self.add_line("/* Split line into fields using EXTRACTALL */")
@@ -5377,17 +5373,7 @@ class VIPPToDFAConverter:
         self.add_line("N = 0;")
         self.add_line("")
 
-        # Declare separator variable
-        delimiter = self.input_config.delimiter
-        # Escape delimiter for DFA syntax if needed
-        if delimiter == "'":
-            delimiter_literal = '"\'"'
-        else:
-            delimiter_literal = f"'{delimiter}'"
-
-        self.add_line("/* Delimiter for field extraction */")
-        self.add_line(f"&SEP = {delimiter_literal};")
-        self.add_line("")
+        # &SEP is set once in $_BEFOREFIRSTDOC from the PREFIX header line — do NOT re-assign here
 
         # Now extract fields using EXTRACTALL with &SEP
         self.add_line("/* Split line into fields using EXTRACTALL */")
@@ -5407,7 +5393,7 @@ class VIPPToDFAConverter:
         self.dedent()
         self.add_line("ENDFOR;")
         self.add_line("")
-    
+
     def _generate_case_processing(self):
         """
         Generate dynamic format routing based on PREFIX field.
@@ -7358,13 +7344,18 @@ class VIPPToDFAConverter:
         self.add_line("ENDIO;")
         self.add_line("")
 
-        # Check if header line contains field names
+        # Check if header line contains field names — check first 6 chars only ('PREFIX')
+        # so the check is separator-agnostic (works for '|', '~', etc.)
         self.add_line("/* Field (Standard) Names: FLD1, FLD2, etc. */")
-        self.add_line("IF LEFT(LINE1, 7, '') == 'PREFIX|'; THEN;")
+        self.add_line("IF LEFT(LINE1, 6, '') == 'PREFIX'; THEN;")
         self.indent()
 
+        # Detect separator dynamically from the 7th character of the PREFIX header line
+        self.add_line("/* Detect separator: the character immediately after 'PREFIX' */")
+        self.add_line("&SEP = SUBSTR(LINE1, 7, 1, '');")
+
         # Extract field names from header
-        self.add_line("LINE1 = CHANGE(LINE1, 'PREFIX|', '');")
+        self.add_line("LINE1 = CHANGE(LINE1, 'PREFIX'!&SEP, '');")
         self.add_line("D = EXTRACTALL(&FIELDS, LINE1, &SEP, '');")
 
         # Calculate max fields (excluding empty trailing field)
