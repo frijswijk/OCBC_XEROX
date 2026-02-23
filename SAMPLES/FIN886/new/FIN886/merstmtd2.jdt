@@ -1,0 +1,646 @@
+%!PS-Adobe-2.0
+
+%%Title: bkcmerstmtd.jdt
+
+%%Application: Bank Card Merchant Daily Statement
+%%Creator: Lum Chi Yan
+%%CreationDate: 16th Aug 2003
+
+%%For: JDT definition for Xerox Generic Format
+
+%%EndComments
+
+% set orientation
+
+%----------------------------------------------------------------------------
+
+PORT                    % PORT - Portrait       IPORT - Inverse Portrait
+
+% set PCC
+
+%----------------------------------------------------------------------------
+
+/ANSI SETPCC
+[ /SK1 1] SETVFU
+
+%----------------------------------------------------------------------------
+
+% set margins
+
+%----------------------------------------------------------------------------
+
+140                     % top margin
+
+0                       % bottom margin
+
+30                      % left margin
+
+100                     % right margin
+
+SETMARGIN
+
+%----------------------------------------------------------------------------
+
+% set grid i.e cpl and lpp
+
+%----------------------------------------------------------------------------
+
+90 70 SETGRID           % 90 char per line and 66 lines per page
+
+%----------------------------------------------------------------------------
+% set forms
+%----------------------------------------------------------------------------
+2 SETMAXFORM
+
+% June 2023
+(MESTDc.frm) CACHE SETFORM
+
+%----------------------------------------------------------------------------
+
+% set font
+
+%----------------------------------------------------------------------------
+
+/NCR                    % font name (key)
+
+8                       % font size in points (1/72 inch)
+
+% 0 = font size will be computed out of grid definition
+
+SETFONT
+
+%------------------------------------------------------------------------------
+% Set RPE fonts
+/Font1	/NTMR	7.5	INDEXFONT
+/Font2	/NHE	9.2	INDEXFONT
+/Font3	/NTMI	9	INDEXFONT
+/Font4	/NHE	9	INDEXFONT
+/Font5	/NTMB	9	INDEXFONT
+/Font6	/NTMR	9 	INDEXFONT
+/Font7	/NHEB	18	INDEXFONT
+/Font8 /NTMB    10	INDEXFONT
+/Font9 /NTMR   10      INDEXFONT
+/Font10 /NHE    10       INDEXFONT
+/Font11 /NCRB  10.8      INDEXFONT
+/Font12 /NHENB  9        INDEXFONT
+/Font13 /NHEN   8.5      INDEXFONT
+/Font14 /NHEN    7    INDEXFONT
+/F15    /NHENB   8.5     INDEXFONT
+/F16    /NHEN    7       INDEXFONT
+/F17    /NHE     8.8     INDEXFONT
+/Font18	/SBT 7.5  	INDEXFONT
+/F19	/SBT		6.8	INDEXFONT
+/F20    /SBT	8 	INDEXFONT
+
+/U /UNDL INDEXBAT
+/N null INDEXBAT
+
+%Condkey      RecPos    Length     Cond.    String
+/IF_CND1         2       7      /eq     (Period:)   SETRCD
+/IF_CND2	 2	8	/eq	(Period E) SETRCD
+/IF_CND3	[IF_CND1 IF_CND2 /or] 	SETRCD
+/IF_CND4	2 	6	/eq	(From M) SETRCD
+/IF_CND5	2	6	/eq	(TERMIN) SETRCD
+/IF_CND6	2	6	/eq	(Mercha) SETRCD
+/IF_CND7	[IF_CND4 IF_CND5 /or] 	SETRCD
+/IF_CND8	[IF_CND7 IF_CND6 /or]	SETRCD
+/IF_CND9A	2	14	/eq	(Settlement No:) SETRCD
+/IF_CND9	2	6	/eq	(Settle) SETRCD
+/IF_CND10	2	6	/eq	(Period) SETRCD
+/IF_CND11	2	6	/eq	(Termin) SETRCD
+/IF_CND12	[IF_CND9 IF_CND10 /or] 	SETRCD
+/IF_CND13	[IF_CND12 IF_CND11 /or]	SETRCD
+/IF_CND14	2	3	/eq	(HD1)	SETRCD
+/IF_CND15	45	6	/eq	(Amount) SETRCD
+/IF_CND16	44	5	/eq	(     ) SETRCD
+/IF_CND17	[IF_CND14 IF_CND15 /and]	SETRCD
+/IF_CND18	[IF_CND14 IF_CND16 /and]	SETRCD
+/IF_CND19	7	1	/eq	(4)	SETRCD
+/IF_CND20	7	1	/eq	(5)	SETRCD
+/IF_CND21	11	1	/eq	( )	SETRCD
+/IF_CND22	[IF_CND19 IF_CND21 /and] SETRCD
+/IF_CND23	[IF_CND20 IF_CND21 /and] SETRCD
+/IF_CND24	[IF_CND22 IF_CND23 /or] SETRCD
+/IF_CND25	2	5	/eq	(=====) SETRCD
+/IF_CND26	2	3	/eq	(MSG)	SETRCD
+/IF_CND27	3	7	/eq	(**Total) SETRCD
+/IF_CND28A	3	7	/eq	(****Tot) SETRCD
+/IF_CND28B	15	7	/eq	(Termina) SETRCD
+/IF_CND28	[IF_CND28A IF_CND28B /and] SETRCD
+/IF_CND29	[IF_CND27 IF_CND28 /or]	SETRCD
+/IF_CND30	3	7	/eq	(*****To) SETRCD
+/IF_CND31	3	7	/eq	(*Total ) SETRCD
+/IF_CND32	[IF_CND29 IF_CND30 /or] SETRCD
+/IF_CND33	[IF_CND32 IF_CND31 /or] SETRCD
+/IF_CND51 	10	9	/eq	(MC CREDIT)	SETRCD
+/IF_CND52 	10	8	/eq	(MC DEBIT)	SETRCD
+% change request 29.06.2015 by Lian
+/IF_CND73 	10	10	/eq	(MC PREPAID)	SETRCD
+
+/IF_CND34	2	7	/eq	(SUMMARY) SETRCD
+/IF_CND35	2	1	/eq	(-)	SETRCD
+/IF_CND36	10	4	/eq	(VISA) SETRCD
+/IF_CND37	10	4	/eq	(MAST) SETRCD
+/IF_CND38	10	4	/eq	(Char) SETRCD
+/IF_CND39	10	4	/eq	(Adju) SETRCD
+/IF_CND40	[IF_CND36 IF_CND37 /or ]	SETRCD
+/IF_CND41	[IF_CND40 IF_CND38 /or]	SETRCD
+/IF_CND42	[IF_CND41 IF_CND39 /or]	SETRCD
+/IF_CND43	10	4	/eq	(Curr) SETRCD
+/IF_CND44	10	4	/eq	(Cheq) SETRCD
+/IF_CND45	[IF_CND43 IF_CND44 /or]	SETRCD
+/IF_CND46	10	4	/eq	(TOTA) SETRCD
+/IF_CND47	[IF_CND42 IF_CND46 /or] SETRCD
+/IF_CND48	16	4	/eq	(Merc) SETRCD
+/IF_CND49	[IF_CND28A IF_CND48 /and] SETRCD
+/IF_CND50	3	14	/eq	(****Total of T) SETRCD
+
+/IF_CND53	2	3	/eq	(DCI)  SETRCD
+/IF_CND54	2	5	/eq	(CCI)  SETRCD
+/IF_CND55	2	6	/eq	(DCDO) SETRCD
+/IF_CND56	2	6	/eq	(CCDO) SETRCD
+/IF_CND57	2	6	/eq	(DCDF) SETRCD
+/IF_CND58	2	6	/eq	(CCDF) SETRCD
+% change request 25/05/2015 - Lian
+/IF_CND70	2	6	/eq	(PCI)  SETRCD
+/IF_CND71	2	6	/eq	(PCDO) SETRCD
+/IF_CND72	2	6	/eq	(PCDF) SETRCD
+
+% change request 25/05/2015 - Lian
+/IF_CND59 [IF_CND51 IF_CND52 /or] SETRCD
+
+%to replace IF_CND47
+/IF_CND60 [IF_CND59 IF_CND47 /or] SETRCD
+% change request 25/05/2015 - Lian to combine 51,52,47,59 and 60
+/IF_CND74 [IF_CND60 IF_CND73 /or] SETRCD
+
+/IF_CND61   0   100   /HOLD   (GST Sum) SETRCD
+/IF_CND62   0   100   /HOLD   (Rumusan GST) SETRCD
+/IF_CND63   0   100   /HOLD   (Invoice Number) SETRCD
+/IF_CND64	0	100   /HOLD   (SR)	SETRCD
+/IF_CND65	0	100   /HOLD   (OS)	SETRCD
+
+/IF_CND66 [IF_CND64 IF_CND65 /or] SETRCD
+
+/IF_CND67	0	100   /HOLD   (ZR)	SETRCD
+/IF_CND68	0	100   /HOLD   (ES)	SETRCD
+
+/IF_CND69 [IF_CND67 IF_CND68 /or] SETRCD
+
+/BANNER   2   1   12   13   /eq   (DATE PRINTED:) SETPCD
+{
+    /VAR_INIT 0 /INI SETVAR
+    /VAR_DT1 (day) /INI SETVAR
+    /VAR_DTd 0 /INI SETVAR
+    /VAR_DT2 (month) /INI SETVAR
+    /VAR_DTm 0 /INI SETVAR
+    /VAR_DT3 (year) /INI SETVAR
+    /VAR_DTy 0 /INI SETVAR
+    /VAR_RUN (000) /INI SETVAR
+
+    IF BANNER {
+        SKIPPAGE
+    } ELSE {
+        IF VAR_INIT 0 eq {
+            /VAR_DTd   9   70  2 GETFIELD
+            /VAR_DTm   9   73  2 GETFIELD
+            /VAR_DT3   9   76  4 GETFIELD
+
+            CASE VAR_DTd { /VAR_DT1 ([=VAR_DTd=]) VSUB SETVAR}
+            (1) {/VAR_DT1 (01) SETVAR}
+            (2) {/VAR_DT1 (02) SETVAR}
+            (3) {/VAR_DT1 (03) SETVAR}
+            (4) {/VAR_DT1 (04) SETVAR}
+            (5) {/VAR_DT1 (05) SETVAR}
+            (6) {/VAR_DT1 (06) SETVAR}
+            (7) {/VAR_DT1 (07) SETVAR}
+            (8) {/VAR_DT1 (08) SETVAR}
+            (9) {/VAR_DT1 (09) SETVAR}
+        ENDCASE
+
+            CASE VAR_DTm { /VAR_DT2 ([=VAR_DTm=]) VSUB SETVAR}
+            (01) {/VAR_DT2 (JAN) SETVAR}
+            (02) {/VAR_DT2 (FEB) SETVAR}
+            (03) {/VAR_DT2 (MAR) SETVAR}
+            (04) {/VAR_DT2 (APR) SETVAR}
+            (05) {/VAR_DT2 (MAY) SETVAR}
+            (06) {/VAR_DT2 (JUN) SETVAR}
+            (07) {/VAR_DT2 (JUL) SETVAR}
+            (08) {/VAR_DT2 (AUG) SETVAR}
+            (09) {/VAR_DT2 (SEP) SETVAR}
+            (10) {/VAR_DT2 (OCT) SETVAR}
+            (11) {/VAR_DT2 (NOV) SETVAR}
+            (12) {/VAR_DT2 (DEC) SETVAR}
+        ENDCASE
+
+            /VAR_DT ([=VAR_DT1=]_[=VAR_DT2=]_20[=VAR_DT3=]_[=VAR_RUN=]) VSUB SETVAR
+            ([=VAR_DT=]) VSUB BOOKMARK
+            /VAR_INIT 1 SETVAR
+        }ENDIF
+    }ENDIF
+}  BEGINPAGE
+
+%RPE Definition
+50 BEGINRPE
+1 FROMLINE
+% Blank lines
+[0	0	00	0	00	00	00	01	/Font7	WHITE]
+3 FROMLINE
+% PageNumber
+[1      0      2360     0      127     00      73      5     /Font14    BLACK]
+4 FROMLINE
+5 FROMLINE
+[1	0	2360	0	162	 00	 67	 6	/Font14	BLACK]
+6 FROMLINE
+[0	0	210	0	122	 40	 0	 99	/Font14	BLACK]
+8 FROMLINE
+9 FROMLINE
+% Merchant Number
+[0	0	1870	0	300	0	24	11	/Font6	BLACK]
+% Date
+[0	0	1870	0	380	0	69	8	/Font6	BLACK]
+%[0	0	1350	0	127	0	0 (MERCHANT DETAIL STATEMENT) /Font8 BLACK]
+[0	0	1360	0	138	0	0 (MERCHANT TAX INVOICE) /Font8 BLACK]
+%9 FROMLINE
+10 FROMLINE
+%10 FROMLINE
+11 FROMLINE
+[0	0	230	0	320	50	29	34 	/Font11 BLACK]
+[1	0	2440	0	300	0	1	3	/Font7	BLACK]
+%11 FROMLINE
+12 FROMLINE
+[0	0	230	0	370	50	29	34 	/Font11 BLACK]
+[1	0	2440	0	339	0	1	3	/Font7	BLACK]
+%12 FROMLINE
+13 FROMLINE
+[0	0	230	0	420	50	29	34 	/Font11 BLACK]
+[1	0	2440	0	378	0	1	3	/Font7	BLACK]
+
+%13 FROMLINE
+14 FROMLINE
+/IF_CND53
+[0	0	230	0	3000 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND54
+[0	0	230	0	3050 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND55
+[0	0	230	0	3100 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND56
+[0	0	230	0	3150 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND57
+[0	0	230	0	3200 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND58
+[0	0	230	0	3250 50	2	80	/Font6	BLACK]
+
+% change request 25/05/2015 - Lian
+/ELSE/IF_CND70
+[0	0	230	0	3300 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND71
+[0	0	230	0	3350 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND72
+[0	0	230	0	3400 50	2	80	/Font6	BLACK]
+
+/ELSE
+[0	0	230	0	470	50	29	34 	/Font11 BLACK]
+[1	0	2440	0	414	0	1	3	/Font7	BLACK]
+/ENDIFALL
+
+%14 FROMLINE
+15 FROMLINE
+/IF_CND53
+[0	0	230	0	3000 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND54
+[0	0	230	0	3050 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND55
+[0	0	230	0	3100 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND56
+[0	0	230	0	3150 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND57
+[0	0	230	0	3200 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND58
+[0	0	230	0	3250 50	2	80	/Font6	BLACK]
+
+% change request 25/05/2015 - Lian
+/ELSE/IF_CND70
+[0	0	230	0	3300 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND71
+[0	0	230	0	3350 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND72
+[0	0	230	0	3400 50	2	80	/Font6	BLACK]
+
+/ELSE
+[0	0	230	0	520	50	29	34 	/Font11 BLACK]
+[1	0	2440	0	451	0	1	3	/Font7	BLACK]
+/ENDIFALL
+
+%15 FROMLINE
+16 FROMLINE
+/IF_CND53
+[0	0	230	0	3000 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND54
+[0	0	230	0	3050 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND55
+[0	0	230	0	3100 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND56
+[0	0	230	0	3150 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND57
+[0	0	230	0	3200 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND58
+[0	0	230	0	3250 50	2	80	/Font6	BLACK]
+
+% change request 25/05/2015 - Lian
+/ELSE/IF_CND70
+[0	0	230	0	3300 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND71
+[0	0	230	0	3350 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND72
+[0	0	230	0	3400 50	2	80	/Font6	BLACK]
+
+/ELSE
+[0	0	230	0	570	50	29	34 	/Font11 BLACK]
+[1	0	2440	0	487	0	1	3	/Font7	BLACK]
+/ENDIFALL
+
+%16 FROMLINE
+17 FROMLINE
+/IF_CND53
+[0	0	230	0	3000 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND54
+[0	0	230	0	3050 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND55
+[0	0	230	0	3100 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND56
+[0	0	230	0	3150 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND57
+[0	0	230	0	3200 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND58
+[0	0	230	0	3250 50	2	80	/Font6	BLACK]
+
+% change request 25/05/2015 - Lian
+/ELSE/IF_CND70
+[0	0	230	0	3300 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND71
+[0	0	230	0	3350 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND72
+[0	0	230	0	3400 50	2	80	/Font6	BLACK]
+
+/ELSE
+[0	0	230	0	620	50	29	34 	/Font11 BLACK]
+[1	0	2440	0	525	0	1	3	/Font7	BLACK]
+/ENDIFALL
+
+%17 FROMLINE
+18 FROMLINE
+/IF_CND53
+[0	0	230	0	3000 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND54
+[0	0	230	0	3050 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND55
+[0	0	230	0	3100 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND56
+[0	0	230	0	3150 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND57
+[0	0	230	0	3200 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND58
+[0	0	230	0	3250 50	2	80	/Font6	BLACK]
+
+% change request 25/05/2015 - Lian
+/ELSE/IF_CND70
+[0	0	230	0	3300 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND71
+[0	0	230	0	3350 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND72
+[0	0	230	0	3400 50	2	80	/Font6	BLACK]
+
+/ELSE
+[1	0	2440	0	563	0	1	3	/Font7	BLACK]
+/ENDIFALL
+
+%18 FROMLINE
+19 FROMLINE
+%[0	0	1920	0	735	50 0 (GST) /Font18	RED]
+/IF_CND53
+[0	0	230	0	3000 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND54
+[0	0	230	0	3050 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND55
+[0	0	230	0	3100 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND56
+[0	0	230	0	3150 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND57
+[0	0	230	0	3200 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND58
+[0	0	230	0	3250 50	2	80	/Font6	BLACK]
+
+% change request 25/05/2015 - Lian
+/ELSE/IF_CND70
+[0	0	230	0	3300 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND71
+[0	0	230	0	3350 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND72
+[0	0	230	0	3400 50	2	80	/Font6	BLACK]
+
+/ELSE/IF_CND3
+[0	0	230	0	700	50	1	29	/Font9	BLACK]
+
+/ELSE/IF_CND50
+[0	0	230	0	700	50	1	23	/Font5	BLACK]
+[0	0	750	0	700	50	25	6	/Font5	BLACK]
+[1	0	1250	0	700	50	34	17	/Font5	BLACK]
+
+/ELSE/IF_CND8
+[0	0	230	0	700	50	1	70	/Font8	BLACK]
+
+/ELSE/IF_CND63
+[{U SH N}	0	230	0	700	50 0 (TAX INVOICE) /Font8	BLACK]
+[1	0	2290	0	700	50	1	70	/Font8	BLACK]
+
+/ELSE/IF_CND17
+[{SCALL} 0	150	0	675	50	0 (DREDBOX) 	/Font3	RED]
+[0	0	250	0	715	50 0 (CARD NUMBER) /Font18	WHITE]
+[0	0	700	0	715	50 0 (TYPE) /Font18	WHITE]
+[0	0	1030	0	715	50 0 (AMOUNT (RM)) /Font18	WHITE]
+[0	0	1400	0	715	50 0 (TRXN DATE) /Font18	WHITE]
+[0	0	1800	0	715	50 0 (REMARK)	/Font18	WHITE]
+
+/ELSE/IF_CND18
+[{SCALL} 0	150	0	675	50	0 (DREDBOX) 	/Font3	RED]
+[0	0	250	0	715	50 0 (CARD NUMBER) /Font18	WHITE]
+[1	0	1100	0	715	50 0 (AMOUNT) /Font18	WHITE]
+[0	0	1350	0	715	50 0 (TRXN DATE) /Font18	WHITE]
+[0	0	1700	0	715	50 0 (REMARK)	/Font18	WHITE]
+
+/ELSE/IF_CND24
+[0	0	180	0	700	50 	6	23	/Font6	BLACK]
+[0	0	700	0	700	50 	30	6	/Font6	BLACK]
+[1	0	1250	0	700	50 	39	16	/Font6	BLACK]
+[1	0	1265	0	700	50 	55	1	/Font6	BLACK]
+[0	0	1400	0	700	50 	60	 8	/Font6	BLACK]
+[0	0	1700	0	700	50 	72	40	/Font6	BLACK]
+
+/ELSE/IF_CND28
+[0	0	230	0	700	50	1	23	/Font5	BLACK]
+[0	0	750	0	700	50	25	6	/Font5	BLACK]
+[1	0	1095	0	700	50	34	17	/Font5	BLACK]
+
+/ELSE/IF_CND33
+[0	0	230	0	700	50	1	23	/Font5	BLACK]
+[0	0	750	0	700	50	25	6	/Font5	BLACK]
+[1	0	1250	0	700	50	33	17	/Font5	BLACK]
+
+/ELSE/IF_CND25
+[0	0	230	0	700	50	0	0	/Font6	BLACK]
+
+/ELSE/IF_CND9A
+[0	0	230	0	700	50	1	14	/Font6	BLACK]
+[0	0	700	0	700	50	14	1	/Font6	BLACK]
+[0	0	715	0	700	50	19	45	/Font6	BLACK]
+
+/ELSE/IF_CND13
+[0	0	230	0	700	50	1	25	/Font6	BLACK]
+[0	0	700	0	700	50	29	45	/Font6	BLACK]
+
+/ELSE/IF_CND26
+[2	0	1200	0	700	50	9	70	/Font6 	BLACK]
+
+/ELSE/IF_CND35
+[0	0	230	0	715	50	1	25	/Font5	BLACK]
+
+/ELSE/IF_CND34
+[0	0	230	0	700	50	1	8	/Font8	BLACK]
+[{SCALL} 0	150	0	710	50	0 (DREDBOX) 	/Font3	RED]
+%[0	0	1100	0	750	50 0 (NUMBER) /Font18	WHITE]
+[0	0	820	0	750	50 0 (NUMBER) /Font18	WHITE]
+%[0	0	1400	0	750	50 0 (AMOUNT (RM)) /Font18	WHITE]
+[0	0	1140	0	735	50 0 (AMOUNT) /Font18	WHITE]
+%[0	0	1750	0	750	50 0 (DISCOUNT (RM)) /Font18	WHITE]
+[0	0	1430	0	735	50 0 (DISCOUNT) /Font18	WHITE]
+[0	0	1600	0	735	50 0 (TAX) /Font18	WHITE]
+[0	0	1920	0	735	50 0 (TAX) /Font18	WHITE]
+[0	0	2240	0	735	50 0 (NET)	/Font18	WHITE]
+[0	0	1180	0	760	50	0 ((RM))	/Font18	WHITE]
+[0	0	1505	0	760	50	0 ((RM))	/Font18	WHITE]
+[0	0	1580	0	760	50	0 (CODE)	/Font18	WHITE]
+[0	0	1910	0	760	50	0 ((RM))	/Font18	WHITE]
+[0	0	2230	0	760	50	0 ((RM))	/Font18	WHITE]
+
+% change request 25/05/2015 - Lian
+/ELSE/IF_CND74
+%[0	0	300	0	710	50	9	32	/Font6	BLACK]
+[0	0	240	0	710	50	9	32	/Font6	BLACK]
+%[1	0	1180	0	710	50	42	6	/Font6	BLACK]
+[1	0	925	0	710	50	42	6	/Font6	BLACK]
+%[1	0	1570	0	710	50	48	18	/Font6	BLACK]
+[1	0	1255	0	710	50	48	17	/Font6	BLACK]
+[1	0	1268	0	710	50	65	1	/Font6	BLACK]
+%[1	0	1920	0	710	50	66	18	/Font6	BLACK]
+[1	0	1580	0	710	50	66	17	/Font6	BLACK]
+[1	0	1593	0	710	50	83	1	/Font6	BLACK]
+% Tax Code
+[1	0	1655	0	710	50	88	2	/Font6	BLACK]
+% GST
+[1	0	1980	0	710	50	94	18	/Font6	BLACK]
+[1	0	1995	0	710	50	112	1	/Font6	BLACK]
+%[1	0	2280	0	710	50	84	17	/Font6	BLACK]
+[1	0	2295	0	710	50	114	16	/Font6	BLACK]
+[1	0	2305	0	710	50	130	1	/Font6	BLACK]
+
+/ELSE/IF_CND45
+[0 	0	280	0	700	50	9	25	/Font5	BLACK]
+[0	0	900	0	700	50	37	20	/Font5	BLACK]
+[0	0	1200	0	700	50	59	26	/Font5	BLACK]
+
+/ELSE/IF_CND49
+[0	0	230	0	700	50	2	32	/Font5	BLACK]
+%[1	0	1120	0	700	50	42	6	/Font5	BLACK]
+[1	0	925	0	700	50	42	6	/Font6	BLACK]
+%[1	0	1500	0	700	50	48	17	/Font5	BLACK]
+[1	0	1255	0	700	50	48	17	/Font6	BLACK]
+[1	0	1268	0	710	50	65	1	/Font6	BLACK]
+[1	0	1268	0	710	50	65	1	/Font6	BLACK]
+%[1	0	1900	0	700	50	66	18	/Font5	BLACK]
+[1	0	1580	0	700	50	66	17	/Font6	BLACK]
+[1	0	1593	0	700	50	83	1	/Font6	BLACK]
+[1	0	1655	0	700	50	88	2	/Font6	BLACK]
+[1	0	1985	0	700	50	94	18	/Font6	BLACK]
+[1	0	1995	0	700	50	112	1	/Font6	BLACK]
+%[1	0	2280	0	700	50	84	17	/Font5	BLACK]
+[1	0	2290	0	700	50	114	16	/Font6	BLACK]
+[1	0	2300	0	700	50	130	1	/Font6	BLACK]
+
+/ELSE/IF_CND61
+[{SCALL} 0	150	0	670	50	0 (GSTBOX) 	/Font3	RED]
+[0	0	230	0	700	50 0 (GST Summary) /Font18	WHITE]
+[1	0	1550	0	700	50 0 (Tax Invoice) /Font18	WHITE]
+%[0	0	210	0	700	50	1	130 /Font18	WHITE]
+
+/ELSE/IF_CND62
+[0	0	230	0	680	50 0 (Rumusan GST) /Font18	WHITE]
+[1	0	1400	0	680	50 0 (Amount (MYR)) /Font18	WHITE]
+[1	0	1700	0	680	50 0 (GST (MYR)) /Font18	WHITE]
+%[0	0	210	0	680	50	1	130 /Font18	WHITE]
+
+/ELSE/IF_CND66
+[0	0	230	0	700	50	2	50	/Font6	BLACK]
+[1	0	1400	0	700	50	61	23	/Font6	BLACK]
+[1	0	1700	0	700	50	89	25	/Font6	BLACK]
+
+%[0	0	230	0	700	50	2	130	/F20	BLACK]
+
+/ELSE
+[0	0	240	0	700	50	1	130 /Font6	BLACK]
+
+/ENDIFALL
+
+%[0	0	230	0	3250 50	2	80	/Font6	BLACK]
+
+70 FROMLINE
+
+ENDRPE
+
+/DREDBOX
+{0	0	2180	62	XDRKR_S1 DRAWB} XGFRESDEF
+
+/GSTBOX
+{0	0	2180	75	XDRKR_S1 DRAWB} XGFRESDEF

@@ -555,8 +555,9 @@ class XeroxLexer:
         start_col = self.col
         start_pos = self.pos
         
+        # Include dot for unslashed VIPP variables like VAR.Y5 used in DRAWB flows.
         while self.pos < len(self.input) and (self.input[self.pos].isalnum() or 
-                                         self.input[self.pos] in '_$'):
+                                         self.input[self.pos] in '_$.'):
             self.pos += 1
             self.col += 1
         
@@ -1089,12 +1090,14 @@ class XeroxParser:
                         row_block = stack.pop()
                         cell_texts = []
                         cell_fonts = []
+                        cell_widths = []
 
                         if isinstance(row_block, tuple) and row_block[0] == 'block':
                             block_tokens = row_block[1]
                             # Parse the cell array to extract /CellText values and /TextAtt fonts
                             current_cell_text = None
                             current_cell_font = None
+                            current_cell_width = None
                             bi = 0
                             while bi < len(block_tokens):
                                 bt = block_tokens[bi]
@@ -1126,26 +1129,46 @@ class XeroxParser:
                                             current_cell_font = font_parts[0] if font_parts else None
                                         elif hasattr(font_val, 'value'):
                                             current_cell_font = font_val.value
+                                elif bt.value in ('/Width', '/CellWdth'):
+                                    # Next token is the cell width
+                                    bi += 1
+                                    if bi < len(block_tokens):
+                                        width_tok = block_tokens[bi]
+                                        width_val = width_tok.value if hasattr(width_tok, 'value') else str(width_tok)
+                                        try:
+                                            current_cell_width = float(width_val)
+                                        except (TypeError, ValueError):
+                                            current_cell_width = None
                                 elif bt.value == ']':
                                     # End of cell - save accumulated text and font
                                     if current_cell_text is not None:
                                         cell_texts.append(current_cell_text)
                                         cell_fonts.append(current_cell_font)
+                                        cell_widths.append(current_cell_width)
                                     current_cell_text = None
                                     current_cell_font = None
+                                    current_cell_width = None
                                 bi += 1
 
                         # Generate SHP command (TEXT block) with combined cell texts
                         if cell_texts:
-                            # Combine cell texts with spaces
+                            # Combine cell texts with width-aware spacing to preserve
+                            # basic table-column structure from SHROW definitions.
                             combined_parts = []
                             combined_font = cell_fonts[0] if cell_fonts else None
-                            for ct in cell_texts:
+                            for idx, ct in enumerate(cell_texts):
                                 if isinstance(ct, tuple) and ct[0] == 'VAR':
                                     combined_parts.append(f'$${ct[1]}.')
                                 else:
                                     combined_parts.append(ct)
-                            combined_text = ' '.join(combined_parts)
+                                if idx < len(cell_texts) - 1:
+                                    w = cell_widths[idx] if idx < len(cell_widths) else None
+                                    if w and w > 0:
+                                        pad_spaces = max(1, int(round(w / 3.0)))
+                                    else:
+                                        pad_spaces = 1
+                                    combined_parts.append(' ' * pad_spaces)
+                            combined_text = ''.join(combined_parts)
 
                             shp_cmd = XeroxCommand(
                                 name='SHP',
@@ -1176,18 +1199,29 @@ class XeroxParser:
                 elif cmd_name == 'NL':
                     # NL can have optional spacing parameter
                     params = []
-                    # Check if there's a number on stack
-                    if len(stack) > 0:
-                        # IMPORTANT: Check for minus+number FIRST before checking for direct number
-                        # Check if we have a number preceded by minus operator (e.g., stack: [-, 04])
+                    # Only consume NL spacing when the source has an explicit numeric
+                    # token directly before NL. This prevents stale numeric stack residue
+                    # (from earlier commands) from becoming accidental NL spacing.
+                    explicit_spacing = False
+                    prev_idx = i - 1
+                    while prev_idx >= 0 and tokens[prev_idx].type == 'comment':
+                        prev_idx -= 1
+
+                    if prev_idx >= 0 and tokens[prev_idx].type == 'number':
+                        explicit_spacing = True
+                    elif (prev_idx >= 1 and tokens[prev_idx].type == 'number'
+                          and tokens[prev_idx - 1].value == '-'):
+                        explicit_spacing = True
+
+                    if explicit_spacing and len(stack) > 0:
+                        # Check for unary minus pattern: stack [..., '-', '04'].
                         if len(stack) >= 2 and isinstance(stack[-1], str) and stack[-2] == '-':
-                            # Last item is a number, second-to-last is minus
                             num = stack[-1]
                             if num.replace('.', '', 1).isdigit():
-                                stack.pop()  # Remove the number
-                                stack.pop()  # Remove the minus
-                                params.append(f"-{num}")  # Combine into negative number
-                        # Check for direct number (no minus)
+                                stack.pop()
+                                stack.pop()
+                                params.append(f"-{num}")
+                        # Direct numeric spacing.
                         elif isinstance(stack[-1], str) and (stack[-1].replace('.', '', 1).replace('-', '', 1).isdigit()):
                             params.append(stack.pop())
                     cmd = XeroxCommand(
@@ -1239,6 +1273,32 @@ class XeroxParser:
                             cmd.parameters = [resource_name]
                             cmd.children = resource_commands
                             commands.append(cmd)
+
+                elif cmd_name in ('MOVEH', 'MOVEHR'):
+                    # Preserve unary minus for horizontal move literals.
+                    # Example in VIPP: -69 MOVEHR
+                    params = []
+                    if len(stack) > 0:
+                        if (len(stack) >= 2 and isinstance(stack[-1], str)
+                                and stack[-1].replace('.', '', 1).isdigit()
+                                and stack[-2] == '-'):
+                            num = stack.pop()
+                            stack.pop()  # remove unary minus token
+                            params.append(f"-{num}")
+                        else:
+                            p = stack.pop()
+                            if isinstance(p, tuple) and p[0] == 'block':
+                                params.append(self._tokens_to_string(p[1]))
+                            else:
+                                params.append(str(p))
+
+                    cmd = XeroxCommand(
+                        name=cmd_name,
+                        line_number=token.line_number + line_offset,
+                        column=token.column
+                    )
+                    cmd.parameters = params
+                    commands.append(cmd)
 
                 elif cmd_name in ('SHP', 'SHp'):
                     # SHP/SHp has variable parameter count depending on VSUB:
@@ -2068,6 +2128,9 @@ class VIPPToDFAConverter:
 
         # Track SETLSP (line spacing) from DBM
         self.line_spacing = None  # Will be set if SETLSP found in DBM
+        # Track Xerox origin mode. ORITL means top-left origin and requires
+        # inverted relative Y offsets in inlined SCALL/XGFRESDEF drawing.
+        self.origin_is_oritl = False
 
         # Track SETPAGEDEF layout positions for OUTLINE generation
         self.page_layout_position = None  # (x, y) from last SETLKF in SETPAGEDEF
@@ -2075,17 +2138,40 @@ class VIPPToDFAConverter:
         # Track when to set box positioning anchors
         self.should_set_box_anchor = True  # Set anchors before first box in a group
 
+        # FRM rendering mode:
+        # FRM include formats already anchor at page origin, so subtracting
+        # margins again can push content above/left of printable area.
+        self.position_no_margins = False
+
         # Track last command type for positioning logic
         self.last_command_type = None  # 'OUTPUT', 'TEXT', 'NL'
 
         # Track subroutine definitions for SCALL handling
         self.subroutines = {}  # Maps subroutine name to {'commands': [...], 'type': 'simple'|'complex'}
 
+        # Track page numbering semantics extracted from VIPP SETPAGENUMBER.
+        # Defaults match the legacy generated footer output.
+        self.page_number_expr = "'Page ' ! P ! ' of ' ! PP"
+        self.page_number_x = "RIGHT-11 MM"
+        self.page_number_y = "286 MM"
+        self.page_number_align = "RIGHT"
+        self.emit_page_index_marker = False
+
+        # Track GETITEM tables (VIPP table lookup pattern).
+        # table_name -> list of target variable names from header row
+        self.getitem_table_fields = {}
+        # table_name -> DFA array variable used to store appended rows
+        self.getitem_store_vars = {}
+        # Counter for generated temporary text-expression variables (SHP/SHp wrapping)
+        self._tmp_text_counter = 0
+
         # Auto-detect input format from DBM
         self._detect_input_format()
         self._build_format_registry()
         self._extract_layout_info()
         self._extract_subroutines()
+        self._extract_page_number_settings()
+        self._extract_getitem_table_definitions()
 
     def _escape_dfa_quotes(self, text: str) -> str:
         """
@@ -2114,6 +2200,11 @@ class VIPPToDFAConverter:
         import re
         # Remove all characters that are not alphanumeric or underscore
         return re.sub(r'[^A-Za-z0-9_]', '', name)
+
+    @staticmethod
+    def _is_total_page_var(name: str) -> bool:
+        """Return True for known VIPP total-page variable aliases."""
+        return name.upper() in ('VAR_PCTOT', 'VAR_PTOT', 'VARPTOT')
 
     def generate_dfa_code(self) -> str:
         """
@@ -2160,6 +2251,8 @@ class VIPPToDFAConverter:
         """
         self.output_lines = []
         self.indent_level = 0
+        prev_position_no_margins = self.position_no_margins
+        self.position_no_margins = True
 
         # Extract FRM name without extension
         frm_name = os.path.splitext(os.path.basename(frm.filename))[0].upper()
@@ -2176,54 +2269,58 @@ class VIPPToDFAConverter:
             self.add_line(f"/* Original Date: {frm.creation_date} */")
         self.add_line("")
 
-        if not as_include:
-            # Generate DOCFORMAT for this FRM
-            self.add_line(f"DOCFORMAT {frm_name};")
-            self.indent()
+        try:
+            if not as_include:
+                # Generate DOCFORMAT for this FRM
+                self.add_line(f"DOCFORMAT {frm_name};")
+                self.indent()
+                # Set margins and units
+                self.add_line("MARGIN TOP 0 MM BOTTOM 0 MM LEFT 0 MM RIGHT 0 MM;")
+                self.add_line("SETUNITS LINESP AUTO;")
+                self.add_line("")
 
-            # Set margins and units
-            self.add_line("MARGIN TOP 0 MM BOTTOM 0 MM LEFT 0 MM RIGHT 0 MM;")
-            self.add_line("SETUNITS LINESP AUTO;")
-            self.add_line("")
+                # Generate OUTLINE block for FRM content.
+                # TOP can underflow in some environments; NEXT keeps first baseline
+                # inside printable area while remaining page-anchored.
+                self.add_line("OUTLINE")
+                self.indent()
+                self.add_line("POSITION LEFT NEXT")
+                self.add_line("DIRECTION ACROSS;")
+                self.add_line("")
 
-            # Generate OUTLINE block for FRM content
-            # Use POSITION LEFT TOP for absolute page-level anchoring
-            self.add_line("OUTLINE")
-            self.indent()
-            self.add_line("POSITION LEFT TOP")
-            self.add_line("DIRECTION ACROSS;")
-            self.add_line("")
+                # Convert FRM commands to DFA
+                self._convert_frm_commands(frm)
 
-            # Convert FRM commands to DFA
-            self._convert_frm_commands(frm)
+                self.dedent()
+                self.add_line("ENDIO;")
 
-            self.dedent()
-            self.add_line("ENDIO;")
+                self.dedent()
+                self.add_line("")
+                self.add_line(f"/* END OF FRM DOCFORMAT {frm_name} */")
+            else:
+                # Just generate comment header for includes
+                self.add_line(f"/* External Format: {frm.filename} */")
+                self.add_line("")
 
-            self.dedent()
-            self.add_line("")
-            self.add_line(f"/* END OF FRM DOCFORMAT {frm_name} */")
-        else:
-            # Just generate comment header for includes
-            self.add_line(f"/* External Format: {frm.filename} */")
-            self.add_line("")
+                # Add OUTLINE wrapper for FRM commands.
+                # External FRMs are rendered from PRINTFOOTER as full-page
+                # backgrounds; anchor at TOP so internal absolute Y values
+                # stay page-relative.
+                self.add_line("OUTLINE ")
+                self.indent()
+                self.add_line("POSITION LEFT TOP")
+                self.add_line("DIRECTION ACROSS;")
+                self.add_line("")
 
-            # Add OUTLINE wrapper for FRM commands
-            # Use POSITION LEFT TOP so that when called from PRINTFOOTER
-            # the FRM anchors to the logical page origin (not the cursor position).
-            self.add_line("OUTLINE ")
-            self.indent()
-            self.add_line("POSITION LEFT TOP")
-            self.add_line("DIRECTION ACROSS;")
-            self.add_line("")            
+                # Convert FRM commands
+                self._convert_frm_commands(frm)
 
-            # Convert FRM commands
-            self._convert_frm_commands(frm)
+                # Close OUTLINE
+                self.add_line("ENDIO;")
 
-            # Close OUTLINE
-            self.add_line("ENDIO;")
-
-        return '\n'.join(self.output_lines)
+            return '\n'.join(self.output_lines)
+        finally:
+            self.position_no_margins = prev_position_no_margins
 
     def _convert_frm_commands(self, frm: XeroxFRM):
         """
@@ -2234,6 +2331,7 @@ class VIPPToDFAConverter:
         """
         current_x = 0.0
         current_y = 0.0
+        anchor_x = 0.0  # Base X for MOVEHR in FRM flows
         current_font = "ARIAL08"
 
         # Track whether position was explicitly set (to distinguish from residual values)
@@ -2272,6 +2370,7 @@ class VIPPToDFAConverter:
                     try:
                         current_x = float(cmd.parameters[0])
                         current_y = float(cmd.parameters[1])
+                        anchor_x = current_x
                         x_was_explicitly_set = True
                         y_was_explicitly_set = True
                         y_is_next_line = False  # Explicit Y position overrides NEXT
@@ -2283,7 +2382,13 @@ class VIPPToDFAConverter:
             if cmd.name in ('MOVEH', 'MOVEHR'):
                 if cmd.parameters:
                     try:
-                        current_x = float(cmd.parameters[0])
+                        move_val = float(cmd.parameters[0])
+                        if cmd.name == 'MOVEHR':
+                            # FRM semantics: horizontal move relative to section anchor
+                            current_x = anchor_x + move_val
+                        else:
+                            current_x = move_val
+                            anchor_x = current_x
                         x_was_explicitly_set = True
                         y_was_explicitly_set = False  # Y becomes implicit (use SAME)
                         y_is_next_line = False  # MOVEH resets next-line flag, Y should be SAME
@@ -2401,7 +2506,8 @@ class VIPPToDFAConverter:
             # Handle resource calls - SCALL (segment/image)
             if cmd.name == 'SCALL':
                 self._convert_frm_segment(cmd, current_x, current_y, frm, last_cache_cmd,
-                                         x_was_explicitly_set, y_was_explicitly_set)
+                                         x_was_explicitly_set, y_was_explicitly_set,
+                                         current_font)
                 last_cache_cmd = None  # Clear after use
                 # Reset position tracking after SCALL
                 x_was_explicitly_set = False
@@ -2443,6 +2549,7 @@ class VIPPToDFAConverter:
         """
         current_x = start_x
         current_y = start_y
+        anchor_x = start_x  # Base X for MOVEHR in FRM child blocks
         current_font = start_font
 
         # Track whether position was explicitly set (to distinguish from residual values)
@@ -2477,6 +2584,7 @@ class VIPPToDFAConverter:
                     try:
                         current_x = float(cmd.parameters[0])
                         current_y = float(cmd.parameters[1])
+                        anchor_x = current_x
                         x_was_explicitly_set = True
                         y_was_explicitly_set = True
                         y_is_next_line = False  # Explicit Y position overrides NEXT
@@ -2488,7 +2596,13 @@ class VIPPToDFAConverter:
             if cmd.name in ('MOVEH', 'MOVEHR'):
                 if cmd.parameters:
                     try:
-                        current_x = float(cmd.parameters[0])
+                        move_val = float(cmd.parameters[0])
+                        if cmd.name == 'MOVEHR':
+                            # FRM semantics: horizontal move relative to section anchor
+                            current_x = anchor_x + move_val
+                        else:
+                            current_x = move_val
+                            anchor_x = current_x
                         x_was_explicitly_set = True
                         y_was_explicitly_set = False  # Y becomes implicit (use SAME)
                         y_is_next_line = False  # MOVEH resets next-line flag, Y should be SAME
@@ -2548,7 +2662,8 @@ class VIPPToDFAConverter:
             # Handle SCALL (segment call)
             if cmd.name == 'SCALL':
                 self._convert_frm_segment(cmd, current_x, current_y, frm, last_cache_cmd,
-                                         x_was_explicitly_set, y_was_explicitly_set)
+                                         x_was_explicitly_set, y_was_explicitly_set,
+                                         current_font)
                 last_cache_cmd = None  # Clear after use
                 # Reset position tracking after SCALL
                 x_was_explicitly_set = False
@@ -3300,7 +3415,9 @@ class VIPPToDFAConverter:
 
         # Don't generate output for XGFRESDEF definitions themselves
 
-    def _inline_xgfresdef_drawbs(self, resource_name: str, origin_x: float, origin_y: float):
+    def _inline_xgfresdef_drawbs(self, resource_name: str, origin_x: float, origin_y: float,
+                                 flow_relative_y: bool = False,
+                                 anchor_x_var: str = None, anchor_y_var: str = None):
         """
         Inline an XGFRESDEF subroutine's DRAWB commands as absolute BOX/RULE at the call site.
 
@@ -3319,6 +3436,11 @@ class VIPPToDFAConverter:
             resource_name: The XGFRESDEF name (e.g. 'SABX') — used only for the comment
             origin_x:      X coordinate from the preceding MOVETO (mm from left edge)
             origin_y:      Y coordinate from the preceding MOVETO (mm from top edge)
+            flow_relative_y: If True, emit Y positions as SAME+/-(offset) relative to
+                             current cursor (DBM inline flow). If False, emit absolute
+                             margin-relative Y coordinates (FRM/static contexts).
+            anchor_x_var: If provided, emit X positions relative to this DFA variable.
+            anchor_y_var: If provided, emit Y positions relative to this DFA variable.
         """
         subroutine_info = self.subroutines.get(resource_name)
         if not subroutine_info:
@@ -3387,23 +3509,51 @@ class VIPPToDFAConverter:
             param4_raw = params[3]           # height or thickness
             style = params[4] if len(params) > 4 else 'R_S1'
 
-            # Compute absolute page coordinates
+            # Compute absolute/relative page coordinates
             abs_x = origin_x + rel_x
-            # In VIPP, XGFRESDEF Y offsets are negative for "below" the origin.
-            # DFA Y grows downward, so we add the magnitude of rel_y to origin_y.
-            # For positive rel_y (same row or above), we subtract.
-            abs_y = origin_y - rel_y   # e.g. origin_y=28, rel_y=-8 → abs_y=36
+            if anchor_x_var:
+                if abs(rel_x) < 0.0001:
+                    x_value = anchor_x_var
+                elif rel_x > 0:
+                    x_value = f"{anchor_x_var}+{rel_x} MM"
+                else:
+                    x_value = f"{anchor_x_var}-{abs(rel_x)} MM"
+            else:
+                x_value = str(abs_x)
+
+            # VIPP Y-offset sign in SCALL segments depends on origin mode.
+            # For ORITL: invert offset sign (-6 -> +6, +6 -> -6).
+            rel_y_signed = -rel_y if self.origin_is_oritl else rel_y
+
+            if anchor_y_var:
+                if abs(rel_y_signed) < 0.0001:
+                    y_value = anchor_y_var
+                elif rel_y_signed > 0:
+                    y_value = f"{anchor_y_var}+{rel_y_signed} MM"
+                else:
+                    y_value = f"{anchor_y_var}-{abs(rel_y_signed)} MM"
+            elif flow_relative_y:
+                y_delta = rel_y_signed
+                if abs(y_delta) < 0.0001:
+                    y_value = "SAME"
+                elif y_delta > 0:
+                    y_value = f"SAME+{y_delta} MM"
+                else:
+                    y_value = f"SAME-{abs(y_delta)} MM"
+            else:
+                # In absolute fallback mode apply signed Y offset.
+                y_value = str(origin_y + rel_y_signed)
 
             # Build a synthetic XeroxCommand with the absolute coordinates so we can
             # reuse the full _convert_frm_rule logic (style mapping, line vs box, etc.)
-            synthetic_params = [str(abs_x), str(abs_y), str(param3), param4_raw, style]
+            synthetic_params = [str(x_value), str(y_value), str(param3), param4_raw, style]
             synthetic_cmd = XeroxCommand(
                 name='DRAWB',
                 parameters=synthetic_params,
                 children=[]
             )
 
-            # _convert_frm_rule uses use_absolute=(x>0 or y!=0) — abs coords are always >0
+            # _convert_frm_rule supports both numeric absolute Y and SAME+/- relative Y.
             self._convert_frm_rule(synthetic_cmd)
 
     def _convert_frm_rule(self, cmd: XeroxCommand):
@@ -3436,10 +3586,22 @@ class VIPPToDFAConverter:
         if len(cmd.parameters) < 4:
             return
 
-        # Parse parameters
+        # Parse parameters (x/y may be expressions for anchored inline SCALL drawing)
+        x_raw = cmd.parameters[0]
+        y_raw = cmd.parameters[1]
+        x_expr = None
+        y_expr = None
         try:
-            x = float(cmd.parameters[0])
-            y = float(cmd.parameters[1])
+            x = float(x_raw)
+        except (ValueError, TypeError):
+            x = 0.0
+            x_expr = str(x_raw)
+        try:
+            y = float(y_raw)
+        except (ValueError, TypeError):
+            y = 0.0
+            y_expr = str(y_raw)
+        try:
             param3 = float(cmd.parameters[2])  # width or length
         except (ValueError, IndexError):
             return
@@ -3481,17 +3643,18 @@ class VIPPToDFAConverter:
             param4_float = thickness_map.get(param4, 0.2)
             param4_val = str(param4_float)
 
-        # Invert Y coordinate (negative becomes positive)
-        y_inverted = abs(y)
+        # Invert Y coordinate (negative becomes positive) when numeric.
+        # If y is an expression (e.g. YPOS-6 MM), pass through as-is.
+        y_inverted = abs(y) if y_expr is None else y_expr
 
-        # Convert tiny widths/heights to 0.1 MM for thin lines
-        width = param3 if param3 >= 0.01 else 0.1
-        height = param4_float if param4_float >= 0.01 else 0.1
+        # Convert tiny widths/heights to 0.01 MM for thin lines
+        width = param3 if param3 >= 0.01 else 0.01
+        height = param4_float if param4_float >= 0.01 else 0.01
 
         # Determine positioning pattern:
         # Pattern A: Absolute coords (x>0 or y!=0) → margin-relative: (x MM-$MR_LEFT) (y MM-$MR_TOP)
         # Pattern B: x=0 and y=0 (relative, e.g. inside XGFRESDEF) → use POSX/POSY anchor
-        use_absolute = (x > 0 or y != 0)
+        use_absolute = (x > 0 or y != 0 or x_expr is not None or y_expr is not None)
 
         # Determine if this is a BOX (rectangle) or RULE (line)
         is_box = param4_float > 1.0
@@ -3554,13 +3717,45 @@ class VIPPToDFAConverter:
             elif 'S4' in style or '_S4' in style:
                 shade = 25
 
-        if is_box:
+        thin_box_as_vertical_rule = is_box and abs(width - 0.1) < 0.0001 and height > width
+
+        if thin_box_as_vertical_rule:
+            self.add_line("RULE")
+            self.indent()
+
+            if use_absolute:
+                if x_expr is None and y_expr is None:
+                    self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_inverted + height} MM-$MR_TOP)")
+                elif x_expr is not None and y_expr is None:
+                    self.add_line(f"POSITION ({x_expr}) ({y_inverted + height} MM-$MR_TOP)")
+                elif x_expr is None and y_expr is not None:
+                    self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_expr}+{height} MM)")
+                else:
+                    self.add_line(f"POSITION ({x_expr}) ({y_expr}+{height} MM)")
+            else:
+                self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted + height} MM)")
+
+            self.add_line("DIRECTION UP")
+            if color:
+                self.add_line(f"COLOR {color}")
+            self.add_line(f"LENGTH {height} MM")
+            self.add_line("THICKNESS 0.1 MM TYPE SOLID")
+            self.add_line(";")
+            self.dedent()
+        elif is_box:
             self.add_line("BOX")
             self.indent()
 
             # Position — absolute or anchor-relative
             if use_absolute:
-                self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_inverted} MM-$MR_TOP)")
+                if x_expr is None and y_expr is None:
+                    self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_inverted} MM-$MR_TOP)")
+                elif x_expr is not None and y_expr is None:
+                    self.add_line(f"POSITION ({x_expr}) ({y_inverted} MM-$MR_TOP)")
+                elif x_expr is None and y_expr is not None:
+                    self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_expr})")
+                else:
+                    self.add_line(f"POSITION ({x_expr}) ({y_expr})")
             else:
                 self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
 
@@ -3584,6 +3779,13 @@ class VIPPToDFAConverter:
             # RULE (line)
             length = width
             thickness = param4_val
+            # 0/0.0001/0.001 MM lines from VIPP become nearly invisible in PDF.
+            # Clamp to 0.01 MM as minimum.
+            try:
+                if float(thickness) < 0.01:
+                    thickness = "0.01"
+            except (TypeError, ValueError):
+                pass
 
             try:
                 length_f = float(length)
@@ -3596,7 +3798,14 @@ class VIPPToDFAConverter:
             self.indent()
 
             if use_absolute:
-                self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_inverted} MM-$MR_TOP)")
+                if x_expr is None and y_expr is None:
+                    self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_inverted} MM-$MR_TOP)")
+                elif x_expr is not None and y_expr is None:
+                    self.add_line(f"POSITION ({x_expr}) ({y_inverted} MM-$MR_TOP)")
+                elif x_expr is None and y_expr is not None:
+                    self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_expr})")
+                else:
+                    self.add_line(f"POSITION ({x_expr}) ({y_expr})")
             else:
                 self.add_line(f"POSITION (POSX+{x} MM) (POSY+{y_inverted} MM)")
 
@@ -3617,7 +3826,8 @@ class VIPPToDFAConverter:
             self.dedent()
 
     def _convert_frm_segment(self, cmd: XeroxCommand, x: float, y: float, frm: XeroxFRM, cache_cmd: XeroxCommand = None,
-                            x_was_set: bool = False, y_was_set: bool = False):
+                            x_was_set: bool = False, y_was_set: bool = False,
+                            current_font: str = "ARIAL08"):
         """Convert FRM SCALL command to DFA SEGMENT or CREATEOBJECT.
 
         For .jpg/.tiff files with CACHE: Generate CREATEOBJECT IOBDLL
@@ -3672,11 +3882,27 @@ class VIPPToDFAConverter:
         if not file_ext and resource_name in self.subroutines:
             sub = self.subroutines[resource_name]
             if sub.get('xgfresdef'):
-                # Inline all DRAWB children with absolute coordinates origin + offset.
-                # If no explicit MOVETO was captured, default origin is (0,0).
+                # Preserve FRM flow cursor around inlined SCALL drawings.
+                self.add_line("YPOS = $SL_CURRY;")
+                self.add_line("XPOS = $SL_CURRX;")
+                if x_was_set:
+                    self.add_line(f"XPOS = MM({x});")
+                if y_was_set:
+                    self.add_line(f"YPOS = MM({y});")
+
+                # Inline all DRAWB children relative to saved anchors.
                 origin_x = x if x_was_set else 0.0
                 origin_y = y if y_was_set else 0.0
-                self._inline_xgfresdef_drawbs(resource_name, origin_x, origin_y)
+                self._inline_xgfresdef_drawbs(
+                    resource_name, origin_x, origin_y,
+                    anchor_x_var="XPOS",
+                    anchor_y_var="YPOS"
+                )
+
+                # Restore cursor so SAME/NEXT flow continues after SCALL.
+                self.add_line("OUTPUT ''")
+                self.add_line(f"    FONT {current_font} NORMAL")
+                self.add_line("    POSITION (XPOS) (YPOS);")
                 return
             else:
                 # Legacy non-XGFRESDEF subroutine: inline via command list (unchanged behaviour)
@@ -4074,6 +4300,10 @@ class VIPPToDFAConverter:
         """
         # First try to scan DBM commands
         for cmd in self.dbm.commands:
+            if cmd.name == 'ORITL':
+                self.origin_is_oritl = True
+                logger.info("Found ORITL: enabling Y-offset inversion for SCALL inlining")
+
             # Extract SETLSP value (typically at start of file)
             if cmd.name == 'SETLSP' and cmd.parameters and not self.line_spacing:
                 try:
@@ -4114,6 +4344,11 @@ class VIPPToDFAConverter:
                 first_match = matches[0]
                 self.page_layout_position = (float(first_match[0]), float(first_match[1]))
                 logger.info(f"Found SETPAGEDEF layout position from raw content: {self.page_layout_position}")
+
+        # Backup ORITL detection from raw content if command parsing missed it.
+        if not self.origin_is_oritl and self.dbm.raw_content and re.search(r'\bORITL\b', self.dbm.raw_content):
+            self.origin_is_oritl = True
+            logger.info("Found ORITL in raw content: enabling Y-offset inversion for SCALL inlining")
 
     def _parse_setpagedef_layout(self, params):
         """
@@ -4172,6 +4407,273 @@ class VIPPToDFAConverter:
 
                 logger.info(f"Found DBM XGFRESDEF subroutine '{resource_name}' with {command_count} children "
                             f"({drawb_count} DRAWB) — will inline at SCALL sites")
+
+    def _iter_all_case_commands(self):
+        """Yield all commands from CASE blocks recursively."""
+        def _walk(cmds):
+            for _cmd in cmds:
+                yield _cmd
+                if _cmd.children:
+                    yield from _walk(_cmd.children)
+
+        for case_cmds in self.dbm.case_blocks.values():
+            yield from _walk(case_cmds)
+
+    def _iter_all_commands(self):
+        """Yield all DBM commands recursively (global + CASE)."""
+        def _walk(cmds):
+            for _cmd in cmds:
+                yield _cmd
+                if _cmd.children:
+                    yield from _walk(_cmd.children)
+
+        yield from _walk(self.dbm.commands)
+        for case_cmds in self.dbm.case_blocks.values():
+            yield from _walk(case_cmds)
+
+    def _extract_page_number_settings(self):
+        """
+        Extract first SETPAGENUMBER command from DBM and map it to footer output.
+
+        VIPP syntax supports several forms; in OCBC DBM we see:
+            (format) start hpos vpos align SETPAGENUMBER
+        """
+        for cmd in self._iter_all_case_commands():
+            if cmd.name != 'SETPAGENUMBER':
+                continue
+
+            self._convert_pagenumber_command(cmd, emit_now=False)
+            return
+
+    def _extract_getitem_table_definitions(self):
+        """
+        Extract GETITEM table headers from SETVAR definitions.
+
+        Pattern from VIPP:
+            /VARtab [[/VAR_pctot]] SETVAR
+        """
+        # Primary path: parse directly from raw DBM text because tokenizer may
+        # normalize/trim bracket payloads used by VIPP table headers.
+        if self.dbm.raw_content:
+            header_pattern = re.compile(
+                r'/([A-Za-z_][A-Za-z0-9_]*)\s+\[\[(.*?)\]\]\s+SETVAR',
+                re.IGNORECASE
+            )
+            for match in header_pattern.finditer(self.dbm.raw_content):
+                table_name = self._sanitize_dfa_name(match.group(1))
+                header_body = match.group(2)
+                fields = re.findall(r'/?([A-Za-z_][A-Za-z0-9_]*)', header_body)
+                if not fields:
+                    continue
+                self.getitem_table_fields[table_name] = fields
+                self.getitem_store_vars[table_name] = f"{table_name}_ROWS"
+
+        # Fallback: use parsed command stream.
+        for cmd in self._iter_all_commands():
+            if cmd.name != 'SETVAR' or len(cmd.parameters) < 2:
+                continue
+
+            lhs = str(cmd.parameters[0]).lstrip('/')
+            rhs = str(cmd.parameters[1])
+            if '[[' not in rhs or ']]' not in rhs or '/' not in rhs:
+                continue
+
+            table_name = self._sanitize_dfa_name(lhs)
+            # Header row contains /VAR_xxx tokens.
+            fields = re.findall(r'/([A-Za-z_][A-Za-z0-9_]*)', rhs)
+            if not fields:
+                continue
+
+            self.getitem_table_fields[table_name] = fields
+            self.getitem_store_vars[table_name] = f"{table_name}_ROWS"
+
+    def _convert_add_command(self, cmd: XeroxCommand):
+        """
+        Convert VIPP ADD command.
+
+        - Numeric pattern: /VAR_X value ADD  -> VAR_X = VAR_X + value;
+        - Table pattern:   /VARtab [ VAR_A VAR_B ] ADD -> append row to table store
+        """
+        if len(cmd.parameters) < 2:
+            self.add_line("/* ADD with insufficient parameters */")
+            return
+
+        target_raw = str(cmd.parameters[0]).lstrip('/')
+        target = self._sanitize_dfa_name(target_raw)
+        value_raw = str(cmd.parameters[1]).strip()
+
+        # Table append mode (for GETITEM-driven tables).
+        if target in self.getitem_table_fields and '[' in value_raw and ']' in value_raw:
+            store = self.getitem_store_vars.get(target, f"{target}_ROWS")
+            fields = self.getitem_table_fields.get(target, [])
+            # Special-case legacy total-page tables: footer rendering uses PP directly.
+            if len(fields) == 1 and self._is_total_page_var(fields[0]):
+                self.add_line("/* Skipped ADD to total-page table; PRINTFOOTER uses PP */")
+                return
+            # Extract row tokens inside [...] and map to DFA identifiers.
+            inner = value_raw.replace('[', ' ').replace(']', ' ')
+            tokens = [t for t in inner.split() if t]
+            row_tokens = []
+            for tok in tokens:
+                if tok.startswith('/'):
+                    row_tokens.append(self._sanitize_dfa_name(tok.lstrip('/')))
+                elif tok.replace('.', '', 1).lstrip('-').isdigit():
+                    row_tokens.append(tok)
+                elif re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', tok):
+                    row_tokens.append(self._sanitize_dfa_name(tok))
+                else:
+                    row_tokens.append(f"'{self._escape_dfa_quotes(tok)}'")
+
+            # Build row payload for store array.
+            if len(fields) <= 1 and row_tokens:
+                payload = row_tokens[0]
+            elif row_tokens:
+                literalized = [rt if rt.startswith("'") or rt.replace('.', '', 1).lstrip('-').isdigit() else rt for rt in row_tokens]
+                payload = " ! '|' ! ".join(literalized)
+            else:
+                payload = "''"
+
+            # For single-column tables, use delimiter-packed scalar storage to avoid
+            # indexed-array declaration warnings in DFA.
+            if len(fields) <= 1:
+                self.add_line(f"IF ISTRUE({store} == '');")
+                self.add_line(f"THEN; {store} = {payload};")
+                self.add_line(f"ELSE; {store} = {store} ! '|' ! {payload};")
+                self.add_line("ENDIF;")
+            else:
+                self.add_line(f"{store}[MAXINDEX({store})+1] = {payload};")
+            return
+
+        # Numeric/regular add mode.
+        rhs = value_raw
+
+        # Xerox dynamic Y anchors:
+        # /VAR.Y4 0 ADD  -> capture current flow Y for later DRAWB use.
+        # Emit direct cursor binding instead of no-op arithmetic.
+        if re.match(r'^VAR\.Y\d+$', target_raw, re.IGNORECASE):
+            try:
+                rhs_num = float(rhs)
+            except (TypeError, ValueError):
+                rhs_num = None
+            if rhs_num is not None and abs(rhs_num) < 0.0001:
+                self.add_line(f"{target} = $SL_CURRY;")
+                return
+
+        if rhs.startswith('/'):
+            rhs = self._sanitize_dfa_name(rhs.lstrip('/'))
+        elif rhs.startswith('(') and rhs.endswith(')'):
+            rhs = f"'{self._escape_dfa_quotes(rhs[1:-1])}'"
+        self.add_line(f"{target} = {target} + {rhs};")
+
+    def _convert_getitem_command(self, cmd: XeroxCommand):
+        """
+        Convert VIPP GETITEM lookup from stored table rows.
+
+        Pattern:
+            VARtab VARdoc GETITEM
+        """
+        if len(cmd.parameters) < 2:
+            self.add_line("/* GETITEM with insufficient parameters */")
+            return
+
+        table = self._sanitize_dfa_name(str(cmd.parameters[0]))
+        index_var = self._sanitize_dfa_name(str(cmd.parameters[1]))
+        fields = self.getitem_table_fields.get(table, [])
+        store = self.getitem_store_vars.get(table, f"{table}_ROWS")
+
+        if not fields:
+            self.add_line(f"/* GETITEM table '{table}' has no extracted header definition */")
+            return
+
+        if len(fields) == 1:
+            if self._is_total_page_var(fields[0]):
+                self.add_line(f"/* Skipped GETITEM for {fields[0]}; PRINTFOOTER uses PP */")
+                return
+            self.add_line(f"GETITEM_CNT = EXTRACTALL(GETITEM_COL, {store}, '|', '');")
+            self.add_line(f"{fields[0]} = GETITEM_COL[{index_var}];")
+            return
+
+        # Multi-column row payload separated by '|'
+        self.add_line(f"GETITEM_ROW = {store}[{index_var}];")
+        self.add_line("GETITEM_COUNT = EXTRACTALL(GETITEM_COL, GETITEM_ROW, '|', '');")
+        for i, field in enumerate(fields, start=1):
+            self.add_line(f"{field} = GETITEM_COL[{i}];")
+
+    def _render_vipp_format_expr(self, raw_text: str) -> str:
+        """
+        Convert VIPP format text with '#' placeholders and VSUB vars to DFA expression.
+        """
+        text = raw_text
+        if text.startswith('(') and text.endswith(')'):
+            text = text[1:-1]
+
+        # Tokenize literals, VIPP variables ($$VAR.), and page placeholders (###).
+        parts = []
+        i = 0
+        while i < len(text):
+            # $$VAR_NAME.
+            if text.startswith('$$', i):
+                j = i + 2
+                while j < len(text) and (text[j].isalnum() or text[j] == '_'):
+                    j += 1
+                if j < len(text) and text[j] == '.' and j > i + 2:
+                    parts.append(('var', text[i + 2:j]))
+                    i = j + 1
+                    continue
+
+            # $VAR_NAME
+            if text.startswith('$', i) and not text.startswith('$$', i):
+                j = i + 1
+                while j < len(text) and (text[j].isalnum() or text[j] == '_'):
+                    j += 1
+                if j > i + 1:
+                    parts.append(('var', text[i + 1:j]))
+                    i = j
+                    continue
+
+            # ### placeholder (current page number)
+            if text[i] == '#':
+                j = i
+                while j < len(text) and text[j] == '#':
+                    j += 1
+                parts.append(('page', j - i))
+                i = j
+                continue
+
+            # Literal run
+            j = i
+            while j < len(text):
+                if text[j] == '#' or text.startswith('$$', j) or text.startswith('$', j):
+                    break
+                j += 1
+            literal = text[i:j]
+            if literal:
+                parts.append(('lit', literal))
+            i = j
+
+        if not parts:
+            return "''"
+
+        expr_parts = []
+        for part_type, value in parts:
+            if part_type == 'lit':
+                expr_parts.append(f"'{self._escape_dfa_quotes(value)}'")
+            elif part_type == 'var':
+                var_name = self._sanitize_dfa_name(value)
+                # In OCBC sources, $$VAR_pctot. denotes total pages.
+                # PRINTFOOTER always has final PP, so use PP directly to avoid scope warnings.
+                if var_name.upper() in ('VAR_PCTOT', 'VAR_PTOT', 'VARPTOT'):
+                    expr_parts.append("PP")
+                else:
+                    expr_parts.append(var_name)
+            else:
+                # Width 1 -> plain page number, width >1 -> zero-padded
+                if value <= 1:
+                    expr_parts.append("P")
+                else:
+                    expr_parts.append(f"NUMPICTURE(P,'{'0' * value}')")
+
+        return ' ! '.join(expr_parts)
 
     def set_input_config(self, delimiter: str = None, field_names: List[str] = None, record_length: int = None):
         """
@@ -4262,6 +4764,7 @@ class VIPPToDFAConverter:
         self.add_line("PTXUNIT 1440")
         self.add_line("FDFINCLUDE YES")
         self.add_line("TLE YES")
+        self.add_line("TLECPID YES")
         self.add_line("ACIFINDEX NO;")
         self.dedent()
         self.add_line("")
@@ -4336,10 +4839,12 @@ class VIPPToDFAConverter:
         self.add_line("        OUTLINE")
         self.add_line("            POSITION RIGHT (0 MM)")
         self.add_line("            DIRECTION ACROSS;")
-        self.add_line("            OUTPUT 'Page '!P!' of '!PP")
+        self.add_line(f"            OUTPUT {self.page_number_expr}")
         self.add_line("                FONT F5_1")
-        self.add_line("                POSITION (RIGHT-11 MM)286 MM")
-        self.add_line("                ALIGN RIGHT NOPAD;")
+        self.add_line(f"                POSITION ({self.page_number_x}) {self.page_number_y}")
+        self.add_line(f"                ALIGN {self.page_number_align} NOPAD;")
+        if self.emit_page_index_marker:
+            self.add_line(f"            INDEX PAGE_MARKER = {self.page_number_expr};")
         self.add_line("        ENDIO;")
         self.add_line("    PRINTEND;")
         self.add_line("")
@@ -4392,10 +4897,12 @@ class VIPPToDFAConverter:
             self.add_line("        OUTLINE")
             self.add_line("            POSITION RIGHT (0 MM)")
             self.add_line("            DIRECTION ACROSS;")
-            self.add_line("            OUTPUT 'Page '!P!' of '!PP")
+            self.add_line(f"            OUTPUT {self.page_number_expr}")
             self.add_line("                FONT F5_1")
-            self.add_line("                POSITION (RIGHT-11 MM)286 MM")
-            self.add_line("                ALIGN RIGHT NOPAD;")
+            self.add_line(f"                POSITION ({self.page_number_x}) {self.page_number_y}")
+            self.add_line(f"                ALIGN {self.page_number_align} NOPAD;")
+            if self.emit_page_index_marker:
+                self.add_line(f"            INDEX PAGE_MARKER = {self.page_number_expr};")
             self.add_line("        ENDIO;")
             self.add_line("    PRINTEND;")
 
@@ -4695,11 +5202,17 @@ class VIPPToDFAConverter:
             if x_upper in ('SAME', 'LEFT', 'RIGHT', 'CENTER') or x_upper.startswith(('LEFT-', 'RIGHT-', 'SAME-', 'SAME+')):
                 x_part = f"({x})"
             else:
-                # Numeric position - use margin correction
-                x_part = f"({x} MM-$MR_LEFT)"
+                # Numeric position - margin-corrected by default; FRM mode emits raw MM
+                if self.position_no_margins:
+                    x_part = f"({x} MM)"
+                else:
+                    x_part = f"({x} MM-$MR_LEFT)"
         else:
-            # Numeric position - use margin correction
-            x_part = f"({x} MM-$MR_LEFT)"
+            # Numeric position - margin-corrected by default; FRM mode emits raw MM
+            if self.position_no_margins:
+                x_part = f"({x} MM)"
+            else:
+                x_part = f"({x} MM-$MR_LEFT)"
 
         # Handle Y coordinate
         font_correction = ""
@@ -4709,20 +5222,32 @@ class VIPPToDFAConverter:
         if isinstance(y, str):
             y_upper = y.upper()
             # Check if it's a keyword or starts with a keyword (for expressions like NEXT-(...) or LASTMAX+...)
-            if y_upper in ('SAME', 'NEXT', 'TOP', 'BOTTOM') or y_upper.startswith(('NEXT-', 'NEXT+', 'SAME-', 'SAME+', 'LASTMAX+')):
+            if y_upper in ('SAME', 'NEXT', 'TOP', 'BOTTOM') or y_upper.startswith(('NEXT-', 'NEXT+', 'SAME-', 'SAME+', 'LASTMAX+', 'LASTMAX-')):
                 y_part = f"({y})"
             else:
-                # Numeric position - use margin correction and font correction
+                # Numeric position - margin-corrected by default; FRM mode emits raw MM
+                if self.position_no_margins:
+                    if font_correction:
+                        y_part = f"({y} MM+{font_correction})"
+                    else:
+                        y_part = f"({y} MM)"
+                else:
+                    if font_correction:
+                        y_part = f"({y} MM-$MR_TOP+{font_correction})"
+                    else:
+                        y_part = f"({y} MM-$MR_TOP)"
+        else:
+            # Numeric position - margin-corrected by default; FRM mode emits raw MM
+            if self.position_no_margins:
+                if font_correction:
+                    y_part = f"({y} MM+{font_correction})"
+                else:
+                    y_part = f"({y} MM)"
+            else:
                 if font_correction:
                     y_part = f"({y} MM-$MR_TOP+{font_correction})"
                 else:
                     y_part = f"({y} MM-$MR_TOP)"
-        else:
-            # Numeric position - use margin correction and font correction
-            if font_correction:
-                y_part = f"({y} MM-$MR_TOP+{font_correction})"
-            else:
-                y_part = f"({y} MM-$MR_TOP)"
 
         return f"POSITION {x_part} {y_part}"
 
@@ -4765,6 +5290,15 @@ class VIPPToDFAConverter:
         Returns:
             True if DOCFORMAT should be generated, False otherwise
         """
+        # Include nested commands (IF/ELSE blocks) in significance checks.
+        def _flatten(cmds):
+            for c in cmds:
+                yield c
+                if c.children:
+                    yield from _flatten(c.children)
+
+        all_cmds = list(_flatten(commands))
+
         # Check for output commands
         output_commands = {
             'SH', 'SHL', 'SHR', 'SHr', 'SHC', 'SHc', 'SHP', 'SHp',  # Text output
@@ -4772,21 +5306,21 @@ class VIPPToDFAConverter:
             'NL', 'SETLSP', 'MOVETO', 'MOVEH', 'MOVEHR',  # Positioning
             'SETFORM', 'SETPAGEDEF', 'SETLKF',        # Page layout
         }
-        has_output = any(cmd.name in output_commands for cmd in commands)
+        has_output = any(cmd.name in output_commands for cmd in all_cmds)
 
         # Check for data manipulation commands (string/date parsing)
         data_commands = {'GETINTV', 'SUBSTR', 'VSUB', 'GETITEM'}
-        has_data_manip = any(cmd.name in data_commands for cmd in commands)
+        has_data_manip = any(cmd.name in data_commands for cmd in all_cmds)
 
         # Check for page management commands
         page_commands = {'PAGEBRK', 'NEWFRAME', 'ADD', 'BOOKMARK'}
-        has_page_mgmt = any(cmd.name in page_commands for cmd in commands)
+        has_page_mgmt = any(cmd.name in page_commands for cmd in all_cmds)
 
         # Check for increment/decrement
-        has_counter = any(cmd.name in ['++', '--'] for cmd in commands)
+        has_counter = any(cmd.name in ['++', '--'] for cmd in all_cmds)
 
         # Check for IF blocks (structural logic)
-        has_if = any(cmd.name == 'IF' for cmd in commands)
+        has_if = any(cmd.name == 'IF' for cmd in all_cmds)
 
         # Check for PREFIX assignment (e.g., /VAR_Y2 PREFIX SETVAR)
         # This is significant as it defines a record type prefix for data processing
@@ -4794,16 +5328,16 @@ class VIPPToDFAConverter:
             cmd.name == 'SETVAR' and
             len(cmd.parameters) >= 2 and
             str(cmd.parameters[1]).upper() == 'PREFIX'
-            for cmd in commands
+            for cmd in all_cmds
         )
 
         # Generate if has ANY of:
         # 1. Output commands
         # 2. Data manipulation (GETINTV, SUBSTR)
-        # 3. Page management + IF (like page counting)
+        # 3. Page management commands (PAGEBRK/ADD/BOOKMARK etc.)
         # 4. Counters (++ or --)
         # 5. PREFIX assignment (important for data record definitions)
-        return has_output or has_data_manip or (has_page_mgmt and has_if) or has_counter or has_prefix_assignment
+        return has_output or has_data_manip or has_page_mgmt or has_counter or has_prefix_assignment
 
     def _convert_vsub(self, text: str) -> str:
         """
@@ -5532,14 +6066,20 @@ class VIPPToDFAConverter:
         self.add_line("/* END OF STUB DOCFORMATS */")
         self.add_line("")
 
-    def _convert_case_commands(self, commands: List[XeroxCommand], start_font: str = "ARIAL08", suppress_leading_pagebrk: bool = False):
+    def _convert_case_commands(self, commands: List[XeroxCommand], start_font: str = "ARIAL08",
+                               start_color: str = None,
+                               suppress_leading_pagebrk: bool = False, existing_outline: bool = False):
         """Convert VIPP commands within a case block to DFA."""
         self.indent()
+        # Treat each DOCFORMAT case as an independent flow context.
+        self.last_command_type = None
 
         # Track current position for OUTLINE generation
         current_x = 20  # Default x position in MM
         current_y = 40  # Default y position in MM
+        current_linesp = 4.0  # Track active line spacing for NL without explicit value
         current_font = start_font  # Inherit font from caller (e.g. parent IF block)
+        current_color = start_color
 
         # Track whether position was explicitly set (to distinguish from residual values)
         x_was_explicitly_set = False
@@ -5548,7 +6088,21 @@ class VIPPToDFAConverter:
 
         # Check if we need OUTLINE wrapper (for OUTPUT/TEXT/graphics commands)
         has_output = self._has_output_commands(commands)
-        outline_opened = False
+        outline_opened = existing_outline
+        outline_opened_here = False
+
+        # Cases with no explicit absolute anchors should continue the current cursor
+        # flow instead of restarting from LEFT/NEXT.
+        def _flatten_cmds(cmds):
+            for c in cmds:
+                yield c
+                if c.children:
+                    yield from _flatten_cmds(c.children)
+        has_absolute_anchor = any(
+            c.name in ('MOVETO', 'SETLKF', 'SETPAGEDEF')
+            for c in _flatten_cmds(commands)
+        )
+        outline_start_pos = "LEFT NEXT" if has_absolute_anchor else "SAME SAME"
 
         # Track consumed commands for lookahead processing (IF/ELSE/ENDIF)
         i = 0
@@ -5639,6 +6193,26 @@ class VIPPToDFAConverter:
                 i += 1
                 continue
 
+            # Handle SETCOLOR / standalone color alias tokens
+            if cmd.name == 'SETCOLOR':
+                if cmd.parameters:
+                    color_alias = str(cmd.parameters[0]).upper().lstrip('/')
+                    current_color = self.color_mappings.get(color_alias, color_alias)
+                i += 1
+                continue
+
+            # Handle standalone font/color shortcut tokens from VIPP streams
+            # (e.g. FI, FK, W, B) that set style state for subsequent output.
+            cmd_upper = cmd.name.upper()
+            if cmd_upper in self.font_mappings:
+                current_font = self.font_mappings[cmd_upper]
+                i += 1
+                continue
+            if cmd_upper in self.color_mappings:
+                current_color = self.color_mappings[cmd_upper]
+                i += 1
+                continue
+
             # Open OUTLINE before first output command
             # All OUTPUT, TEXT, and graphics commands must be inside OUTLINE block
             if has_output and not outline_opened and cmd.name in ('NL', 'SH', 'SHL', 'SHR', 'SHr', 'SHC', 'SHc', 'SHP', 'SHp', 'DRAWB', 'SCALL', 'ICALL', 'MOVEHR'):
@@ -5651,37 +6225,60 @@ class VIPPToDFAConverter:
                 self.add_line("")
                 self.add_line("OUTLINE")
                 self.indent()
-                self.add_line("POSITION LEFT NEXT")
+                self.add_line(f"POSITION {outline_start_pos}")
                 self.add_line("DIRECTION ACROSS;")
                 self.add_line("")
                 outline_opened = True
+                outline_opened_here = True
                 # Reset box anchor flag for new OUTLINE block
                 self.should_set_box_anchor = True
 
             # Handle NL (newline) - generate OUTPUT '' POSITION SAME NEXT
             if cmd.name == 'NL':
                 y_position = 'NEXT'
+                spacing_delta = None
 
                 # If NL has a spacing parameter
                 if cmd.parameters:
                     try:
                         spacing_val = float(cmd.parameters[0])
+                        spacing_delta = spacing_val
                         if spacing_val < 0:
-                            # Negative NL: move up by N mm from current position
-                            # Example: -04 NL becomes SAME-4.0 MM
                             distance_up = abs(spacing_val)
-                            y_position = f"SAME-{distance_up} MM"
+                            # If the very first vertical move in a case is negative,
+                            # DFA can underflow because the case starts at LEFT NEXT.
+                            # Clamp to NEXT for stability; subsequent relative NL
+                            # movements keep original SAME- semantics.
+                            if self.last_command_type is None:
+                                y_position = 'NEXT'
+                            elif self.last_command_type == 'TEXT':
+                                # After TEXT blocks, anchor relative moves to LASTMAX
+                                # (the text extent), not SAME baseline.
+                                y_position = f"LASTMAX-{distance_up} MM"
+                            else:
+                                # Negative NL: move up by N mm from current position
+                                # Example: -04 NL becomes SAME-4.0 MM
+                                y_position = f"SAME-{distance_up} MM"
                         else:
                             # Positive NL: move down by N mm from current position
                             # Example: 0.3 NL becomes SAME+0.3 MM
-                            y_position = f"SAME+{spacing_val} MM"
+                            if self.last_command_type == 'TEXT':
+                                y_position = f"LASTMAX+{spacing_val} MM"
+                            else:
+                                y_position = f"SAME+{spacing_val} MM"
                     except ValueError:
                         pass
+                else:
+                    spacing_delta = current_linesp
 
                 # Generate the newline as OUTPUT with POSITION SAME (NEXT or SAME+/-X MM)
                 self.add_line("OUTPUT ''")
                 self.add_line(f"    FONT {current_font} NORMAL")
                 self.add_line(f"    {self._format_position('SAME', y_position)};")
+
+                # Maintain an approximate flow cursor for subsequent SCALL anchors.
+                if spacing_delta is not None:
+                    current_y += spacing_delta
 
                 # After NL, next OUTPUT should use NEXT (advance to next line)
                 y_was_explicitly_set = False
@@ -5743,6 +6340,10 @@ class VIPPToDFAConverter:
                 if cmd.parameters:
                     spacing_val = cmd.parameters[0]
                     self.add_line(f"SETUNITS LINESP {spacing_val} MM;")
+                    try:
+                        current_linesp = float(spacing_val)
+                    except (TypeError, ValueError):
+                        pass
                 else:
                     # Default to AUTO (uses font's line spacing)
                     self.add_line("SETUNITS LINESP AUTO;")
@@ -5764,7 +6365,7 @@ class VIPPToDFAConverter:
 
                 # Convert the IF command with lookahead for ELSE/ENDIF
                 # Pass current_font so nested NL commands use the active font, not ARIAL08
-                consumed = self._convert_if_command(cmd, commands, i, current_font)
+                consumed = self._convert_if_command(cmd, commands, i, current_font, current_color, in_outline=outline_opened)
                 # Skip the consumed commands (ELSE, ENDIF, and their bodies)
                 i += consumed
                 continue
@@ -5806,7 +6407,8 @@ class VIPPToDFAConverter:
             # Handle output commands (SH, SHL, SHR, SHC, SHP)
             if dfa_cmd == 'OUTPUT':
                 self._convert_output_command_dfa(cmd, current_x, current_y, current_font,
-                                                 x_was_explicitly_set, y_was_explicitly_set, y_is_next_line)
+                                                 x_was_explicitly_set, y_was_explicitly_set, y_is_next_line,
+                                                 current_color)
                 # After output, position becomes implicit and next output should advance to next line
                 x_was_explicitly_set = False
                 y_was_explicitly_set = False
@@ -5861,10 +6463,18 @@ class VIPPToDFAConverter:
                     # IMG_W_MM calculation, and XOBJECTAREASIZE emission correctly.
                     self._convert_frm_segment(cmd, current_x, current_y, None,
                                               last_cache_cmd,
-                                              x_was_explicitly_set, y_was_explicitly_set)
+                                              x_was_explicitly_set, y_was_explicitly_set,
+                                              current_font)
                     last_cache_cmd = None  # Clear after use
                 else:
-                    self._convert_resource_command_dfa(cmd, current_x, current_y)
+                    self._convert_resource_command_dfa(
+                        cmd,
+                        current_x,
+                        current_y,
+                        current_font=current_font,
+                        x_was_set=x_was_explicitly_set,
+                        y_was_set=y_was_explicitly_set
+                    )
                 i += 1
                 continue
 
@@ -5997,10 +6607,40 @@ class VIPPToDFAConverter:
                 i += 1
                 continue
 
+            if cmd.name == 'ADD':
+                self._convert_add_command(cmd)
+                i += 1
+                continue
+
+            if cmd.name == 'GETITEM':
+                self._convert_getitem_command(cmd)
+                i += 1
+                continue
+
+            if cmd.name == 'BOOKMARK':
+                # Emit bookmark indices at DOCFORMAT scope (outside OUTLINE).
+                if outline_opened:
+                    self.dedent()
+                    self.add_line("ENDIO;")
+                    outline_opened = False
+                self._convert_bookmark_command(cmd)
+                i += 1
+                continue
+
+            if cmd.name == 'SETPAGENUMBER':
+                # Extracted for footer generation; keep trace for auditability.
+                if outline_opened:
+                    self.dedent()
+                    self.add_line("ENDIO;")
+                    outline_opened = False
+                self._convert_pagenumber_command(cmd)
+                i += 1
+                continue
+
             # Skip other unsupported VIPP commands with comment
             if cmd.name in ('CACHE',
-                          'BOOKMARK', 'SETPAGENUMBER', 'PAGEDEF',
-                          'CPCOUNT', 'GETITEM'):
+                          'PAGEDEF',
+                          'CPCOUNT'):
                 self.add_line(f"/* VIPP command not directly supported: {cmd.name} */")
                 i += 1
                 continue
@@ -6008,14 +6648,16 @@ class VIPPToDFAConverter:
             # Increment counter for any unhandled commands (shouldn't reach here)
             i += 1
 
-        # Close OUTLINE if it was opened
-        if outline_opened:
+        # Close OUTLINE only if this invocation opened it.
+        if outline_opened and outline_opened_here:
             self.dedent()
             self.add_line("ENDIO;")
 
         self.dedent()
     
-    def _convert_if_command(self, cmd: XeroxCommand, commands: List[XeroxCommand] = None, idx: int = -1, current_font: str = "ARIAL08"):
+    def _convert_if_command(self, cmd: XeroxCommand, commands: List[XeroxCommand] = None,
+                            idx: int = -1, current_font: str = "ARIAL08",
+                            current_color: str = None, in_outline: bool = False):
         """
         Convert an IF command to DFA, handling ELSE and ENDIF at the same nesting level.
 
@@ -6024,6 +6666,7 @@ class VIPPToDFAConverter:
             commands: Full list of commands (for lookahead to find ELSE/ENDIF)
             idx: Current index of the IF command in the commands list
             current_font: Active font at the call site, propagated into child blocks
+            current_color: Active color at the call site, propagated into child blocks
 
         Returns:
             Number of commands consumed (including IF, ELSE, ENDIF, and their bodies)
@@ -6078,7 +6721,7 @@ class VIPPToDFAConverter:
             has_pagebrk = cmd.children and any(c.name == 'PAGEBRK' for c in cmd.children)
             if has_pagebrk:
                 self.add_line(f"/* FRLEFT section transition (unconditional) */")
-                self._convert_case_commands(cmd.children, current_font)
+                self._convert_case_commands(cmd.children, current_font, current_color, existing_outline=in_outline)
                 # Still need to consume ELSE/ENDIF siblings if present
                 consumed = 1
                 if commands is not None and idx >= 0:
@@ -6170,7 +6813,7 @@ class VIPPToDFAConverter:
 
         # Process children (IF body) if present
         if cmd.children:
-            self._convert_case_commands(cmd.children, current_font)
+            self._convert_case_commands(cmd.children, current_font, current_color, existing_outline=in_outline)
             # IF blocks with children still need lookahead for ELSE at parent level
             # In VIPP: IF cond { then_block } ELSE { else_block } ENDIF
             # Parser creates children for {block} but ELSE/ENDIF remain as siblings
@@ -6195,7 +6838,7 @@ class VIPPToDFAConverter:
                     self.add_line("ELSE;")
                     else_cmd = commands[else_idx]
                     if else_cmd.children:
-                        self._convert_case_commands(else_cmd.children, current_font)
+                        self._convert_case_commands(else_cmd.children, current_font, current_color, existing_outline=in_outline)
                     elif endif_idx > else_idx + 1:
                         self.indent()
                         else_commands = commands[else_idx + 1:endif_idx]
@@ -6378,6 +7021,22 @@ class VIPPToDFAConverter:
         if cmd.name in ('ELSE', 'ENDIF'):
             return
 
+        if cmd.name == 'BOOKMARK':
+            self._convert_bookmark_command(cmd)
+            return
+
+        if cmd.name == 'SETPAGENUMBER':
+            self._convert_pagenumber_command(cmd)
+            return
+
+        if cmd.name == 'ADD':
+            self._convert_add_command(cmd)
+            return
+
+        if cmd.name == 'GETITEM':
+            self._convert_getitem_command(cmd)
+            return
+
         # Log unhandled commands for debugging
         # This helps identify commands that need proper conversion
         logger.debug(f"Unhandled command in IF/ELSE block: {cmd.name} {cmd.parameters}")
@@ -6556,11 +7215,12 @@ class VIPPToDFAConverter:
         self.add_line("TEXT")
         self.indent()
 
-        # Position SAME SAME BASELINE
-        self.add_line("POSITION SAME SAME BASELINE")
+        # Keep the caller-provided anchor position; forcing SAME SAME causes
+        # wrapped paragraphs to overprint previous lines.
+        self.add_line(f"{self._format_position(x_pos, y_pos)} BASELINE")
 
-        # Width for JUSTIFY
-        if alignment == 3 and width:
+        # Width for wrapped paragraph output (SHP/SHp and JUSTIFY cases)
+        if width:
             self.add_line(f"WIDTH {width} MM")
 
         # Font
@@ -6598,16 +7258,17 @@ class VIPPToDFAConverter:
 
         self.dedent()
 
-        self.dedent()
-
 
 
     def _convert_output_command_dfa(self, cmd: XeroxCommand, x_pos: float, y_pos: float, current_font: str,
-                                   x_was_set: bool = True, y_was_set: bool = True, y_is_next: bool = False):
+                                   x_was_set: bool = True, y_was_set: bool = True, y_is_next: bool = False,
+                                   current_color: str = None):
         """Convert an output command to proper DFA OUTPUT with FONT and POSITION."""
         text = ""
         is_variable = False
         format_string = None  # Will hold the FORMAT pattern if detected
+        shp_width = None
+        shp_alignment = None
 
         # Extract text from parameters
         # Note: In VIPP, /NAME can be either:
@@ -6649,6 +7310,23 @@ class VIPPToDFAConverter:
             else:
                 i += 1
 
+        # SHP/SHp carries width and alignment as numeric params.
+        # Use trailing numeric values to avoid confusion with values embedded in text.
+        if cmd.name in ('SHP', 'SHp'):
+            numeric_vals = []
+            for p in cmd.parameters:
+                ps = str(p)
+                try:
+                    numeric_vals.append(float(ps))
+                except (TypeError, ValueError):
+                    continue
+            if len(numeric_vals) >= 2:
+                shp_width = numeric_vals[-2]
+                try:
+                    shp_alignment = int(numeric_vals[-1])
+                except (TypeError, ValueError):
+                    shp_alignment = None
+
         if not text:
             return
 
@@ -6664,14 +7342,16 @@ class VIPPToDFAConverter:
                 # The converted text is just a bare variable name — must not be quoted.
                 is_variable = True
 
-        # Determine alignment from command type
+        # Determine alignment from command type / SHP parameter
         alignment = None
         if cmd.name == 'SHL':
             alignment = 0  # Left
         elif cmd.name in ('SHR', 'SHr'):
             alignment = 1  # Right
-        elif cmd.name == 'SHC':
+        elif cmd.name in ('SHC', 'SHc'):
             alignment = 2  # Center
+        elif cmd.name in ('SHP', 'SHp') and shp_alignment is not None:
+            alignment = shp_alignment
 
         # Use flags to determine position format
         # X position: pass raw numeric value if set (MM will be added by _format_position), SAME otherwise
@@ -6693,9 +7373,32 @@ class VIPPToDFAConverter:
         # Only for literal text (not variables)
         if not is_variable and self._should_use_text_baseline(text, cmd.parameters, alignment):
             # Use TEXT BASELINE for long strings, multi-font text, or JUSTIFY alignment
-            # For width, use a default of 193 MM (common page width) for JUSTIFY
-            width = 193.0 if alignment == 3 else None
+            # Use SHP width when available; otherwise fallback for JUSTIFY.
+            width = shp_width if shp_width else (193.0 if alignment == 3 else None)
             self._generate_text_baseline(text, current_font, (x_final, y_final), alignment, width)
+            self.last_command_type = 'TEXT'
+        elif is_variable and cmd.name in ('SHP', 'SHp') and shp_width:
+            # SHP with VSUB/variable content still needs WIDTH-based paragraph layout.
+            self._tmp_text_counter += 1
+            tmp_var = f"TMP_TXT_{self._tmp_text_counter}"
+
+            if format_string:
+                dfa_format = self._convert_vipp_format_to_dfa(format_string)
+                expr = f"NUMPICTURE({text},{dfa_format})"
+            else:
+                expr = text
+
+            self.add_line(f"{tmp_var} = {expr};")
+            self.add_line("TEXT")
+            self.indent()
+            self.add_line(f"{self._format_position(x_final, y_final)} BASELINE")
+            self.add_line(f"WIDTH {shp_width} MM")
+            self.add_line(f"FONT {current_font}")
+            align_map = {0: 'LEFT', 1: 'RIGHT', 2: 'CENTER', 3: 'JUSTIFY'}
+            if alignment in align_map:
+                self.add_line(f"ALIGN {align_map[alignment]}")
+            self.add_line(f"({tmp_var});")
+            self.dedent()
             self.last_command_type = 'TEXT'
         else:
             # Generate proper DFA OUTPUT with FONT and POSITION on separate lines
@@ -6711,6 +7414,8 @@ class VIPPToDFAConverter:
                 self.add_line(f"OUTPUT '{self._escape_dfa_quotes(text)}'")
             self.add_line(f"    FONT {current_font} NORMAL")
             self.add_line(f"    {self._format_position(x_final, y_final)}")
+            if current_color:
+                self.add_line(f"    COLOR {current_color}")
 
             # Add alignment if specified (but NOT JUSTIFY - that's not valid for OUTPUT)
             if alignment == 0:
@@ -6736,23 +7441,54 @@ class VIPPToDFAConverter:
         if len(cmd.parameters) < 4:
             return
 
-        # Parse parameters
+        # Parse dimensions first (must be numeric)
         try:
-            x = float(cmd.parameters[0])
-            y = float(cmd.parameters[1])
             width = float(cmd.parameters[2])
             height = float(cmd.parameters[3])
-        except (ValueError, IndexError):
+        except (ValueError, IndexError, TypeError):
             return
 
-        # Invert Y coordinate (negative becomes positive)
-        y_inverted = abs(y)
+        x_raw = str(cmd.parameters[0])
+        y_raw = str(cmd.parameters[1])
 
-        # Convert tiny widths/heights to 0.1 MM for thin lines
+        def _num_or_none(v: str):
+            try:
+                return float(v)
+            except (ValueError, TypeError):
+                return None
+
+        x_num = _num_or_none(x_raw)
+        y_num = _num_or_none(y_raw)
+
+        # Build position expressions:
+        # - numeric coordinates keep current behavior (Y uses absolute inversion)
+        # - variable/identifier coordinates are emitted as dynamic MM expressions
+        if x_num is not None:
+            x_expr = f"{x_num} MM-$MR_LEFT"
+        else:
+            x_var = self._sanitize_dfa_name(x_raw.lstrip('/'))
+            if not x_var:
+                return
+            x_expr = f"{x_var}-$MR_LEFT"
+
+        y_var_name = None
+        if y_num is not None:
+            y_expr = f"{abs(y_num)} MM-$MR_TOP"
+        else:
+            # In DBM inline flows (e.g. CASIO Y0), variable Y operands such as VAR.Y5
+            # are often zero-offset placeholders and must follow current cursor Y.
+            # Mapping them to absolute margin coordinates pushes lines to page top.
+            y_var = self._sanitize_dfa_name(y_raw.lstrip('/'))
+            if not y_var:
+                return
+            y_var_name = y_var
+            y_expr = "SAME"
+
+        # Convert tiny widths/heights to 0.01 MM for thin lines
         if width < 0.01:
-            width = 0.1
+            width = 0.01
         if height < 0.01:
-            height = 0.1
+            height = 0.01
 
         # Parse style parameter if present
         style = str(cmd.parameters[4]).upper() if len(cmd.parameters) >= 5 else None
@@ -6764,14 +7500,49 @@ class VIPPToDFAConverter:
         # x=0 and y=0 → DBM inline context: "current position" → use SAME SAME
         # Note: POSX/POSY anchors are only valid inside XGFRESDEF-generated SEGMENTs,
         # not in top-level DOCFORMAT/OUTLINE blocks.
-        use_absolute = (x > 0 or y != 0)
+        use_absolute = (x_num is None or y_num is None or x_num > 0 or y_num != 0)
+
+        # Convert thin vertical boxes (width 0.1 MM) to RULE UP.
+        if abs(width - 0.1) < 0.0001 and height > width:
+            if y_var_name:
+                # Keep Xerox-like dynamic anchor immediately before each draw.
+                self.add_line(f"{y_var_name} = $SL_CURRY;")
+            self.add_line("RULE")
+            self.indent()
+            if use_absolute:
+                if y_var_name:
+                    y_start = f"{y_var_name}+{height} MM"
+                elif y_expr == "SAME":
+                    y_start = f"SAME+{height} MM"
+                else:
+                    y_start = f"{y_expr}+{height} MM"
+                self.add_line(f"POSITION ({x_expr}) ({y_start})")
+            else:
+                self.add_line(f"POSITION (POSX+{x_num} MM) (POSY+{height} MM)")
+            self.add_line("DIRECTION UP")
+            if style:
+                color = 'FBLACK'
+                if style.startswith('R'):
+                    color = 'R'
+                elif style.startswith('G'):
+                    color = 'G'
+                elif style.startswith('B') and style != 'BLACK':
+                    color = 'B'
+                elif style in ('XDRK', 'MED', 'LMED', 'FBLACK'):
+                    color = style
+                self.add_line(f"COLOR {color}")
+            self.add_line(f"LENGTH {height} MM")
+            self.add_line("THICKNESS 0.1 MM TYPE SOLID")
+            self.add_line(";")
+            self.dedent()
+            return
 
         # Generate BOX
         self.add_line("BOX")
         self.indent()
 
         if use_absolute:
-            self.add_line(f"POSITION ({x} MM-$MR_LEFT) ({y_inverted} MM-$MR_TOP)")
+            self.add_line(f"POSITION ({x_expr}) ({y_expr})")
         else:
             # x=0 y=0: draw at current inline position
             self.add_line("POSITION (SAME) (SAME)")
@@ -6813,7 +7584,9 @@ class VIPPToDFAConverter:
 
         self.dedent()
 
-    def _convert_resource_command_dfa(self, cmd: XeroxCommand, x_pos: float, y_pos: float):
+    def _convert_resource_command_dfa(self, cmd: XeroxCommand, x_pos: float, y_pos: float,
+                                      current_font: str = "ARIAL08",
+                                      x_was_set: bool = False, y_was_set: bool = False):
         """Convert a resource call (SCALL/ICALL) to proper DFA SEGMENT or inlined BOX/RULE.
 
         For XGFRESDEF subroutines (drawing macros): inline DRAWB children as absolute BOX/RULE
@@ -6825,8 +7598,27 @@ class VIPPToDFAConverter:
         resource_name = self._sanitize_dfa_name(cmd.parameters[0].strip('()'))
         sub = self.subroutines.get(resource_name)
         if sub and sub.get('xgfresdef'):
-            # Inline the XGFRESDEF subroutine as BOX/RULE commands at the call-site coordinates
-            self._inline_xgfresdef_drawbs(resource_name, x_pos, y_pos)
+            # Save current cursor before drawing inline segment content.
+            self.add_line("YPOS = $SL_CURRY;")
+            self.add_line("XPOS = $SL_CURRX;")
+            if x_was_set:
+                self.add_line(f"XPOS = MM({x_pos});")
+            if y_was_set:
+                self.add_line(f"YPOS = MM({y_pos});")
+
+            # Inline XGFRESDEF relative to saved XPOS/YPOS anchors.
+            self._inline_xgfresdef_drawbs(
+                resource_name,
+                x_pos,
+                y_pos,
+                anchor_x_var="XPOS",
+                anchor_y_var="YPOS"
+            )
+
+            # Restore cursor so subsequent SAME/NEXT flow continues from pre-SCALL location.
+            self.add_line("OUTPUT ''")
+            self.add_line(f"    FONT {current_font} NORMAL")
+            self.add_line("    POSITION (XPOS) (YPOS);")
         else:
             # AFP page segment: SEGMENT requires .240/.300 files from psew3pic (unlicensed).
             # Commented out; use CREATEOBJECT IOBDLL to load JPG directly instead.
@@ -7035,36 +7827,63 @@ class VIPPToDFAConverter:
         """
         Convert a VIPP BOOKMARK command to DFA.
 
-        BOOKMARK creates PDF bookmarks for navigation.
-        VIPP: (text) level BOOKMARK
-        DFA: BOOKMARK 'text' LEVEL level;
+        VIPP BOOKMARK semantics are mapped to PDF index records in DFA.
+        We generate GROUPINDEX so PDF output can build bookmark trees.
         """
-        bookmark_text = ""
-        level = "1"
+        bookmark_param = None
 
         for param in cmd.parameters:
-            if param.startswith('(') and param.endswith(')'):
-                bookmark_text = param.strip('()')
-            elif param.isdigit():
-                level = param
+            if param == 'VSUB':
+                continue
+            if isinstance(param, str) and (param.startswith('(') or '$$' in param or param.startswith('$') or param.startswith('VAR_')):
+                bookmark_param = param
+                break
 
-        if bookmark_text:
-            # Handle VSUB in bookmark text
-            if '$$' in bookmark_text or '$' in bookmark_text:
-                bookmark_text = self._convert_vsub(bookmark_text)
-            self.add_line(f"BOOKMARK '{bookmark_text}' LEVEL {level};")
+        if not bookmark_param:
+            self.add_line("/* BOOKMARK without resolvable text parameter */")
+            return
 
-    def _convert_pagenumber_command(self, cmd: XeroxCommand):
+        expr = self._render_vipp_format_expr(bookmark_param)
+        self.add_line(f"GROUPINDEX BOOKMARK = {expr};")
+
+    def _convert_pagenumber_command(self, cmd: XeroxCommand, emit_now: bool = True):
         """
         Convert a VIPP SETPAGENUMBER command to DFA.
 
-        SETPAGENUMBER sets up page numbering.
+        We apply its format/position metadata to generated PRINTFOOTER output.
         """
-        if cmd.parameters:
-            params = " ".join(self._convert_params(cmd.parameters))
-            self.add_line(f"PAGENUMBER {params};")
-        else:
-            self.add_line("PAGENUMBER;")
+        if not cmd.parameters:
+            if emit_now:
+                self.add_line("/* SETPAGENUMBER without parameters */")
+            return
+
+        # Expected frequent form:
+        # (format) [VSUB] start hpos vpos align SETPAGENUMBER
+        # Keep numeric operands in encountered order.
+        fmt_param = None
+        numeric_params = []
+        for param in cmd.parameters:
+            if param == 'VSUB':
+                continue
+            if fmt_param is None and isinstance(param, str) and param.startswith('(') and param.endswith(')'):
+                fmt_param = param
+                continue
+            if isinstance(param, str) and (param.replace('.', '', 1).lstrip('-').isdigit()):
+                numeric_params.append(param)
+
+        if fmt_param:
+            self.page_number_expr = self._render_vipp_format_expr(fmt_param)
+            self.emit_page_index_marker = True
+
+        # start hpos vpos align
+        if len(numeric_params) >= 4:
+            self.page_number_x = f"{numeric_params[1]} MM-$MR_LEFT"
+            self.page_number_y = f"{numeric_params[2]} MM"
+            align_map = {'5': 'LEFT', '6': 'RIGHT', '7': 'CENTER'}
+            self.page_number_align = align_map.get(numeric_params[3], self.page_number_align)
+
+        if emit_now:
+            self.add_line("/* SETPAGENUMBER mapped to PRINTFOOTER page-number output */")
 
     def _convert_params(self, params: List[str]) -> List[str]:
         """Convert Xerox command parameters to DFA format."""
@@ -7260,6 +8079,10 @@ class VIPPToDFAConverter:
 
             if init_count > 0:
                 logger.info(f"Extracted {init_count} initialization variables from raw DBM content")
+
+        # Initialize GETITEM backing stores so DFA does not warn on first indexed read.
+        for store_var in sorted(set(self.getitem_store_vars.values())):
+            self.add_line(f"{store_var} = '';")
 
         self.add_line("")
 

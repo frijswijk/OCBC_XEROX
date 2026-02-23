@@ -1,0 +1,177 @@
+%!
+%%Title: CASIOF3.FRM
+%%Creator: Lian 
+%%CreationDate: Mon Jun 15 2009, 14:28:30.
+%%EndComments
+
+{  %%Begin Form
+XGF
+MM SETUNIT
+ORITL
+PORT
+2 SETLSP
+
+% Define Font Indexing
+(**) 2 SETFTSW
+/F1  /ARIALB   07  INDEXFONT
+/F2  /ARIAL    06  INDEXFONT
+/F3  /ARIAL    08  INDEXFONT
+/F4  /ARIALB   09  INDEXFONT
+/F5  /ARIALBO  07  INDEXFONT
+/F6  /ARIAL    07  INDEXFONT
+/F7  /ARIALB   08  INDEXFONT
+/F8  /ARIALO   07  INDEXFONT
+/F9  /ARIALBO  08  INDEXFONT
+
+% Define Color Indexing
+/B    BLACK        INDEXCOLOR
+/R    RED          INDEXCOLOR
+
+% HEADER
+% Insert Company Logo
+%08 01.5 MOVETO
+%(OCBC-LOGO.TIF) 0.125 0 ICALL
+%08 01 MOVETO
+%(OCBC-LOGO.TIF) 0.16 0 ICALL
+
+% June 2023
+%11 0.80 MOVETO (OCBC.JPG) 0.45 0 ICALL			
+%10 0 MOVETO (OCBC.tif) 0.38 0 ICALL
+10 16 MOVETO (OCBC.eps) CACHE 0.38  SCALL
+
+%131.3 05.2 MOVETO F1 (OCBC Bank (Malaysia) Berhad (199401009721 / 295400-W)) SHL
+131.3 04  MOVETO F1 (OCBC Bank (Malaysia) Berhad 199401009721 (295400-W)) SHL
+
+% Insert Company Name
+F6
+%20.5 12.5 MOVETO
+%(OCBC Bank (Malaysia) Berhad (295400-W)) SHL
+%23.5 15 MOVETO (OCBC Bank (Malaysia) Berhad (199401009721 / 295400-W)) SHL
+
+% Draw a horizontal line
+%08 15 193 0.2 R_S1 DRAWB
+%08 17 193 0.2 R_S1 DRAWB
+12 17 187 0.2 R_S1 DRAWB
+
+% Insert Enquiries Information
+% F1
+% 201 08.5 MOVETO
+% (Personal Banking Enquiries  03-8317 5000                         )    SHR
+% NL
+% (Business Banking Enquiries 1300-88-7000 / 03-8317 5200)    SHR
+
+% June 2023
+03 SETLSP
+131.3 11 MOVETO  F6  (Personal Banking Enquiries  03-8317 5000                         )    SHL  
+(Business Banking Enquiries 1300-88-7000 / 03-8317 5200)    SHL
+
+02 SETLSP
+
+%199 12 MOVETO
+%(1300-88 5000 / 03-8317 5000)   SHR
+%NL
+%(1300-88 8883 / 03-8317 5555)   SHR
+
+% Insert Statement Text
+%105 20 MOVETO
+105 22 MOVETO
+F4
+(STATEMENT OF ACCOUNT) SHC
+02 NL
+F9
+(PENYATA AKAUN)        SHC
+
+% Insert Your Monthly Transaction Details
+NL
+%10 30 MOVETO
+ 10 31 MOVETO
+F7
+(Your Monthly Transaction Details /)  SH
+F8
+(Transaksi Bulanan Anda)  SH
+F7
+( - )  SH
+
+% Insert Variables - Customer Name
+  %88 30 MOVETO
+   88 31 MOVETO
+  F7
+  VAR_CN1  80 0 SHP
+
+% Insert Header
+10  33  189  15  LT     DRAWB % Shaded Box
+28  33   01  15  FWHITE DRAWB
+48  33   01  15  FWHITE DRAWB
+165 33   01  15  FWHITE DRAWB
+
+%10.5 44 MOVETO
+%08.5  MOVEHR
+F7
+%05  NL
+03.5  NL 
+-69    MOVEHR (Transaction)   SHc
+03  NL
+-69    MOVEHR (Date)    SHc
+
+-03 NL
+-49.5    MOVEHR (Posting) SHc 
+03  NL
+-49.5    MOVEHR (Date)    SHc
+
+-03 NL
+15     MOVEHR (Transaction Description)   SHc
+95     MOVEHR (Amount (RM))               SHc
+
+06  NL
+F8
+-69    MOVEHR (Tarikh) SHc
+03  NL
+-69    MOVEHR (Transaksi) SHc
+
+-03 NL
+-49.5    MOVEHR (Tarikh Bil) SHc 
+03  NL
+-49.5    MOVEHR (Diterima) SHc
+
+-05 NL
+15     MOVEHR (Deskripsi Transaksi)       SHc
+95     MOVEHR (Amaun (RM))                SHc
+
+% Insert Tiff Image Message
+		%10 245 191 36.3 S2 DRAWB
+		
+		%10.9 280.4 MOVETO
+	
+		%11 246 187.7 35 CLIP DRAWB
+		%(Promotion2.jpg) CACHE [188 35.5] 0 222 SCALL
+		%ENDCLIP
+		
+% FOOTER
+% Insert MEPS Logo
+% 10 284.5 MOVETO
+% (OCBC-MEPS.JPG) 0.128 0 ICALL
+
+% Insert URL text
+F6 B 
+%128 290 MOVETO (Your banking questions ANSWERED! For more info,) SHC
+%R  01 NL  (log on to http://www.bankinginfo.com.my) SHC
+
+ % 20210427
+ %  08 290 MOVETO (Your banking questions ANSWERED! For more info,) SHL
+ %  R  01 NL (log on to http://www.bankinginfo.com.my) SHL
+
+% Insert Group Name
+F6 B
+186.5 290 MOVETO
+(A Member of OCBC Group) SHC
+
+R 01 NL (https://www.ocbc.com.my) SHC B
+
+ % 20210427
+ %   201.5 290 MOVETO  (A Member of OCBC Group) SHR
+ %	R  01 NL  (http://www.ocbc.com.my) SHR  B
+
+}  % FSHOW
+% EOF
+
+

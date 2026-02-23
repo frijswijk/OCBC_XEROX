@@ -1,0 +1,548 @@
+%!
+%%Title: UT00060.dbm
+%%Creator: Lian
+%%CreationDate: Fri Jan 18 2019, 16:53:31.
+%%WIZVAR:BEGIN
+%%WIZVAR PREFIX, FLD1, FLD2, FLD3, FLD4, FLD5, FLD6, FLD7
+%%WIZVAR FLD8, FLD9, FLD10, FLD11, FLD12, FLD13, FLD14, FLD15
+%%WIZVAR FLD16, FLD17, FLD18, FLD19, FLD20, FLD21, FLD22, FLD23
+%%WIZVAR FLD24, FLD25, FLD26, FLD27, FLD28, FLD29, FLD30, FLD31
+%%WIZVAR FLD32, FLD33, FLD34, FLD35, FLD36, FLD37, FLD38, FLD39
+%%WIZVAR FLD40
+%%WIZVAR:END
+%%EndComments
+
+XGF
+
+[ /DecimalPoint  46    % decimal delimiter in numeric data (default .)
+/NSign         45    % negative sign in numeric data (default: -)
+/FDecimalPoint 46    % decimal delimiter in format (default: .)
+/FNSign        45    % nefgative sign in format (default: -)
+/FPSign        43    % positive sign in format (default: +)
+/FPunctuation  44    % thousands delimiter in format (default: ,)
+/FDigit        35    % placeholder for digit in format (default: #)
+/FLZDigit      64    % placeholder for digit in format (default: @)
+% is aleading zero
+] SETPARAMS
+
+% Start Of Initializations
+% ------------------------------------------------
+/VARINI true				/INI	SETVAR
+IF VARINI
+
+{	% Define Page Layout
+
+    /VAR_New_DOC	true	/INI	SETVAR
+    /VAR_Brk_count	(000)   /INI	SETVAR
+
+    /VAR_NoTrx		true 	/INI 	SETVAR	% for multiple account without transaction
+    /VAR_NotBeign	false 	/INI 	SETVAR	% for multiple account without transaction
+
+    % define var VAR_DOC_Count
+    /VAR_DOC_count	0		/INI	SETVAR
+
+    MM SETUNIT
+    ORITL
+    PORT
+    04 SETLSP
+
+    % Run Initialising Once Only
+    /VARINI			false			SETVAR
+
+    %YKS
+    /VAR_New_DOC	true	/INI	SETVAR
+    /VAR_DOC_count	0		/INI	SETVAR
+    /VAR_Brk_count	(000)	/INI	SETVAR
+
+    % Define Font Indexing
+    % ------------------------------------------------
+    (~~) 2 SETFTSW
+
+    /PNFT   /ARIALB		07		INDEXFONT
+
+    /F1		/ARIAL		06		INDEXFONT
+    /F2  	/ARIAL      07		INDEXFONT
+    /F3  	/ARIAL      08		INDEXFONT
+    /F4  	/ARIAL      09		INDEXFONT
+    /F5  	/ARIALB     09		INDEXFONT
+    /F6  	/ARIAL      10		INDEXFONT
+    /F7  	/ARIALB     10		INDEXFONT
+    /F8  	/ARIAL      11		INDEXFONT
+    /F9  	/ARIALB     15		INDEXFONT
+    /F10  	/ARIALB     18		INDEXFONT
+    /F11 	/ARIAL 		35 		INDEXFONT
+    /F12  	/ARIALB     07		INDEXFONT
+
+    % Define Colour Indexing
+    % ------------------------------------------------
+    /B    	BLACK          	 INDEXCOLOR
+    /W    	WHITE          	 INDEXCOLOR
+    /R    	RED            	 INDEXCOLOR
+    /M      MAGENTA          INDEXCOLOR
+    /P      LBLUE            INDEXCOLOR
+
+    % Define BatKey Indexing
+    % ------------------------------------------------
+    /S0  /SUP  INDEXSST
+    /N0  null  INDEXSST
+    /U0  /UNDL INDEXBAT
+    /N1  null  INDEXBAT
+
+    /VARMM2		0	/INI	SETVAR
+    /VARMdate	0	/INI	SETVAR
+    /VARMmonth	0	/INI	SETVAR
+    /VARMyear	0	/INI	SETVAR
+
+    % file splitting
+    /VAR_New_DOC	  true  /INI SETVAR
+    /VAR_DOC_count  0     /INI SETVAR
+    /VAR_Brk_count  (000) /INI SETVAR
+
+    { } BEGINPAGE
+
+} ENDIF	% Closing for =>IF VARINI
+
+% Process PREFIX (CASE starts here)
+% ------------------------------------------------
+CASE PREFIX
+{}
+% ------------------------------------------------
+% define statement type field
+(DTL)
+{
+    /VAR_DTL	PREFIX	SETVAR	% define letter code
+    /VAR_CON	FLD1	SETVAR	% ut fund setup for conventional
+    /VAR_ISL	FLD1	SETVAR	% ut fund setup for islamic
+    /VAR_CTY	FLD2	SETVAR	% client type corporate/individual
+    /VAR_ITY	FLD2	SETVAR	% client type corporate/individual
+    /VAR_BCD	FLD3	SETVAR	% salutation
+    /VAR_SAL	FLD4	SETVAR	% salutation
+    /VAR_CNM	FLD5	SETVAR	% customer name
+    /VAR_AD1	FLD6	SETVAR	% address 1
+    /VAR_AD2	FLD7	SETVAR	% address 2
+    /VAR_AD3	FLD8	SETVAR	% address 3
+    /VAR_AD4	FLD9	SETVAR	% address 4
+    /VAR_CRY	FLD10	SETVAR	% country
+    /VAR_ORN	FLD11	SETVAR	% our reference number
+    /VAR_DOI	FLD12	SETVAR	% date of issue
+    /VAR_IAN	FLD13	SETVAR	% your investment account number
+    /VAR_TRT	FLD14	SETVAR	% transaction type
+    /VAR_OFN	FLD15	SETVAR	% fund name
+    /VAR_OTD	FLD16	SETVAR	% trade date
+    /VAR_OCR	FLD17	SETVAR	% currency
+    /VAR_OGA	FLD18	SETVAR	% gross amount
+    /VAR_ONP	FLD19	SETVAR	% Net Sales Charge/Exit Fee (%)
+    /VAR_ONS	FLD20	SETVAR	% Net Sales Charge/Exit Fee
+    /VAR_OTC	FLD21	SETVAR	% total charges
+    /VAR_ONA	FLD22	SETVAR	% net amount
+    /VAR_OUP	FLD23	SETVAR	% unit price
+    /VAR_OUS	FLD24	SETVAR	% units
+    /VAR_TID	FLD25	SETVAR	% transaction instruction date
+    % new fields for joint account on 20220520
+    /VAR_SNP	FLD26	SETVAR	% salutation joint name primary
+    /VAR_JNP	FLD27	SETVAR	% customer joint name primary
+    /VAR_SNS	FLD28	SETVAR	% salutation joint name secondary
+    /VAR_JNS	FLD29	SETVAR	% customer joint name secondary
+
+    /VARMdate  VAR_DOI 0  2 GETINTV SETVAR
+    /VARMmonth VAR_DOI 3  2 GETINTV SETVAR
+    /VARMyear  VAR_DOI 0 -4 GETINTV SETVAR
+
+    CASE VARMmonth { /VARMmonth ([=VARMM2=]) VSUB SETVAR}
+    (01) {/VARMM2 (JAN) SETVAR}
+    (02) {/VARMM2 (FEB) SETVAR}
+    (03) {/VARMM2 (MAR) SETVAR}
+    (04) {/VARMM2 (APR) SETVAR}
+    (05) {/VARMM2 (MAY)SETVAR}
+    (06) {/VARMM2 (JUN) SETVAR}
+    (07) {/VARMM2 (JUL) SETVAR}
+    (08) {/VARMM2 (AUG) SETVAR}
+    (09) {/VARMM2 (SEP) SETVAR}
+    (10) {/VARMM2 (OCT) SETVAR}
+    (11) {/VARMM2 (NOV) SETVAR}
+    (12) {/VARMM2 (DEC) SETVAR}
+ENDCASE
+
+    % reset new customer page
+    % ------------------------------------------------
+    IF VAR_DTL(DTL) eq
+    { PAGEBRK } ENDIF
+
+    % ------------------------------------------------
+    /VAR_DOC_count ++
+    IF VAR_DOC_count 10000 gt
+    {
+        /VAR_Brk_count ++
+        /VAR_New_DOC true SETVAR
+    }
+ENDIF
+
+    IF VAR_New_DOC
+    {
+        ($$VARMdate._$$VARMM2._$$VARMyear._$$VAR_Brk_count.) VSUB BOOKMARK
+        /VAR_DOC_count 0 SETVAR
+        /VAR_New_DOC	false	SETVAR
+    }
+ENDIF
+
+    % define page-break
+
+    (UT00060.frm) SETFORM
+
+    % define company logo for conventional
+    IF VAR_CON (C) eq
+    {
+
+        % June 2023
+        10.7 16.2 MOVETO (OCBC.eps) CACHE 0.38  SCALL
+
+        4.2 SETLSP
+        131.3 04 MOVETO F12 (OCBC Bank (Malaysia) Berhad 199401009721 (295400-W)) SHL
+        -01 NL (OCBC Al-Amin Bank Berhad 200801017151 (818444-T)) SHL
+
+    } ENDIF
+
+    % define the company logo for islamic
+    IF VAR_ISL (I) eq
+    {
+
+        % June 2023
+        10.7 16.2 MOVETO (OCBC.eps) CACHE 0.38  SCALL
+
+        4.2 SETLSP
+        131.3 04 MOVETO F12 (OCBC Bank (Malaysia) Berhad 199401009721 (295400-W)) SHL
+        -01 NL (OCBC Al-Amin Bank Berhad 200801017151 (818444-T)) SHL
+
+    } ENDIF
+
+    BLACK SETTXC
+    05 SETLSP
+
+    [[10 19.7 193 270 0 ]] SETLKF
+    12 20 MOVETO
+
+    % brach code
+    12 24 MOVETO  F4 VAR_BCD VSUB 110 0  SHP
+    % customer name and address
+    F4
+    12 35 MOVETO
+    VAR_CNM VSUB 110 0  SHP
+    VAR_AD1 VSUB 110 0  SHP
+    VAR_AD2 VSUB 110 0  SHP
+    VAR_AD3 VSUB 110 0  SHP
+    VAR_AD4 VSUB 110 0  SHP
+    VAR_CRY VSUB 110 0  SHP
+
+    % insert the date of issue
+    137 53 MOVETO
+    F6 (Our Reference Number) SHL
+    F7 ($$VAR_ORN.) VSUB SHL 02 NL
+    F6 (Date of Issue) SHL
+    F7 ($$VAR_DOI.) VSUB SHL 02 NL
+    F6 (Your Investment Account No.) SHL
+    F7 ($$VAR_IAN.) VSUB SHL
+
+    %----------------------------------
+    IF VAR_SNP () ne VAR_JNP () ne and
+    { 137 120 MOVETO F7 (Joint Account Holder:) SHL 0.5 NL
+        F6 ($$VAR_SNP. $$VAR_JNP.) VSUB 63 3 SHP 0.5 NL
+        F6 ($$VAR_SNS. $$VAR_JNS.) VSUB 63 3 SHP
+    } ENDIF
+
+    12 95 MOVETO
+    F6 (Dear $$VAR_SAL. $$VAR_CNM.,) VSUB BSTRIP 113 3  SHP
+
+    %-----------------------
+    IF VAR_TRT (subscription) eq  {
+
+        06 NL (We are pleased to confirm your purchase for the following unit trust fund.) 113 3 SHP
+
+        10 NL
+        [ /Margins [0 3 0 0] /FixHeight 10 /Align 0 ] BEGINTABLE   % set table default
+
+        % fund name
+        [ [ /Width 52 /TextAtt {F7} /CellText (Fund Name)   	 				]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OFN.) 	VSUB  				]
+        ] SHROW
+
+        % trade date
+        [ [ /Width 52 /TextAtt {F7} /CellText (Trade Date)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OTD.) 	VSUB 				]
+        ] SHROW
+
+        % currency
+        [ [ /Width 52 /TextAtt {F7} /CellText (Currency) 	  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OCR.) 	VSUB 				]
+        ] SHROW
+
+        % gross amount
+        [ [ /Width 52 /TextAtt {F7} /CellText (Gross Amount)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OGA.) 	VSUB 				]
+        ] SHROW
+
+        % net sales charge/exit fee (%)
+        [ [ /Width 52 /TextAtt {F7} /CellText (Net Sales Charge/Exit Fee (%)) 	]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_ONP.) 	VSUB 				]
+        ] SHROW
+
+        % net sales charge/exit Fee
+        [ [ /Width 52 /TextAtt {F7} /CellText (Net Sales Charge/Exit Fee)  		]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		    					]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_ONS.)  VSUB 				]
+        ] SHROW
+
+        % total charges
+        [ [ /Width 52 /TextAtt {F7} /CellText (Total Charges)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OTC.) 	VSUB 				]
+        ] SHROW
+
+        % net amount
+        [ [ /Width 52 /TextAtt {F7} /CellText (Net Amount)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 	 					]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_ONA.) 	VSUB 				]
+        ] SHROW
+
+        % unit price
+        [ [ /Width 52 /TextAtt {F7} /CellText (Unit Price)   					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OUP.) 	VSUB 				]
+        ] SHROW
+
+        % units
+        [ [ /Width 52 /TextAtt {F7} /CellText (Units)   		    			]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OUS.) 	VSUB 				]
+        ] SHROW  } ENDIF
+
+    %---------------------------------
+    IF VAR_TRT (monthly investment plan) eq  {
+
+        06 NL (We are pleased to confirm your monthly investment plan for the following unit trust fund.) 113 3 SHP
+
+        05 NL
+        [ /Margins [0 3 0 0] /FixHeight 10 /Align 0 ] BEGINTABLE   % set table default
+
+        % fund name
+        [ [ /Width 52 /TextAtt {F7} /CellText (Fund Name)   	 				]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OFN.) 	VSUB  				]
+        ] SHROW
+
+        % trade date
+        [ [ /Width 52 /TextAtt {F7} /CellText (Trade Date)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OTD.) 	VSUB 				]
+        ] SHROW
+
+        % currency
+        [ [ /Width 52 /TextAtt {F7} /CellText (Currency) 	  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OCR.) 	VSUB 				]
+        ] SHROW
+
+        % gross amount
+        [ [ /Width 52 /TextAtt {F7} /CellText (Gross Amount)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OGA.) 	VSUB 				]
+        ] SHROW
+
+        % net sales charge/exit fee (%)
+        [ [ /Width 52 /TextAtt {F7} /CellText (Net Sales Charge/Exit Fee (%)) 	]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_ONP.) 	VSUB 				]
+        ] SHROW
+
+        % net sales charge/exit Fee
+        [ [ /Width 52 /TextAtt {F7} /CellText (Net Sales Charge/Exit Fee)  		]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		    					]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_ONS.)  VSUB 				]
+        ] SHROW
+
+        % total charges
+        [ [ /Width 52 /TextAtt {F7} /CellText (Total Charges)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OTC.) 	VSUB 				]
+        ] SHROW
+
+        % net amount
+        [ [ /Width 52 /TextAtt {F7} /CellText (Net Amount)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 	 					]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_ONA.) 	VSUB 				]
+        ] SHROW
+
+        % unit price
+        [ [ /Width 52 /TextAtt {F7} /CellText (Unit Price)   					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OUP.) 	VSUB 				]
+        ] SHROW
+
+        % units
+        [ [ /Width 52 /TextAtt {F7} /CellText (Units)   		    			]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OUS.) 	VSUB 				]
+        ] SHROW  } ENDIF
+
+    %--------------------
+    IF VAR_TRT (redemption) eq  {
+
+        06 NL (We are pleased to confirm that you have sold the following unit trust fund.) 113 3 SHP
+
+        08 NL
+        [ /Margins [0 3 0 0] /FixHeight 10 /Align 0 ] BEGINTABLE   % set table default
+
+        % fund name
+        [ [ /Width 52 /TextAtt {F7} /CellText (Fund Name)   	 				]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OFN.) 	VSUB  				]
+        ] SHROW
+
+        % trade date
+        [ [ /Width 52 /TextAtt {F7} /CellText (Trade Date)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OTD.) 	VSUB 				]
+        ] SHROW
+
+        % currency
+        [ [ /Width 52 /TextAtt {F7} /CellText (Currency) 	  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OCR.) 	VSUB 				]
+        ] SHROW
+
+        % gross amount
+        [ [ /Width 52 /TextAtt {F7} /CellText (Gross Amount)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OGA.) 	VSUB 				]
+        ] SHROW
+
+        % net sales charge/exit fee (%)
+        [ [ /Width 52 /TextAtt {F7} /CellText (Net Sales Charge/Exit Fee (%)) 	]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_ONP.) 	VSUB 				]
+        ] SHROW
+
+        % net sales charge/exit Fee
+        [ [ /Width 52 /TextAtt {F7} /CellText (Net Sales Charge/Exit Fee)  		]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		    					]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_ONS.)  VSUB 				]
+        ] SHROW
+
+        % total charges
+        [ [ /Width 52 /TextAtt {F7} /CellText (Total Charges)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OTC.) 	VSUB 				]
+        ] SHROW
+
+        % net amount
+        [ [ /Width 52 /TextAtt {F7} /CellText (Net Amount)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 	 					]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_ONA.) 	VSUB 				]
+        ] SHROW
+
+        % unit price
+        [ [ /Width 52 /TextAtt {F7} /CellText (Unit Price)   					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OUP.) 	VSUB 				]
+        ] SHROW
+
+        % units
+        [ [ /Width 52 /TextAtt {F7} /CellText (Units)   		    			]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OUS.) 	VSUB 				]
+        ] SHROW  } ENDIF
+
+    %----------------------------------------
+    IF VAR_TRT (internal unit trust transfer) eq  {
+
+        06 NL (We are pleased to confirm your transfer request for the following unit trust fund:) 113 3 SHP
+
+        08 NL
+        [ /Margins [0 3 0 0] /FixHeight 10 /Align 0 ] BEGINTABLE   % set table default
+
+        % fund name
+        [ [ /Width 52 /TextAtt {F7} /CellText (Fund Name)   	 				]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OFN.) 	VSUB  				]
+        ] SHROW
+
+        % trade date
+        [ [ /Width 52 /TextAtt {F7} /CellText (Trade Date)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OTD.) 	VSUB 				]
+        ] SHROW
+
+        % currency
+        [ [ /Width 52 /TextAtt {F7} /CellText (Currency) 	  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OCR.) 	VSUB 				]
+        ] SHROW
+
+        % total charges
+        [ [ /Width 52 /TextAtt {F7} /CellText (Total Charges)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OTC.) 	VSUB 				]
+        ] SHROW
+
+        % units
+        [ [ /Width 52 /TextAtt {F7} /CellText (Units)   		    			]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OUS.) 	VSUB 				]
+        ] SHROW  } ENDIF
+
+    %----------------------------------
+    IF VAR_TRT (external unit trust transfer) eq  {
+
+        06 NL (We are pleased to confirm your transfer request for the following unit trust fund:) 113 3 SHP
+
+        08 NL
+        [ /Margins [0 3 0 0] /FixHeight 10 /Align 0 ] BEGINTABLE   % set table default
+
+        % fund name
+        [ [ /Width 52 /TextAtt {F7} /CellText (Fund Name)   	 				]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OFN.) 	VSUB  				]
+        ] SHROW
+
+        % trade date
+        [ [ /Width 52 /TextAtt {F7} /CellText (Trade Date)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OTD.) 	VSUB 				]
+        ] SHROW
+
+        % currency
+        [ [ /Width 52 /TextAtt {F7} /CellText (Currency) 	  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OCR.) 	VSUB 				]
+        ] SHROW
+
+        % total charges
+        [ [ /Width 52 /TextAtt {F7} /CellText (Total Charges)  					]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		  						]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OTC.) 	VSUB 				]
+        ] SHROW
+
+        % units
+        [ [ /Width 52 /TextAtt {F7} /CellText (Units)   		    			]
+        [ /Width 03 /TextAtt {F6} /CellText (:) 		 		 				]
+        [ /Width 45 /TextAtt {F6} /CellText ($$VAR_OUS.) 	VSUB 				]
+        ] SHROW  } ENDIF
+
+    08 NL (Thank you for banking with us.) 113 3 SHP
+
+}
+% -----------------------------------------------------------
+% define pagebreak
+(FTR)
+{
+    /VAR_FTR		PREFIX	SETVAR
+
+    PAGEBRK
+
+} ENDCASE
+
+%%EOF

@@ -1,0 +1,38 @@
+[PPMF]
+TARGETMODE="PIC"
+PPMFInputName ="D:\TEST\OCBC\PIC\OCBC.tif"
+TargetName ="D:\TEST\OCBC\PIC\OCBC.240"
+  JOURNALPATH           = "C:\ISIS\demo\log"
+  REPORTMESSAGELEVEL    = "I"     * I,W,E,F
+  ERRORLEVEL            = "8"     * 8=ERROR
+  ABENDONERROR          = "NO"
+  MAXIMUMWARNINGS       = "0"
+  
+[PIC]
+PICOutimgType = "1"
+PICPsgPrefix = "1"
+PICImgMode = "5" * color images 
+PICColorMode ="2" * RGB color
+PICCompression ="3" *LZW Tiff Compression
+* PICRotation ="0"
+PICResolution ="240"
+PICWidth ="p50"
+PICHeight ="auto"
+PICMaintDim ="0" * set to zero if resizing, here PICWidth
+* PICBestZoom ="1"
+* PICCellOpt ="0" * to use only for B/W IM
+* PICCuttingArea ="300,50,50,419,207,255,138,0" *to cut an image
+* PICIBMOgl ="0"
+* PICOglEncoded ="1"
+* PICOglBitmap ="1"
+* PICTransparency ="1,255,255,255,0" * to set transparency, not necessary here, even if nice
+* PICDitherMet ="0"
+* PICDitherAlg ="0"
+* PICDitherMax ="1024"
+* PICMaxLen =""
+* PICTiffMultipage ="1" * for TIFF multipage, not necessary for single image
+* PICGenTiffMultipage =""
+* PICBmpMode =""
+* PICRemoveNOPs =""
+* PICPhotometric ="0"
+* ? PICImageType = "1"

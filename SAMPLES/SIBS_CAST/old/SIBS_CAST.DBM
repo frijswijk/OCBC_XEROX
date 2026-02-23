@@ -1,0 +1,612 @@
+%!
+%%Title: SIBS_CAST.dbm
+%%Creator: LIAN 
+%%CreationDate: Thu Aug 4 2011, 06:01:58.
+%%WIZVAR:BEGIN
+%%WIZVAR PREFIX, FLD1, FLD2, FLD3, FLD4, FLD5, FLD6, FLD7
+%%WIZVAR FLD8, FLD9, FLD10, FLD11, FLD12, FLD13, FLD14, FLD15
+%%WIZVAR FLD16, FLD17, FLD18, FLD19, FLD20,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+%%WIZVAR:END
+%%EndComments
+
+XGF
+
+[ /DecimalPoint  46    % decimal delimiter in numeric data (default .) 
+  /NSign         45    % negative sign in numeric data (default: -) 
+  /FDecimalPoint 46    % decimal delimiter in format (default: .) 
+  /FNSign        45    % nefgative sign in format (default: -) 
+  /FPSign        43    % positive sign in format (default: +) 
+  /FPunctuation  44    % thousands delimiter in format (default: ,) 
+  /FDigit        35    % placeholder for digit in format (default: #) 
+  /FLZDigit      64    % placeholder for digit in format (default: @) 
+                       % that will be replaced by space if the digit  
+                       % is aleading zero  
+] SETPARAMS
+
+
+% Start Of Initializations
+% ------------------------------------------------
+	/VARINI true	/INI			SETVAR
+	IF VARINI 
+
+	{	
+		% Define Page Layout
+
+        MM SETUNIT
+        ORITL
+        PORT
+        04 SETLSP
+        %DUPLEX_on
+        %210 297 SETPAGESIZE
+
+		% Run Initialising Once Only
+		/VARINI		false			SETVAR
+
+		% define counters for headers suppression
+		/VAR_COUNTERC 	0 	/INI 	SETVAR
+		/VAR_COUNTERI 	0 	/INI 	SETVAR
+		/VAR_COUNT_TX 	0 	/INI 	SETVAR
+
+		/VAR_COUNT-TX	0	/INI	SETVAR % counter for TX transaction
+		/VAR_COUNT-SS	0	/INI	SETVAR % counter for TS summary
+
+		/VAR_COUNTTX2	0	/INI	SETVAR % counter for TX transaction
+		/VAR_COUNTTS2	0	/INI	SETVAR % counter for TS summary
+
+		% Flag for TX OVERFLOW
+		/VAR_TXNF		0	/INI	SETVAR % counter for TS summary overflow	
+
+		% Define counter for data overflow header
+		/VAR_NF			0	/INI	SETVAR
+	
+		% Define Reset Count Account
+		/VAR_RACC		0	/INI	SETVAR
+	
+		% Define Counter For PAGE NUMBER
+		/VAR_COUNTPAGE	0	/INI	SETVAR
+
+		% define counters for headers suppression
+		/VAR_COUNTERS	0	/INI	SETVAR
+
+		% date format with spacing for BLD
+		/VARMdate	0	/INI	SETVAR
+		/VARMmonth	0	/INI	SETVAR
+		/VARMyear	0	/INI	SETVAR
+		
+		% date format with spacing for transaction details
+		/VARTdate	0	/INI	SETVAR
+		/VARTmonth	0	/INI	SETVAR
+		/VARTyear	0	/INI	SETVAR
+
+		/VAR_NoTrx	true /INI SETVAR		% for multiple account without transaction
+		/VAR_NotBeign	false /INI SETVAR	% for multiple account without transaction
+
+		% Define For Page Numbering
+		/VARtab [[/VAR_pctot]] SETVAR
+		/VARdoc 0 SETVAR
+		
+		%YKS
+		/VAR_New_DOC	true		/INI	SETVAR
+		/VAR_DOC_count	0	/INI SETVAR
+		/VAR_Brk_count	(000)	/INI	SETVAR
+
+	} ENDIF	% Closing for =>IF VARINI 
+
+% Begin Page
+% ------------------------------------------------
+{	
+	IF CPCOUNT 1 eq
+	 { SKIPPAGE 
+	   /VAR_pctot ++ } ENDIF 
+
+} BEGINPAGE
+
+% Define Font Indexing
+% ------------------------------------------------
+(~~) 2 SETFTSW
+
+/PNFT   /ARIALB		07		INDEXFONT
+/F1  	/ARIAL      10		INDEXFONT
+/F2  	/ARIAL      07		INDEXFONT
+/F3  	/ARIALBO    07		INDEXFONT
+/F4  	/ARIAL      08		INDEXFONT
+/F5  	/ARIALB     08		INDEXFONT
+/F6  	/ARIALB     09		INDEXFONT
+/F7  	/ARIAL      09		INDEXFONT
+/F8  	/ARIALB     10		INDEXFONT
+/F9		/ARIALB	    07		INDEXFONT
+/F0		/ARIALO	    08		INDEXFONT
+/Z 	 	/NZDB 	    10		INDEXFONT
+/Z1     /NZDB       08		INDEXFONT
+/FA		/ARIALB	    10		INDEXFONT
+/FB		/ARIALBO    08		INDEXFONT
+/FC     /ARIALO     07		INDEXFONT
+/FD		/ARIALB		06		INDEXFONT
+/FE		/ARIALBO	06		INDEXFONT
+/FF		/ARIAL		06		INDEXFONT
+
+% Define Colour Indexing
+% ------------------------------------------------
+/B    	BLACK          	 INDEXCOLOR
+/W    	WHITE          	 INDEXCOLOR
+/R    	RED            	 INDEXCOLOR
+/E    	BLUE           	 INDEXCOLOR
+/G	  	GREEN			 INDEXCOLOR
+/O 		ORANGE 			 INDEXCOLOR
+
+% Define Dynamic Elements for Boxes
+% ------------------------------------------------
+/TXNB  {  0   0    188    09  LMED     DRAWB} XGFRESDEF
+
+% Process PREFIX (CASE starts here)
+% ------------------------------------------------
+CASE PREFIX
+{}
+% ------------------------------------------------
+% define statement type field
+(STMTTP)
+{
+	/VAR_STMTTP		PREFIX	SETVAR	% define statement code
+	/VAR_CCAST		FLD1	SETVAR	% define statement type - current conventional
+	/VAR_ICAST		FLD1	SETVAR	% define statement type - current islamic
+	/VAR_CVAST		FLD1	SETVAR	% define statement type - vostro conventional
+	/VAR_IVAST		FLD1	SETVAR	% define statement type - vostro islamic
+	/VAR_CAE		FLD2	SETVAR	% define statement in english
+	/VAR_ASB		FLD3	SETVAR	% define statement in bahasa
+
+		% reset page count
+ 		/VAR_COUNTPAGE 0 SETVAR
+
+		% define page-break
+		IF PREFIX (STMTTP) eq				   % new document
+		{ 
+			PAGEBRK
+  			IF CPCOUNT 1 eq
+		 	{ 	/VAR_pctot 0 SETVAR 
+		 	}	% reset page count
+  			ELSE
+     		{ 	/VARdoc ++
+	   	   		VARtab VARdoc GETITEM
+	      		(Page # of $$VAR_pctot.) VSUB 1 199 286 6 SETPAGENUMBER
+			} ENDIF 
+		}ENDIF
+
+		
+% Layout Definitions
+% ------------------------------------------------
+	[
+		{ % Page Layout For Page 1
+			 [ [	12	  82	183		120     0 ]] SETLKF % without address
+			(SIBS_CASTF.FRM) SETFORM
+		} 
+		{ % Page Layout For Page 2
+			 [ [ 12    82   183 		190     0 ]] SETLKF
+			(SIBS_CASTS.FRM) SETFORM
+						
+		} /R
+		
+	 ]	SETPAGEDEF
+
+	% Define Counters
+	/VAR_COUNTERS	0	SETVAR
+	/VAR_COUNTERY	0	SETVAR
+	/VAR_COUNT-TX	0	SETVAR
+	/VAR_COUNT-SS	0	SETVAR
+	/VAR_COUNTTX2	0	SETVAR
+	/VAR_COUNTTS2	0	SETVAR
+	/VAR_TXNF		0	SETVAR
+
+ }
+% -----------------------------------------------------------
+% define header field
+(HEADER)
+{
+	/VAR_HEADER		PREFIX	SETVAR
+	/VAR_ABC		FLD1	SETVAR
+	/VAR_CN1		FLD2	SETVAR
+	/VAR_CN2		FLD3	SETVAR
+	/VAR_CN3		FLD4	SETVAR
+	/VAR_AD1		FLD5	SETVAR
+	/VAR_AD2		FLD6	SETVAR
+	/VAR_AD3		FLD7	SETVAR
+	/VAR_AD4		FLD8	SETVAR
+	%/VAR_HMD		FLD9	SETVAR
+	/VAR_ACN		FLD10	SETVAR
+	/VAR_SSD		FLD11	SETVAR
+	/VAR_SED		FLD12	SETVAR
+	/VAR_BRC		FLD13	SETVAR
+	
+	%YKS
+	/VAR_DOC_count ++
+	IF VAR_DOC_count 10000 gt
+	{
+	/VAR_Brk_count ++
+	/VAR_New_DOC true SETVAR
+	}
+	ENDIF
+
+	IF VAR_New_DOC
+	{
+	($$VAR_SED. $$VAR_Brk_count.) VSUB BOOKMARK
+	/VAR_DOC_count 0 SETVAR
+	/VAR_New_DOC	false	SETVAR
+	}
+	ENDIF
+ }
+% -----------------------------------------------------------
+% define marketing message field
+(MKTMSG)
+{
+	/VAR_MKTMSG		PREFIX	SETVAR
+	/VAR_BLD		FLD1	SETVAR
+	/VAR_BLR		FLD2	SETVAR
+	
+	% date format with spacing 20120116
+  	/VARMdate  VAR_BLD 0 2 GETINTV SETVAR
+	/VARMmonth VAR_BLD 2 3 GETINTV SETVAR
+	/VARMyear  VAR_BLD 5 4 GETINTV SETVAR
+}
+% -----------------------------------------------------------
+% define  field
+(TRXHDR)
+{
+	/VAR_TRXHDR		PREFIX	SETVAR
+}
+% -----------------------------------------------------------
+% define  transaction heading
+(CCASTB)
+{
+	/VAR_CCASTB		PREFIX	SETVAR % Transaction Heading
+	/VAR_CLSB		FLD1	SETVAR % Last Statement Balance
+	/VAR_CBNM		FLD2	SETVAR % Negative Mark
+
+	IF FRLEFT 10 lt
+  	{ NEWFRAME } ENDIF
+	
+	F4
+	NL
+
+	38 MOVEH
+	(Balance B/F) SH
+
+	193 MOVEH
+	VAR_CLSB SHr
+
+	193.5 MOVEH
+	VAR_CBNM SH
+}
+% -----------------------------------------------------------
+% define  transaction heading
+(ICASTB)
+{
+	/VAR_ICASTB		PREFIX	SETVAR % Transaction Heading
+	/VAR_ILSB		FLD1	SETVAR % Last Statement Balance
+	/VAR_IBNM		FLD2	SETVAR % Negative Mark
+
+	IF FRLEFT 10 lt
+  	{ NEWFRAME } ENDIF
+
+	F4
+	NL
+
+    	38 MOVEH
+	(Balance B/F) SH
+
+	193 MOVEH
+	VAR_ILSB SHr
+
+	193.5 MOVEH
+	VAR_IBNM SH
+}
+% -----------------------------------------------------------
+% define  transaction details
+(CCASTX)
+{
+ 	/VAR_CCASTX     PREFIX	SETVAR % define detailed transaction prefix
+	/VAR_CTXD		FLD1	SETVAR % transaction date
+	/VAR_CTVD		FLD2	SETVAR % value date
+	/VAR_CTDS		FLD3	SETVAR % transaction description
+	/VAR_CIBT		FLD4	SETVAR % interbranch
+	/VAR_CTCN		FLD5	SETVAR % cheque no.
+	/VAR_CTDE		FLD6	SETVAR % deposit
+	/VAR_CTWD		FLD7	SETVAR % withdrawal
+	/VAR_CBAL		FLD8	SETVAR % balance
+	/VAR_CBDR		FLD9	SETVAR % DR
+	/VAR_CORF		FLD10	SETVAR % your reference
+	/VAR_CYRF		FLD11	SETVAR % our reference
+	/VAR_CREM		FLD12	SETVAR % remarks
+
+  	% date format with spacing 20120116
+  	/VARTdate  VAR_CTVD 0 2 GETINTV SETVAR
+	/VARTmonth VAR_CTVD 2 3 GETINTV SETVAR
+	/VARTyear  VAR_CTVD 5 4 GETINTV SETVAR
+  	
+	IF FRLEFT 18 lt
+  	{ NEWFRAME } ENDIF
+
+	F4
+	NL
+	
+ 	14 MOVEH
+ 	($$VARTdate. $$VARTmonth. $$VARTyear.) VSUB SH
+ 	
+	38 MOVEH
+	VAR_CTDS VSUB SH
+  	
+	76 MOVEH
+	VAR_CIBT VSUB SH
+  	
+ 	84 MOVEH
+ 	VAR_CTCN VSUB SH
+  	
+ 	130 MOVEH
+ 	VAR_CTWD VSUB SHr
+  	
+ 	162 MOVEH
+ 	VAR_CTDE VSUB SHr
+  	
+  	193 MOVEH
+ 	VAR_CBAL VSUB SHr
+ 	
+ 	193.5 MOVEH
+	VAR_CBDR VSUB SH
+ 	
+ 	IF VAR_CORF () ne
+  	{ 
+  		NL
+  		38 MOVEH
+  		VAR_CORF VSUB  SH
+  		
+  	} ENDIF
+  			
+  	IF VAR_CYRF () ne
+  	{  			
+  		NL
+  		38 MOVEH
+  		VAR_CYRF VSUB SH
+  		
+  	} ENDIF
+  		
+  	IF VAR_CREM () ne
+  	{
+  		NL
+  		38 MOVEH
+  		VAR_CREM VSUB SH
+  		 		
+  	} ENDIF
+}
+% -----------------------------------------------------------
+% define  transaction details
+(ICASTX)
+{
+
+ 	/VAR_ICASTX     PREFIX	SETVAR % define detailed transaction prefix
+	/VAR_ITXD		FLD1	SETVAR % transaction date
+	/VAR_ITVD		FLD2	SETVAR % value date
+	/VAR_ITDS		FLD3	SETVAR % transaction description
+	/VAR_IIBT		FLD4	SETVAR % interbranch
+	/VAR_ITCN		FLD5	SETVAR % cheque no.
+	/VAR_ITDE		FLD6	SETVAR % deposit
+	/VAR_ITWD		FLD7	SETVAR % withdrawal
+	/VAR_IBAL		FLD8	SETVAR % balance
+	/VAR_IBDR		FLD9	SETVAR % DR
+	/VAR_IORF		FLD10	SETVAR % your reference
+	/VAR_IYRF		FLD11	SETVAR % our reference
+	/VAR_IREM		FLD12	SETVAR % remarks
+		
+  	% date format with spacing 20120116
+  	/VARTdate  VAR_ITVD 0 2 GETINTV SETVAR
+	/VARTmonth VAR_ITVD 2 3 GETINTV SETVAR
+	/VARTyear  VAR_ITVD 5 4 GETINTV SETVAR
+  	
+	IF FRLEFT 18 lt
+  	{ NEWFRAME } ENDIF
+	F4
+	NL
+	
+ 	14 MOVEH
+ 	($$VARTdate. $$VARTmonth. $$VARTyear.) VSUB SH
+ 	
+	38 MOVEH
+	VAR_ITDS VSUB SH
+  	
+	76 MOVEH
+	VAR_IIBT VSUB SH
+  	
+ 	84 MOVEH
+ 	VAR_ITCN VSUB SH
+  	
+ 	130 MOVEH
+ 	VAR_ITWD VSUB SHr
+  	
+ 	162 MOVEH
+ 	VAR_ITDE VSUB SHr
+  	
+  	193 MOVEH
+ 	VAR_IBAL VSUB SHr
+ 	
+ 	193.5 MOVEH
+	VAR_IBDR VSUB SH
+ 	
+ 	IF VAR_IORF () ne
+  	{ 
+  		NL
+  		38 MOVEH
+  		VAR_IORF VSUB  SH
+  		
+  	} ENDIF
+  			
+  	IF VAR_IYRF () ne
+  	{  			
+  		NL
+  		38 MOVEH
+  		VAR_IYRF VSUB SH
+  		
+  	} ENDIF
+  		
+  	IF VAR_IREM () ne
+  	{
+  		NL
+  		38 MOVEH
+  		VAR_IREM VSUB SH
+  		
+  	} ENDIF
+}
+% -----------------------------------------------------------
+% define  transaction details
+(CCASTS)
+{
+
+	/VAR_CCASTS		PREFIX	SETVAR
+	/VAR_CNOW		FLD1	SETVAR
+	/VAR_CTOW		FLD2	SETVAR
+	/VAR_CNOD		FLD3	SETVAR
+	/VAR_CTOD		FLD4	SETVAR
+	/VAR_CSHA		FLD5	SETVAR
+	/VAR_CLLC		FLD6	SETVAR
+
+  	IF FRLEFT 20 lt 
+  	{ NEWFRAME } ENDIF
+
+	F5
+	NL
+	NL
+
+	14 MOVEH
+	(TRANSACTION) SH
+
+	NL
+	14 MOVEH
+	(SUMMARY) SH
+
+	F5
+	-04 NL
+	38    MOVEH (No. of Withdrawals)  VSUB SH
+ 
+ 	F4  
+	77    MOVEH VAR_CNOW VSUB SHr
+  
+   	F5
+	81    MOVEH (Total Withdrawals) VSUB SH
+  
+   	F4
+  	135   MOVEH VAR_CTOW VSUB SHr
+  
+   	F5
+  	138   MOVEH (Hold Amount) VSUB SH
+  
+   	F4
+  	193   MOVEH VAR_CSHA VSUB SHr
+  
+  	NL
+  	F5
+	38    MOVEH (No. of Deposits) VSUB SH
+    
+   	F4
+	77    MOVEH VAR_CNOD VSUB SHr
+
+	F5
+	81    MOVEH (Total Deposits) VSUB SH
+   
+   	F4
+	135   MOVEH VAR_CTOD VSUB SHr
+ 
+   	F5
+	138   MOVEH (Late Local Cheque) VSUB SH
+ 
+   	F4
+	193   MOVEH VAR_CLLC VSUB SHr
+}
+% -----------------------------------------------------------
+% define  transaction details
+(ICASTS)
+{
+
+	/VAR_ICASTS		PREFIX	SETVAR
+	/VAR_INOW		FLD1	SETVAR
+	/VAR_ITOW		FLD2	SETVAR
+	/VAR_INOD		FLD3	SETVAR
+	/VAR_ITOD		FLD4	SETVAR
+	/VAR_ISHA		FLD5	SETVAR
+	/VAR_ILLC		FLD6	SETVAR
+	
+  	IF FRLEFT 20 lt 
+  	{ NEWFRAME } ENDIF
+        		  	        		 
+	F5
+	NL
+	NL
+
+	14 MOVEH
+	(TRANSACTION) SH
+
+	NL
+	14 MOVEH
+	(SUMMARY) SH
+
+	F5
+	-04 NL
+	38    MOVEH (No. of Withdrawals)  VSUB SH
+ 	
+ 	F4  
+	77    MOVEH VAR_INOW VSUB SHr
+   	
+   	F5
+	81    MOVEH (Total Withdrawals) VSUB SH
+   	
+   	F4
+	135   MOVEH VAR_ITOW VSUB SHr
+   
+   	F5
+	138   MOVEH (Hold Amount) VSUB SH
+   	
+   	F4
+	193   MOVEH VAR_ISHA VSUB SHr
+  
+  	NL
+  	F5
+	38    MOVEH (No. of Deposits) VSUB SH
+    
+   	F4
+	77    MOVEH VAR_INOD VSUB SHr
+
+  	F5
+	81    MOVEH (Total Deposits) VSUB SH
+  
+   	F4
+	135   MOVEH VAR_ITOD VSUB SHr
+   
+   	F5
+	138   MOVEH (Late Local Cheque) VSUB SH
+   
+   	F4
+	193   MOVEH VAR_ILLC VSUB SHr 
+}
+% -----------------------------------------------------------
+% define page break of each customer
+(1)	
+{
+
+	/VAR_1		PREFIX	SETVAR
+	
+	%PAGEBRK
+	[] SETLKF
+
+% Store Number of Pages for Current Document
+	IF CPCOUNT 1 eq
+		{ /VARtab [[VAR_pctot]] ADD }
+	ENDIF
+
+ } ENDCASE
+% -----------------------------------------------------------
+% OMR Logic Inset Here If Any
+{
+
+} ENDPAGE
+
+% -----------------------------------------------------------
+% Reset Doc Index Between Copies
+{ /VARdoc 0 SETVAR } ENDJOB
+
+%PAGEBRK
+%%EOF
