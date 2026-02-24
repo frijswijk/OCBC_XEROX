@@ -2165,6 +2165,10 @@ class VIPPToDFAConverter:
         # Counter for generated temporary text-expression variables (SHP/SHp wrapping)
         self._tmp_text_counter = 0
 
+        # Text-flow carry is now part of the default DBM behavior.
+        # Keep scope conservative: only apply carry to selected continuation cases.
+        self.dbm_textflow_cases = {'Y1'}
+
         # Auto-detect input format from DBM
         self._detect_input_format()
         self._build_format_registry()
@@ -5997,7 +6001,7 @@ class VIPPToDFAConverter:
                 continue
 
             self.add_line(f"_CASE '{case_value}';")
-            self._convert_case_commands(commands)
+            self._convert_case_commands(commands, case_value=case_value)
 
         self.add_line("ENDSELECT;")
         self.add_line("")
@@ -6035,7 +6039,11 @@ class VIPPToDFAConverter:
             # Generate case-specific processing.
             # For the first PREFIX case (document marker, e.g. MR): suppress the leading
             # PAGEBRK because DFA's ENDGROUP/ENDDOCUMENT handles document boundaries.
-            self._convert_case_commands(commands, suppress_leading_pagebrk=is_first_docformat)
+            self._convert_case_commands(
+                commands,
+                suppress_leading_pagebrk=is_first_docformat,
+                case_value=case_value
+            )
             is_first_docformat = False
 
             self.dedent()
@@ -6078,7 +6086,8 @@ class VIPPToDFAConverter:
 
     def _convert_case_commands(self, commands: List[XeroxCommand], start_font: str = "ARIAL08",
                                start_color: str = None,
-                               suppress_leading_pagebrk: bool = False, existing_outline: bool = False):
+                               suppress_leading_pagebrk: bool = False, existing_outline: bool = False,
+                               anchor_context: str = "root", case_value: str = None):
         """Convert VIPP commands within a case block to DFA."""
         self.indent()
         # Treat each DOCFORMAT case as an independent flow context.
@@ -6112,7 +6121,32 @@ class VIPPToDFAConverter:
             c.name in ('MOVETO', 'SETLKF', 'SETPAGEDEF')
             for c in _flatten_cmds(commands)
         )
-        outline_start_pos = "LEFT NEXT" if has_absolute_anchor else "LEFT SAME"
+        # Only top-level reset commands should break continuation classification.
+        # Nested FRLEFT IF blocks can contain PAGEBRK without meaning that the
+        # case itself starts from a reset anchor.
+        has_reset_anchor = any(
+            c.name in ('PAGEBRK', 'NEWFRONT', 'NEWBACK')
+            for c in commands
+        )
+        case_is_continuation = (not has_absolute_anchor and not has_reset_anchor)
+        # Root-level DBM cases should keep legacy flow behavior (LEFT NEXT) unless
+        # explicitly anchored. Nested IF bodies without anchors should continue in-place
+        # (LEFT SAME) to avoid artificial Y resets inside conditional blocks.
+        if has_absolute_anchor:
+            outline_start_pos = "LEFT NEXT"
+        elif anchor_context == "nested":
+            outline_start_pos = "LEFT SAME"
+        else:
+            outline_start_pos = "LEFT NEXT"
+
+        def _close_outline_and_store_textflow():
+            nonlocal outline_opened, outline_opened_here
+            if outline_opened:
+                self.dedent()
+                self.add_line("ENDIO;")
+                outline_opened = False
+                outline_opened_here = False
+                self.add_line("TFLOW_Y = $SL_CURRY;")
 
         # Track consumed commands for lookahead processing (IF/ELSE/ENDIF)
         i = 0
@@ -6233,9 +6267,42 @@ class VIPPToDFAConverter:
                 # not trapped inside the OUTLINE where they are invalid.
 
                 self.add_line("")
+                use_textflow_carry_pos = (
+                    case_is_continuation
+                    and not existing_outline
+                    and case_value is not None
+                    and case_value.upper() in self.dbm_textflow_cases
+                )
+                if use_textflow_carry_pos:
+                    self.add_line("IF ISTRUE(TFLOW_Y == '');")
+                    self.add_line("THEN;")
+                    self.indent()
+                    self.add_line("TFLOW_Y = $SL_CURRY;")
+                    self.dedent()
+                    self.add_line("ENDIF;")
                 self.add_line("OUTLINE")
                 self.indent()
-                self.add_line(f"POSITION {outline_start_pos}")
+                if x_was_explicitly_set and y_was_explicitly_set:
+                    x_expr = f"({current_x} MM-$MR_LEFT)"
+                    y_expr = f"({current_y} MM-$MR_TOP)"
+                    self.add_line("/* OUTLINE_ANCHOR_V2: ABS_XY */")
+                    self.add_line(f"POSITION {x_expr} {y_expr}")
+                elif x_was_explicitly_set:
+                    x_expr = f"({current_x} MM-$MR_LEFT)"
+                    self.add_line("/* OUTLINE_ANCHOR_V2: ABS_X_SAME_Y */")
+                    self.add_line(f"POSITION {x_expr} SAME")
+                else:
+                    if use_textflow_carry_pos:
+                        self.add_line("/* OUTLINE_ANCHOR_V2: TEXTFLOW_CARRY */")
+                        self.add_line("POSITION LEFT (TFLOW_Y)")
+                    else:
+                        marker = (
+                            "LEFT_SAME_FALLBACK"
+                            if outline_start_pos == "LEFT SAME"
+                            else "LEFT_NEXT_FALLBACK"
+                        )
+                        self.add_line(f"/* OUTLINE_ANCHOR_V2: {marker} */")
+                        self.add_line(f"POSITION {outline_start_pos}")
                 self.add_line("DIRECTION ACROSS;")
                 self.add_line("")
                 outline_opened = True
@@ -6369,13 +6436,20 @@ class VIPPToDFAConverter:
                 is_frleft_if = any('FRLEFT' in str(p) for p in cmd.parameters)
                 if is_frleft_if and outline_opened:
                     # Close the OUTLINE before emitting the page-break IF block
-                    self.dedent()
-                    self.add_line("ENDIO;")
-                    outline_opened = False
+                    _close_outline_and_store_textflow()
 
                 # Convert the IF command with lookahead for ELSE/ENDIF
                 # Pass current_font so nested NL commands use the active font, not ARIAL08
-                consumed = self._convert_if_command(cmd, commands, i, current_font, current_color, in_outline=outline_opened)
+                consumed = self._convert_if_command(
+                    cmd,
+                    commands,
+                    i,
+                    current_font,
+                    current_color,
+                    in_outline=outline_opened,
+                    anchor_context=anchor_context,
+                    case_value=case_value
+                )
                 # Skip the consumed commands (ELSE, ENDIF, and their bodies)
                 i += consumed
                 continue
@@ -6430,6 +6504,10 @@ class VIPPToDFAConverter:
             if cmd.name == 'MOVETO':
                 if len(cmd.parameters) >= 2:
                     try:
+                        if outline_opened_here:
+                            _close_outline_and_store_textflow()
+                            self.add_line("")
+                            self.should_set_box_anchor = True
                         current_x = float(cmd.parameters[0])
                         current_y = float(cmd.parameters[1])
                         x_was_explicitly_set = True
@@ -6545,9 +6623,7 @@ class VIPPToDFAConverter:
                         frame_y = float(values[1])
                         # Close any open OUTLINE first
                         if outline_opened:
-                            self.dedent()
-                            self.add_line("ENDIO;")
-                            outline_opened = False
+                            _close_outline_and_store_textflow()
                         # Emit cursor-positioning OUTLINE at frame origin
                         self.add_line(f"/* SETLKF: data area at ({frame_x}, {frame_y}) */")
                         self.add_line("OUTLINE")
@@ -6576,10 +6652,9 @@ class VIPPToDFAConverter:
                 # NOTE: "SIDE FRONT" is NOT valid in USE LOGICALPAGE — it is only valid
                 # inside FORMATGROUP LOGICALPAGE definitions. USE LOGICALPAGE only takes NEXT/SAME/etc.
                 if outline_opened:
-                    self.dedent()
-                    self.add_line("ENDIO;")
-                    outline_opened = False
+                    _close_outline_and_store_textflow()
                 self.add_line("USE LOGICALPAGE NEXT;")
+                self.add_line("TFLOW_Y = $SL_CURRY;")
                 prev_cmd_was_pagebrk = True
                 i += 1
                 continue
@@ -6590,10 +6665,9 @@ class VIPPToDFAConverter:
                 # NEWFRONT standalone (no preceding PAGEBRK): force a new front page.
                 if not prev_cmd_was_pagebrk:
                     if outline_opened:
-                        self.dedent()
-                        self.add_line("ENDIO;")
-                        outline_opened = False
+                        _close_outline_and_store_textflow()
                     self.add_line("USE LOGICALPAGE NEXT;")
+                self.add_line("TFLOW_Y = $SL_CURRY;")
                 # else: PAGEBRK already emitted the page break — suppress this one
                 prev_cmd_was_pagebrk = False
                 i += 1
@@ -6603,10 +6677,9 @@ class VIPPToDFAConverter:
                 # Same logic as NEWFRONT — suppress if preceded by PAGEBRK.
                 if not prev_cmd_was_pagebrk:
                     if outline_opened:
-                        self.dedent()
-                        self.add_line("ENDIO;")
-                        outline_opened = False
+                        _close_outline_and_store_textflow()
                     self.add_line("USE LOGICALPAGE NEXT;")
+                self.add_line("TFLOW_Y = $SL_CURRY;")
                 prev_cmd_was_pagebrk = False
                 i += 1
                 continue
@@ -6630,9 +6703,7 @@ class VIPPToDFAConverter:
             if cmd.name == 'BOOKMARK':
                 # Emit bookmark indices at DOCFORMAT scope (outside OUTLINE).
                 if outline_opened:
-                    self.dedent()
-                    self.add_line("ENDIO;")
-                    outline_opened = False
+                    _close_outline_and_store_textflow()
                 self._convert_bookmark_command(cmd)
                 i += 1
                 continue
@@ -6640,9 +6711,7 @@ class VIPPToDFAConverter:
             if cmd.name == 'SETPAGENUMBER':
                 # Extracted for footer generation; keep trace for auditability.
                 if outline_opened:
-                    self.dedent()
-                    self.add_line("ENDIO;")
-                    outline_opened = False
+                    _close_outline_and_store_textflow()
                 self._convert_pagenumber_command(cmd)
                 i += 1
                 continue
@@ -6660,14 +6729,14 @@ class VIPPToDFAConverter:
 
         # Close OUTLINE only if this invocation opened it.
         if outline_opened and outline_opened_here:
-            self.dedent()
-            self.add_line("ENDIO;")
+            _close_outline_and_store_textflow()
 
         self.dedent()
     
     def _convert_if_command(self, cmd: XeroxCommand, commands: List[XeroxCommand] = None,
                             idx: int = -1, current_font: str = "ARIAL08",
-                            current_color: str = None, in_outline: bool = False):
+                            current_color: str = None, in_outline: bool = False,
+                            anchor_context: str = "root", case_value: str = None):
         """
         Convert an IF command to DFA, handling ELSE and ENDIF at the same nesting level.
 
@@ -6731,7 +6800,14 @@ class VIPPToDFAConverter:
             has_pagebrk = cmd.children and any(c.name == 'PAGEBRK' for c in cmd.children)
             if has_pagebrk:
                 self.add_line(f"/* FRLEFT section transition (unconditional) */")
-                self._convert_case_commands(cmd.children, current_font, current_color, existing_outline=in_outline)
+                self._convert_case_commands(
+                    cmd.children,
+                    current_font,
+                    current_color,
+                    existing_outline=in_outline,
+                    anchor_context="nested",
+                    case_value=case_value
+                )
                 # Still need to consume ELSE/ENDIF siblings if present
                 consumed = 1
                 if commands is not None and idx >= 0:
@@ -6823,7 +6899,14 @@ class VIPPToDFAConverter:
 
         # Process children (IF body) if present
         if cmd.children:
-            self._convert_case_commands(cmd.children, current_font, current_color, existing_outline=in_outline)
+            self._convert_case_commands(
+                cmd.children,
+                current_font,
+                current_color,
+                existing_outline=in_outline,
+                anchor_context="nested",
+                case_value=case_value
+            )
             # IF blocks with children still need lookahead for ELSE at parent level
             # In VIPP: IF cond { then_block } ELSE { else_block } ENDIF
             # Parser creates children for {block} but ELSE/ENDIF remain as siblings
@@ -6848,7 +6931,14 @@ class VIPPToDFAConverter:
                     self.add_line("ELSE;")
                     else_cmd = commands[else_idx]
                     if else_cmd.children:
-                        self._convert_case_commands(else_cmd.children, current_font, current_color, existing_outline=in_outline)
+                        self._convert_case_commands(
+                            else_cmd.children,
+                            current_font,
+                            current_color,
+                            existing_outline=in_outline,
+                            anchor_context="nested",
+                            case_value=case_value
+                        )
                     elif endif_idx > else_idx + 1:
                         self.indent()
                         else_commands = commands[else_idx + 1:endif_idx]
@@ -8304,6 +8394,7 @@ class VIPPToDFAConverter:
         self.add_line("P = 0;     /* Reset page counter for new document */")
         self.add_line("PP = 0;    /* Reset total page counter */")
         self.add_line("VAR_CURFORM = '';  /* Reset FRM selector — set by SETFORM-equivalent DOCFORMATs */")
+        self.add_line("TFLOW_Y = $SL_CURRY;")
         self.dedent()
         self.add_line("")
 

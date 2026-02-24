@@ -248,3 +248,75 @@
 ### 30) Propagate style state into nested IF/ELSE blocks
 - DBM conversion now propagates both `current_font` and `current_color` when entering `_convert_if_command` children.
 - This prevents losing shortcut style commands (`FI/FK`, `W/B`) inside IF/ELSE content, which previously caused intermittent missing color/font output.
+
+### 31) Positioning experiment summary (CASIO vs SIBS_CAST, Feb 2026)
+- Scope:
+  - We tested OUTLINE and OUTPUT vertical behavior changes to improve CASIO without breaking other DBM samples.
+- What worked and should be kept:
+  - `OUTPUT/TEXT` vertical `NEXT -> AUTOSPACE`.
+  - `SAME+/-N MM -> AUTOSPACE+/-N MM` for `OUTPUT/TEXT`.
+  - Skip AUTOSPACE replacement for empty newline output (`OUTPUT ''`), because no text is printed to drive autospace.
+  - Keep non-absolute OUTLINE horizontal positioning as `LEFT`.
+- What did not generalize well:
+  - Forcing non-anchored OUTLINE vertical start to `0` improved CASIO but regressed SIBS_CAST.
+  - Adaptive/heuristic fallback (`same|zero|adaptive`) was not robust across samples.
+  - Intra-case carry (`LEFT LASTMAX`) had little effect; most drift is between DOCFORMAT cases, not inside one case.
+  - Cross-DOCFORMAT carry prototype (`FLOW_Y` state with `LEFT (FLOW_Y)`) compiled and rendered, but visual output was worse overall than baseline on reviewed samples.
+- Final decision after validation:
+  - Revert cross-DOCFORMAT carry prototype.
+  - Keep AUTOSPACE improvements only (plus empty `OUTPUT ''` safeguard).
+- Practical guidance for future tuning:
+  - Avoid global OUTLINE-Y policy changes unless validated across a broad sample set.
+  - Prefer command-level fixes (`OUTPUT/TEXT`) over global anchoring changes.
+  - When testing positioning ideas, always evaluate at least CASIO + SIBS_CAST before scaling to full sample corpus.
+### 32) DBM OUTLINE anchoring V2 (feature-flagged) implementation and sample check (2026-02-24)
+- Implemented in `universal_xerox_parser.py` behind env flag `XEROX_DBM_OUTLINE_ANCHOR_V2` (default OFF).
+- V2 OUTLINE-open anchor precedence:
+  - explicit X+Y (MOVETO): `POSITION (X MM-$MR_LEFT) (Y MM-$MR_TOP)`
+  - explicit X only (MOVEH/MOVEHR): `POSITION (X MM-$MR_LEFT) SAME`
+  - no explicit anchor: `POSITION LEFT SAME`
+- Mid-OUTLINE MOVETO handling:
+  - when V2 ON and current frame opened the OUTLINE (`outline_opened_here`), close `ENDIO;` before storing new MOVETO; next content reopens with new absolute anchor.
+  - prevents accidental closure of inherited parent outlines.
+- Nested IF propagation:
+  - added `anchor_context` plumbing through `_convert_case_commands` and `_convert_if_command` child calls (`nested`) to keep conversion context explicit for future tuning.
+- Diagnostics:
+  - V2 emits marker comments in generated DFA: `OUTLINE_ANCHOR_V2: ABS_XY`, `ABS_X_SAME_Y`, `LEFT_SAME_FALLBACK`.
+- Validation runs with `XEROX_DBM_OUTLINE_ANCHOR_V2=1` + DocEXEC:
+  - SIBS_CAST -> `C:\ISIS\samples_pdd\OCBC\TEST_SIBS_V2\afpds\SIBS_CAST.pdf` (DocEXEC RC 0, migration report warnings 3).
+  - UT00060 -> `C:\ISIS\samples_pdd\OCBC\TEST_UT00060_V2\afpds\UT00060.pdf` (DocEXEC RC 4 warnings-only; migration report warnings 7).
+  - CASIO -> `C:\ISIS\samples_pdd\OCBC\TEST_CASIO_V2\afpds\CASIO.pdf` (DocEXEC RC 0, migration report warnings 3).
+- Concrete UT00060 anchor evidence in generated DFA:
+  - `POSITION (10.7 MM-$MR_LEFT) (16.2 MM-$MR_TOP)`
+  - `POSITION (131.3 MM-$MR_LEFT) (4.0 MM-$MR_TOP)`
+- Notes:
+  - CASIO/SIBS DocEXEC logs for this run did not emit `PPDE7128W Text coordinate < 0`; visual comparison remains required for final quality sign-off.
+- Plan document written to `plans/outline_positioning_fix_v2.md`.
+
+### 33) Text-flow carry tuning for SIBS regression (2026-02-24)
+- Issue observed after enabling text-flow carry experiments: `DF_CCASTB` could start at page top in SIBS.
+- Root cause in converter logic:
+  - V2 fallback path was hardcoded to `POSITION LEFT SAME` when no explicit anchor.
+  - This bypassed the case-level fallback policy and regressed root DBM flow in SIBS.
+- Fix applied in `universal_xerox_parser.py`:
+  - Restored context-aware fallback selection via `outline_start_pos`:
+    - root case without explicit anchors -> `LEFT NEXT`
+    - nested IF body without explicit anchors -> `LEFT SAME`
+  - V2 marker now reports either `LEFT_NEXT_FALLBACK` or `LEFT_SAME_FALLBACK`.
+- Validation:
+  - Regenerated `SIBS_CAST` with `XEROX_DBM_OUTLINE_ANCHOR_V2=1`, `XEROX_DBM_TEXTFLOW_CARRY=1`, `XEROX_DBM_TEXTFLOW_CASES=Y1`.
+  - `DF_CCASTB`/`DF_CCASTS` now emit `OUTLINE_ANCHOR_V2: LEFT_NEXT_FALLBACK` and `POSITION LEFT NEXT` (instead of forced `LEFT SAME`).
+
+### 34) Promote OUTLINE v2 + text-flow carry from flags to default behavior (2026-02-25)
+- Decision:
+  - Keep the current anchoring/carry logic permanently enabled in DBM conversion.
+  - Remove runtime feature flags (`XEROX_DBM_OUTLINE_ANCHOR_V2`, `XEROX_DBM_TEXTFLOW_CARRY`, `XEROX_DBM_TEXTFLOW_CASES`) from converter behavior.
+- Effective default behavior now:
+  - OUTLINE anchor precedence always active:
+    - explicit X+Y -> `ABS_XY`
+    - explicit X only -> `ABS_X_SAME_Y`
+    - no explicit anchor -> fallback by context (`LEFT NEXT` root, `LEFT SAME` nested IF)
+  - `TFLOW_Y` initialization and updates are always emitted.
+  - Text-flow carry positioning remains scoped conservatively to continuation cases with `case_value in {'Y1'}`.
+- Rationale:
+  - Current baseline validated as strong on SIBS_CAST and acceptable on CASIO/UT00060 for continued iterative tuning.
