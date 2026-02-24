@@ -3010,7 +3010,7 @@ class VIPPToDFAConverter:
             else:
                 y_pos = 'SAME'
 
-            self.add_line(self._format_position(x_pos, y_pos, dfa_font))
+            self.add_line(self._format_position(x_pos, y_pos, dfa_font, vertical_next_to_autospace=True))
 
             # Add WIDTH using the original x value
             if x_was_set and x != 'SAME':
@@ -3029,7 +3029,7 @@ class VIPPToDFAConverter:
                 y_pos = 'SAME'  # Implicit position
 
             # Use helper method for consistent POSITION formatting
-            self.add_line(self._format_position(x_pos, y_pos, dfa_font))
+            self.add_line(self._format_position(x_pos, y_pos, dfa_font, vertical_next_to_autospace=True))
 
         # Add font-switched segments
         for font_alias, text_seg in segments:
@@ -3177,9 +3177,12 @@ class VIPPToDFAConverter:
         else:
             y_pos = 'SAME'  # Implicit position
 
+        # Empty literal OUTPUT ('') is a spacing carrier; keep original vertical semantics.
+        use_autospace = not (not is_variable and text == '')
+
         # Add position using helper method (handles both keywords and numeric with margin correction)
         # Pass font for vertical position correction
-        self.add_line(self._format_position(x_pos, y_pos, dfa_font))
+        self.add_line(self._format_position(x_pos, y_pos, dfa_font, vertical_next_to_autospace=use_autospace))
 
         # Add color if specified
         if color:
@@ -3238,7 +3241,7 @@ class VIPPToDFAConverter:
             y_pos = 'SAME'  # Implicit position
 
         # Add position with font correction
-        self.add_line(self._format_position(x_pos, y_pos, dfa_font))
+        self.add_line(self._format_position(x_pos, y_pos, dfa_font, vertical_next_to_autospace=True))
 
         # Add WIDTH parameter for line wrapping
         self.add_line(f"WIDTH {width} MM")
@@ -5173,7 +5176,7 @@ class VIPPToDFAConverter:
         else:
             return "&CORFONT12"
 
-    def _format_position(self, x, y, font: str = None):
+    def _format_position(self, x, y, font: str = None, vertical_next_to_autospace: bool = False):
         """
         Format POSITION statement with proper DFA syntax.
 
@@ -5220,9 +5223,16 @@ class VIPPToDFAConverter:
             font_correction = self._get_font_correction(font)
 
         if isinstance(y, str):
+            y = y.strip()
+            if vertical_next_to_autospace and y.upper() == 'NEXT':
+                y = 'AUTOSPACE'
+            elif vertical_next_to_autospace:
+                y_upper_raw = y.upper()
+                if y_upper_raw.startswith('SAME+') or y_upper_raw.startswith('SAME-'):
+                    y = f"AUTOSPACE{y[4:]}"
             y_upper = y.upper()
             # Check if it's a keyword or starts with a keyword (for expressions like NEXT-(...) or LASTMAX+...)
-            if y_upper in ('SAME', 'NEXT', 'TOP', 'BOTTOM') or y_upper.startswith(('NEXT-', 'NEXT+', 'SAME-', 'SAME+', 'LASTMAX+', 'LASTMAX-')):
+            if y_upper in ('SAME', 'NEXT', 'AUTOSPACE', 'TOP', 'BOTTOM') or y_upper.startswith(('NEXT-', 'NEXT+', 'SAME-', 'SAME+', 'AUTOSPACE+', 'AUTOSPACE-', 'LASTMAX+', 'LASTMAX-')):
                 y_part = f"({y})"
             else:
                 # Numeric position - margin-corrected by default; FRM mode emits raw MM
@@ -6102,7 +6112,7 @@ class VIPPToDFAConverter:
             c.name in ('MOVETO', 'SETLKF', 'SETPAGEDEF')
             for c in _flatten_cmds(commands)
         )
-        outline_start_pos = "LEFT NEXT" if has_absolute_anchor else "SAME SAME"
+        outline_start_pos = "LEFT NEXT" if has_absolute_anchor else "LEFT SAME"
 
         # Track consumed commands for lookahead processing (IF/ELSE/ENDIF)
         i = 0
@@ -7217,7 +7227,7 @@ class VIPPToDFAConverter:
 
         # Keep the caller-provided anchor position; forcing SAME SAME causes
         # wrapped paragraphs to overprint previous lines.
-        self.add_line(f"{self._format_position(x_pos, y_pos)} BASELINE")
+        self.add_line(f"{self._format_position(x_pos, y_pos, vertical_next_to_autospace=True)} BASELINE")
 
         # Width for wrapped paragraph output (SHP/SHp and JUSTIFY cases)
         if width:
@@ -7391,7 +7401,7 @@ class VIPPToDFAConverter:
             self.add_line(f"{tmp_var} = {expr};")
             self.add_line("TEXT")
             self.indent()
-            self.add_line(f"{self._format_position(x_final, y_final)} BASELINE")
+            self.add_line(f"{self._format_position(x_final, y_final, vertical_next_to_autospace=True)} BASELINE")
             self.add_line(f"WIDTH {shp_width} MM")
             self.add_line(f"FONT {current_font}")
             align_map = {0: 'LEFT', 1: 'RIGHT', 2: 'CENTER', 3: 'JUSTIFY'}
@@ -7413,7 +7423,8 @@ class VIPPToDFAConverter:
             else:
                 self.add_line(f"OUTPUT '{self._escape_dfa_quotes(text)}'")
             self.add_line(f"    FONT {current_font} NORMAL")
-            self.add_line(f"    {self._format_position(x_final, y_final)}")
+            use_autospace_output = not (not is_variable and text == '')
+            self.add_line(f"    {self._format_position(x_final, y_final, vertical_next_to_autospace=use_autospace_output)}")
             if current_color:
                 self.add_line(f"    COLOR {current_color}")
 
