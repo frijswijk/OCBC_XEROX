@@ -6309,6 +6309,12 @@ class VIPPToDFAConverter:
                 outline_opened_here = True
                 # Reset box anchor flag for new OUTLINE block
                 self.should_set_box_anchor = True
+                # After opening OUTLINE with its anchor, reset position flags so the first
+                # OUTPUT/TEXT inside the OUTLINE uses SAME (not a re-emitted absolute coord).
+                # Without this, MOVETO coords consumed as the OUTLINE anchor are re-emitted
+                # inside the OUTLINE, doubling the X offset (PPDE7038W negative width).
+                x_was_explicitly_set = False
+                y_was_explicitly_set = False
 
             # Handle NL (newline) - generate OUTPUT '' POSITION SAME NEXT
             if cmd.name == 'NL':
