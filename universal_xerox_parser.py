@@ -2134,6 +2134,7 @@ class VIPPToDFAConverter:
 
         # Track SETPAGEDEF layout positions for OUTLINE generation
         self.page_layout_position = None  # (x, y) from last SETLKF in SETPAGEDEF
+        self.page_frame_heights = []      # Frame heights from each SETLKF in SETPAGEDEF
 
         # Track when to set box positioning anchors
         self.should_set_box_anchor = True  # Set anchors before first box in a group
@@ -3014,7 +3015,7 @@ class VIPPToDFAConverter:
             else:
                 y_pos = 'SAME'
 
-            self.add_line(self._format_position(x_pos, y_pos, dfa_font, vertical_next_to_autospace=True))
+            self.add_line(self._format_position(x_pos, y_pos, dfa_font, vertical_next_to_autospace=True) + " BASELINE")
 
             # Add WIDTH using the original x value
             if x_was_set and x != 'SAME':
@@ -3033,7 +3034,7 @@ class VIPPToDFAConverter:
                 y_pos = 'SAME'  # Implicit position
 
             # Use helper method for consistent POSITION formatting
-            self.add_line(self._format_position(x_pos, y_pos, dfa_font, vertical_next_to_autospace=True))
+            self.add_line(self._format_position(x_pos, y_pos, dfa_font, vertical_next_to_autospace=True) + " BASELINE")
 
         # Add font-switched segments
         for font_alias, text_seg in segments:
@@ -3244,8 +3245,8 @@ class VIPPToDFAConverter:
         else:
             y_pos = 'SAME'  # Implicit position
 
-        # Add position with font correction
-        self.add_line(self._format_position(x_pos, y_pos, dfa_font, vertical_next_to_autospace=True))
+        # Add position with font correction — BASELINE matches Xerox baseline-relative positioning
+        self.add_line(self._format_position(x_pos, y_pos, dfa_font, vertical_next_to_autospace=True) + " BASELINE")
 
         # Add WIDTH parameter for line wrapping
         self.add_line(f"WIDTH {width} MM")
@@ -4341,8 +4342,8 @@ class VIPPToDFAConverter:
         # Extract SETPAGEDEF from raw content as backup
         if not self.page_layout_position and self.dbm.raw_content:
             # Pattern to find SETLKF arrays before SETPAGEDEF
-            # Looking for: [ [ number number number number number ] ] SETLKF
-            setlkf_pattern = r'\[\s*\[\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+\d+(?:\.\d+)?\s+\d+(?:\.\d+)?\s+\d+\s*\]\s*\]'
+            # Looking for: [ [ x y width height flags ] ] SETLKF
+            setlkf_pattern = r'\[\s*\[\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+\d+(?:\.\d+)?\s+(\d+(?:\.\d+)?)\s+\d+\s*\]\s*\]'
             matches = re.findall(setlkf_pattern, self.dbm.raw_content)
             if matches:
                 # Get the first match (initial page layout frame)
@@ -4351,6 +4352,9 @@ class VIPPToDFAConverter:
                 first_match = matches[0]
                 self.page_layout_position = (float(first_match[0]), float(first_match[1]))
                 logger.info(f"Found SETPAGEDEF layout position from raw content: {self.page_layout_position}")
+                # Capture all frame heights for FRLEFT overflow threshold calculation
+                self.page_frame_heights = [float(m[2]) for m in matches]
+                logger.info(f"Found SETPAGEDEF frame heights: {self.page_frame_heights}")
 
         # Backup ORITL detection from raw content if command parsing missed it.
         if not self.origin_is_oritl and self.dbm.raw_content and re.search(r'\bORITL\b', self.dbm.raw_content):
@@ -4359,7 +4363,7 @@ class VIPPToDFAConverter:
 
     def _parse_setpagedef_layout(self, params):
         """
-        Parse SETPAGEDEF parameters to extract the last SETLKF position.
+        Parse SETPAGEDEF parameters to extract SETLKF positions and frame heights.
 
         SETPAGEDEF structure:
         [
@@ -4367,9 +4371,10 @@ class VIPPToDFAConverter:
             { [[x2, y2, w2, h2, 0]] SETLKF (form2.FRM) SETFORM } /R
         ] SETPAGEDEF
 
-        We want the last layout's (x, y) position.
+        We want the last layout's (x, y) position and all frame heights.
         """
         last_setlkf_position = None
+        frame_heights = []
 
         # Params is typically a list/block containing the page definitions
         for param in params:
@@ -4378,20 +4383,23 @@ class VIPPToDFAConverter:
                 block_content = param[1]
 
                 # Look for patterns like [[x, y, w, h, 0]]
-                # This is a simplified parser - may need refinement
                 import re
-                # Pattern to match numbers in SETLKF arrays
-                setlkf_pattern = r'\[\s*\[\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+\d+(?:\.\d+)?\s+\d+(?:\.\d+)?\s+\d+\s*\]\s*\]'
+                # Pattern to match x, y, height from SETLKF arrays
+                setlkf_pattern = r'\[\s*\[\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+\d+(?:\.\d+)?\s+(\d+(?:\.\d+)?)\s+\d+\s*\]\s*\]'
                 matches = re.findall(setlkf_pattern, str(block_content))
 
                 if matches:
                     # Get the last match (last page layout)
                     last_match = matches[-1]
                     last_setlkf_position = (float(last_match[0]), float(last_match[1]))
+                    frame_heights = [float(m[2]) for m in matches]
                     logger.info(f"Found SETPAGEDEF layout position: {last_setlkf_position}")
+                    logger.info(f"Found SETPAGEDEF frame heights: {frame_heights}")
 
         if last_setlkf_position:
             self.page_layout_position = last_setlkf_position
+        if frame_heights:
+            self.page_frame_heights = frame_heights
 
     def _extract_subroutines(self):
         """
@@ -5265,6 +5273,21 @@ class VIPPToDFAConverter:
 
         return f"POSITION {x_part} {y_part}"
 
+    def _emit_page_overflow_reset(self):
+        """Emit OUTLINE position reset after USE LOGICALPAGE NEXT in overflow contexts.
+
+        After a page break, the text cursor position is undefined.  This resets
+        the cursor to the page layout Y origin from SETPAGEDEF so subsequent
+        AUTOSPACE / NEXT positioning works correctly on the new page.
+        """
+        if self.page_layout_position:
+            _, layout_y = self.page_layout_position
+            self.add_line("OUTLINE")
+            self.indent()
+            self.add_line(f"POSITION 0  {int(layout_y)} MM;")
+            self.dedent()
+            self.add_line("ENDIO;")
+
     def _has_output_commands(self, commands: List[XeroxCommand]) -> bool:
         """
         Check if command list contains OUTPUT/TEXT/graphical commands.
@@ -5692,8 +5715,26 @@ class VIPPToDFAConverter:
         """
         Convert FRLEFT (frame left) condition to DFA page break logic.
 
-        VIPP: FRLEFT 60 lt → page has less than 60mm left
-        DFA: $SL_MAXY>$LP_HEIGHT-MM(60)
+        VIPP FRLEFT returns the number of LINES remaining in the current
+        frame.  The line unit is the current SETLSP spacing (mm).
+
+        VIPP: IF FRLEFT 18 lt { NEWFRAME } ENDIF
+              → "if fewer than 18 lines remain in the frame, new page"
+
+        The DFA threshold must account for:
+        1. FRLEFT value is in LINES, not mm → multiply by line_spacing
+        2. The text frame may not extend to the page bottom → add the
+           gap between the frame bottom and $LP_HEIGHT
+
+        Formula (when frame info available):
+            frame_bottom = frame_Y + last_frame_height   (continuation page)
+            frleft_mm    = frleft_lines * line_spacing
+            overflow_y   = frame_bottom - frleft_mm
+            threshold    = page_height - overflow_y
+
+        Fallback (no frame info): threshold = frleft_lines * line_spacing
+
+        DFA: $SL_LMAXY > $LP_HEIGHT - MM(threshold)
 
         Args:
             params: List of parameters that may contain FRLEFT condition
@@ -5714,37 +5755,81 @@ class VIPPToDFAConverter:
                     # Check if param1 is the operator (FRLEFT lt 60)
                     if param1.lower() in ['lt', '<', 'gt', '>', 'ge', '>=', 'le', '<=']:
                         operator = param1.lower()
-                        threshold = param2
+                        frleft_raw = param2
                     # Otherwise assume param2 is the operator (FRLEFT 60 lt)
                     else:
-                        threshold = param1
+                        frleft_raw = param1
                         operator = param2.lower()
 
+                    # Compute the DFA MM threshold from the FRLEFT line count
+                    threshold = self._compute_frleft_threshold_mm(frleft_raw)
+
                     # Convert to DFA condition
-                    # Use $SL_LMAXY (last max Y from just-closed sublevel) because
-                    # the FRLEFT check is emitted OUTSIDE the OUTLINE block (at
-                    # DOCFORMAT level).  At that level $SL_MAXY is 0 (no active
-                    # sublevel), but $SL_LMAXY retains the max Y from the OUTLINE
-                    # that was just closed via ENDIO.
+                    # Use $ML_YPOS (main level Y position) because the overflow
+                    # check runs at DOCFORMAT level (outside any OUTLINE).
+                    # $ML_YPOS accumulates correctly across successive DOCFORMAT
+                    # calls, while $SL_LMAXY only tracks the last closed sublevel.
                     if operator in ['lt', '<']:
-                        # FRLEFT 60 lt → page has less than 60mm left
-                        # This means we're close to bottom of page
-                        condition = f"$SL_LMAXY>$LP_HEIGHT-MM({threshold})"
+                        # FRLEFT N lt → fewer than N lines remain → close to bottom
+                        condition = f"$ML_YPOS>$LP_HEIGHT-MM({threshold})"
                         return (condition, True)
                     elif operator in ['gt', '>']:
-                        # FRLEFT 60 gt → page has more than 60mm left
-                        condition = f"$SL_LMAXY<$LP_HEIGHT-MM({threshold})"
+                        # FRLEFT N gt → more than N lines remain
+                        condition = f"$ML_YPOS<$LP_HEIGHT-MM({threshold})"
                         return (condition, True)
                     elif operator in ['ge', '>=']:
-                        # FRLEFT 60 ge → page has at least 60mm left
-                        condition = f"$SL_LMAXY<=$LP_HEIGHT-MM({threshold})"
+                        # FRLEFT N ge → at least N lines remain
+                        condition = f"$ML_YPOS<=$LP_HEIGHT-MM({threshold})"
                         return (condition, True)
                     elif operator in ['le', '<=']:
-                        # FRLEFT 60 le → page has at most 60mm left
-                        condition = f"$SL_LMAXY>=$LP_HEIGHT-MM({threshold})"
+                        # FRLEFT N le → at most N lines remain
+                        condition = f"$ML_YPOS>=$LP_HEIGHT-MM({threshold})"
                         return (condition, True)
 
         return (None, False)
+
+    def _compute_frleft_threshold_mm(self, frleft_raw: str) -> int:
+        """
+        Convert a FRLEFT line count to a DFA MM threshold value.
+
+        FRLEFT values in VIPP are line counts relative to the frame bottom.
+        The DFA condition ``$ML_YPOS > $LP_HEIGHT - MM(threshold)`` needs
+        ``threshold`` in mm measured from the page bottom.
+
+        When SETPAGEDEF frame heights are available:
+            frame_bottom = frame_Y + last_frame_height  (use continuation page)
+            frleft_mm    = frleft_lines * line_spacing
+            threshold    = page_height - (frame_bottom - frleft_mm)
+
+        When no frame info is available:
+            threshold    = frleft_lines * line_spacing  (simple fallback)
+        """
+        try:
+            frleft_lines = float(frleft_raw)
+        except (ValueError, TypeError):
+            # Not a number — return the raw value unchanged (legacy behaviour)
+            return frleft_raw
+
+        line_sp = self.line_spacing if self.line_spacing else 4.0  # default 4mm
+        frleft_mm = frleft_lines * line_sp
+        page_height = 297.0  # A4
+
+        if self.page_frame_heights and self.page_layout_position:
+            _, frame_y = self.page_layout_position
+            # Use the LAST (continuation/repeat) frame height — this gives the
+            # steady-state text capacity and a threshold that is safe for page 1
+            # (whose frame is smaller and therefore ends earlier).
+            last_height = self.page_frame_heights[-1]
+            frame_bottom = frame_y + last_height
+            # Subtract one extra line_sp because the overflow check runs BEFORE
+            # the current line is rendered — we must trigger one line early.
+            overflow_y = frame_bottom - frleft_mm - line_sp
+            threshold = page_height - overflow_y
+        else:
+            # No frame info — simple line-to-mm conversion
+            threshold = frleft_mm
+
+        return int(round(threshold))
 
     def _generate_docformat_main(self):
         """Generate the main DOCFORMAT section."""
@@ -6660,6 +6745,7 @@ class VIPPToDFAConverter:
                 if outline_opened:
                     _close_outline_and_store_textflow()
                 self.add_line("USE LOGICALPAGE NEXT;")
+                self._emit_page_overflow_reset()
                 self.add_line("TFLOW_Y = $SL_CURRY;")
                 prev_cmd_was_pagebrk = True
                 i += 1
@@ -6673,6 +6759,7 @@ class VIPPToDFAConverter:
                     if outline_opened:
                         _close_outline_and_store_textflow()
                     self.add_line("USE LOGICALPAGE NEXT;")
+                    self._emit_page_overflow_reset()
                 self.add_line("TFLOW_Y = $SL_CURRY;")
                 # else: PAGEBRK already emitted the page break — suppress this one
                 prev_cmd_was_pagebrk = False
@@ -6685,6 +6772,7 @@ class VIPPToDFAConverter:
                     if outline_opened:
                         _close_outline_and_store_textflow()
                     self.add_line("USE LOGICALPAGE NEXT;")
+                    self._emit_page_overflow_reset()
                 self.add_line("TFLOW_Y = $SL_CURRY;")
                 prev_cmd_was_pagebrk = False
                 i += 1
@@ -6864,7 +6952,7 @@ class VIPPToDFAConverter:
             has_prefix_cmp = (('PREFIX' in condition or 'VAR_' in condition)
                               and '==' in condition)
             if has_prefix_cmp and has_pagebrk_child:
-                condition = '$SL_LMAXY>$LP_HEIGHT-MM(20)'
+                condition = '$ML_YPOS>$LP_HEIGHT-MM(20)'
                 needs_istrue = True
 
         # Don't output empty conditions - just output IF with THEN
@@ -6900,6 +6988,7 @@ class VIPPToDFAConverter:
                 self.indent()
                 self.add_line("/* Page overflow: NEWFRAME → USE LOGICALPAGE NEXT */")
                 self.add_line("USE LOGICALPAGE NEXT;")
+                self._emit_page_overflow_reset()
                 self.dedent()
             # else: PAGEBRK children will emit USE LOGICALPAGE NEXT; — no pre-emptive emission needed
 

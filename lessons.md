@@ -320,3 +320,74 @@
   - Text-flow carry positioning remains scoped conservatively to continuation cases with `case_value in {'Y1'}`.
 - Rationale:
   - Current baseline validated as strong on SIBS_CAST and acceptable on CASIO/UT00060 for continued iterative tuning.
+
+### 35) Expert review: SETLKF must generate MARGIN commands (2026-02-27)
+- When finding a SETLKF instruction `[[x y width height flags]] SETLKF`:
+  - In the **main DFA** (DBM-derived): emit `MARGIN TOP y MM LEFT x MM;`
+  - In **all FRM-derived DFA** files: emit `MARGIN TOP 0 MM LEFT 0 MM;`
+- This MARGIN applies from that point forward until encountering a new SETLKF.
+- Example: `[[08 25 190 255 0]] SETLKF` → `MARGIN TOP 25 MM LEFT 8 MM;`
+- Impact: this changes the coordinate frame for all subsequent positioned output, making X coordinates relative to MARGIN rather than page edge. First-page positions use `X-$MR_LEFT` but elsewhere raw `X` is correct when MARGINS are active.
+
+### 36) Expert review: SETLKF width clamps X coordinate (2026-02-27)
+- The 3rd value of SETLKF is the **maximum width** of the printable area.
+- When a MOVEH X value exceeds this width, Xerox automatically clamps it to the SETLKF width.
+- Example: SETLKF has width=190, MOVEH 197 → clamped to 190.
+- Converter must track SETLKF width and apply clamping in MOVEH/MOVEHR handling.
+
+### 37) Expert review: OUTPUT should always use PAD (2026-02-27)
+- When a string has trailing spaces, OUTPUT must have PAD set.
+- Expert recommendation: **always use PAD in OUTPUT** (never NOPAD).
+- This preserves intentional trailing whitespace from the Xerox source.
+
+### 38) Expert review: TEXT must always use BASELINE (2026-02-27)
+- Confirmed: BASELINE is the standard Xerox positioning model.
+- All TEXT commands must include BASELINE keyword.
+- Already implemented in session fix (Change 1 of the plan).
+
+### 39) Expert review: OUTLINE positioning in first vs. continuation DOCFORMAT (2026-02-27)
+- In the **first DOCFORMAT** to print LD on a page: `OUTLINE POSITION LEFT TOP`.
+  - The last position must be recorded: `YPOS = $SL_CURRY;`
+  - Problem: not clear where this "last position" is, especially in CASIO first page.
+- When a **DOCFORMAT follows another** on the same page:
+  - `OUTLINE POSITION (SAME+YPOS_START-$LINESP)` or `OUTLINE POSITION (SAME+YPOS-$LINESP)`
+  - Depends on what was recorded from the previous DOCFORMAT.
+- There must be something "recorded" in Xerox as table origin for positions after SCALL.
+
+### 40) Expert review: X-$MR_LEFT only needed on first page without MARGINS (2026-02-27)
+- In the first page, positions use `X-$MR_LEFT`.
+- Elsewhere, when using MARGINS, the position X does **not** need `-$MR_LEFT`.
+- This is directly related to lesson 35 (MARGIN from SETLKF).
+
+### 41) Expert review: SHp text-in-area conversion with width (2026-02-27)
+- Xerox pattern: `X MOVEH (text) width align SHp`
+- DFA conversion: `TEXT POSITION (X MM-$MR_LEFT) (LASTMAX-NL MM) BASELINE WIDTH W MM FONT F ALIGN LEFT 'text' ;`
+- The NL value before MOVEH determines vertical position as `LASTMAX-NL MM`.
+
+### 42) Expert review: Centered text with SHp (2026-02-27)
+- Xerox pattern: `X MOVEHR (text) width 2 SHp` (align=2 means CENTER)
+- DFA: `TEXT POSITION (X MM-(width MM/#2)) SAME BASELINE WIDTH W MM FONT F ALIGN CENTER 'text' ;`
+- The X position is adjusted by half the width for centering.
+- SHp alignment values: 0=LEFT, 1=RIGHT, 2=CENTER, 3=JUSTIFY.
+
+### 43) Expert review: CLEAR(FLD) must be CLEARPREFIX('FLD') with CATCHERROR (2026-02-27)
+- In the main DFA, `CLEAR(FLD)` is wrong.
+- Correct: `CLEARPREFIX('FLD')` — clears all variables with prefix 'FLD'.
+- This avoids getting unexisting (or previous) values from prior docdef output.
+- Problem: CLEARPREFIX generates errors if 'FLD' prefix doesn't exist.
+- Solution: wrap in CATCHERROR routine to silence errors for missing prefix.
+- Visible in CASIO last page where fields from previous docdef leak through.
+
+### 44) FRLEFT overflow threshold fix (2026-02-27)
+- FRLEFT values are LINE COUNTS, not mm values.
+- Formula: `threshold_mm = page_height - frame_Y - last_frame_height + FRLEFT_lines × SETLSP`
+- Example: SIBS_CAST CCASTX with FRLEFT 18, SETLSP 4mm, frame_Y=82, last_height=190:
+  - threshold = 297 - 82 - 190 + (18×4) = 97mm
+- Converter now parses SETPAGEDEF frame heights from SETLKF 4th parameter.
+
+### 45) Overflow condition must use $ML_YPOS, not $SL_LMAXY (2026-02-27)
+- `$SL_LMAXY` (last sublevel max Y) does NOT accumulate across successive DOCFORMAT calls.
+  - Each transaction creates a small OUTLINE (~4mm content). $SL_LMAXY only reflects that one sublevel's max Y, which never reaches the page bottom threshold.
+- `$ML_YPOS` (main level Y position) accumulates correctly as successive DOCFORMATs push the cursor down the page.
+- All FRLEFT and PAGEBRK overflow conditions now use `$ML_YPOS > $LP_HEIGHT - MM(threshold)`.
+- Confirmed by reference file: CCASTX uses `$ML_YPOS > $LP_HEIGHT-MM(100)` at line 502.
