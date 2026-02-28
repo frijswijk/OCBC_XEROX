@@ -5228,6 +5228,13 @@ class VIPPToDFAConverter:
             # Check if it's a keyword or starts with a keyword (for expressions like LEFT-$MR_LEFT)
             if x_upper in ('SAME', 'LEFT', 'RIGHT', 'CENTER') or x_upper.startswith(('LEFT-', 'RIGHT-', 'SAME-', 'SAME+')):
                 x_part = f"({x})"
+            elif x_upper.startswith('(') and 'MM' in x_upper:
+                # Pre-formatted expression (e.g., SHp CENTER: (X MM-(W MM/#2)))
+                # Already contains MM units — just add margin correction
+                if self.position_no_margins:
+                    x_part = f"({x})"
+                else:
+                    x_part = f"({x}-$MR_LEFT)"
             else:
                 # Numeric position - margin-corrected by default; FRM mode emits raw MM
                 if self.position_no_margins:
@@ -5941,9 +5948,7 @@ class VIPPToDFAConverter:
         self.add_line("USE FORMAT REFERENCE('DF_'!PREFIX);")
         self.add_line("")
         self.add_line("/* Reset Field Names/Number — CLEARPREFIX avoids stale values */")
-        self.add_line("CATCHERROR;")
-        self.add_line("D = CLEARPREFIX('FLD');")
-        self.add_line("ENDCATCHERROR;")
+        self.add_line("~RC = CLEARPREFIX('FLD');")
 
         self.dedent()
         self.add_line("ELSE;")
@@ -6085,9 +6090,7 @@ class VIPPToDFAConverter:
         self.add_line("USE FORMAT REFERENCE('DF_'!PREFIX);")
         self.add_line("")
         self.add_line("/* Reset Field Names/Number — CLEARPREFIX avoids stale values */")
-        self.add_line("CATCHERROR;")
-        self.add_line("D = CLEARPREFIX('FLD');")
-        self.add_line("ENDCATCHERROR;")
+        self.add_line("~RC = CLEARPREFIX('FLD');")
 
         if self.dfa_config.enable_document_boundaries:
             self.dedent()

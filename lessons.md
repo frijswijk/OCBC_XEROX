@@ -370,13 +370,22 @@
 - The X position is adjusted by half the width for centering.
 - SHp alignment values: 0=LEFT, 1=RIGHT, 2=CENTER, 3=JUSTIFY.
 
-### 43) Expert review: CLEAR(FLD) must be CLEARPREFIX('FLD') with CATCHERROR (2026-02-27)
+### 43) Expert review: CLEAR(FLD) must be CLEARPREFIX('FLD') — correct syntax (2026-02-27, revised 2026-02-28)
 - In the main DFA, `CLEAR(FLD)` is wrong.
 - Correct: `CLEARPREFIX('FLD')` — clears all variables with prefix 'FLD'.
 - This avoids getting unexisting (or previous) values from prior docdef output.
-- Problem: CLEARPREFIX generates errors if 'FLD' prefix doesn't exist.
-- Solution: wrap in CATCHERROR routine to silence errors for missing prefix.
-- Visible in CASIO last page where fields from previous docdef leak through.
+- CLEARPREFIX must be assigned to a discard variable: `~RC = CLEARPREFIX('FLD');`
+  - The tilde prefix (~) marks a temporary/discard variable in Papyrus DFA.
+  - Plain `D = CLEARPREFIX('FLD');` also works but `~RC` is the idiomatic form.
+- CATCHERROR does NOT exist as an inline block keyword in DFA.
+  - `CATCHERROR ... ENDCATCHERROR` is invalid syntax — produces errors on semicolons or the first word after CATCHERROR.
+  - The correct DFA error-handling pattern is a lifecycle DOCFORMAT hook: `DOCFORMAT $_CATCHERROR;`
+  - This is a special DOCFORMAT that is called automatically by the engine when any runtime error occurs.
+  - Inside `$_CATCHERROR`, use `&WARNING` to inspect the error code, and `RESULT_VARIABLE_NAME` to inspect which variable caused it.
+- For CLEARPREFIX where the prefix may not exist: simply call it without a guard.
+  - In practice, CLEARPREFIX does not error if no variables match the prefix (confirmed from Papyrus demo DFAs).
+  - The correct unconditional call is: `~RC = CLEARPREFIX('FLD');`
+- Visible in CASIO/SIBS last page where fields from previous docdef leak through.
 
 ### 44) FRLEFT overflow threshold fix (2026-02-27)
 - FRLEFT values are LINE COUNTS, not mm values.
