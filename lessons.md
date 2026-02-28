@@ -400,3 +400,17 @@
 - `$ML_YPOS` (main level Y position) accumulates correctly as successive DOCFORMATs push the cursor down the page.
 - All FRLEFT and PAGEBRK overflow conditions now use `$ML_YPOS > $LP_HEIGHT - MM(threshold)`.
 - Confirmed by reference file: CCASTX uses `$ML_YPOS > $LP_HEIGHT-MM(100)` at line 502.
+
+### 46) MARGIN must stay zero — SETLKF origin is NOT page margin (2026-02-28)
+- Expert review suggested `MARGIN TOP {y} MM LEFT {x} MM` from SETLKF frame origin.
+- **This is wrong**: FRM overlays position elements absolutely from page (0,0) and subtract `$MR_TOP`/`$MR_LEFT`.
+- With `MARGIN TOP 82 MM`: `$MR_TOP=82`, so FRM position `17.0 MM-$MR_TOP = -65mm` (off page!).
+- Non-margin-corrected FRM positions like `(131.3 MM) (4.0 MM)` also shift down by 82mm.
+- **Fix**: MARGIN must always be `TOP 0 MM LEFT 0 MM`. The SETLKF origin is used for `page_layout_position` (OUTLINE position resets after page overflow), not as page margins.
+
+### 47) CATCHERROR/ENDCATCHERROR is not valid DFA inline block syntax (2026-02-28)
+- `CATCHERROR; ... ENDCATCHERROR;` fails with "syntax error on word ';'"
+- `CATCHERROR ... ENDCATCHERROR` (no semicolons) fails with "syntax error on word 'D'"
+- DFA error handling uses `DOCFORMAT $_CATCHERROR;` — a lifecycle hook, not an inline block.
+- CLEARPREFIX doesn't need error wrapping — it's a no-op when no variables match.
+- Correct syntax: `~RC = CLEARPREFIX('FLD');` (tilde prefix = discard variable).

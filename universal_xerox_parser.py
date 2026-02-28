@@ -5860,12 +5860,10 @@ class VIPPToDFAConverter:
         #self.add_line("USE")
         #self.add_line("    FORMATGROUP MAIN;")
 
-        # Set margins from SETPAGEDEF/SETLKF frame origin
-        if self.page_layout_position:
-            mx, my = self.page_layout_position
-            self.add_line(f"MARGIN TOP {int(my)} MM BOTTOM 0 MM LEFT {int(mx)} MM RIGHT 0 MM;")
-        else:
-            self.add_line("MARGIN TOP 0 MM BOTTOM 0 MM LEFT 0 MM RIGHT 0 MM;")
+        # MARGIN must stay zero — FRM overlays use absolute positions from page (0,0)
+        # and subtract $MR_TOP/$MR_LEFT. SETLKF origin is handled by page_layout_position
+        # for OUTLINE position resets, not as page margins.
+        self.add_line("MARGIN TOP 0 MM BOTTOM 0 MM LEFT 0 MM RIGHT 0 MM;")
 
         # Set line spacing if SETLSP was found in DBM
         if self.line_spacing is not None:
