@@ -2135,6 +2135,7 @@ class VIPPToDFAConverter:
         # Track SETPAGEDEF layout positions for OUTLINE generation
         self.page_layout_position = None  # (x, y) from last SETLKF in SETPAGEDEF
         self.page_frame_heights = []      # Frame heights from each SETLKF in SETPAGEDEF
+        self.page_frame_width = None      # Max printable width from SETLKF (3rd value)
 
         # Track when to set box positioning anchors
         self.should_set_box_anchor = True  # Set anchors before first box in a group
@@ -2394,6 +2395,9 @@ class VIPPToDFAConverter:
                         else:
                             current_x = move_val
                             anchor_x = current_x
+                        # Clamp X to SETLKF frame width (Xerox auto-clamps)
+                        if self.page_frame_width and current_x > self.page_frame_width:
+                            current_x = self.page_frame_width
                         x_was_explicitly_set = True
                         y_was_explicitly_set = False  # Y becomes implicit (use SAME)
                         y_is_next_line = False  # MOVEH resets next-line flag, Y should be SAME
@@ -2608,6 +2612,9 @@ class VIPPToDFAConverter:
                         else:
                             current_x = move_val
                             anchor_x = current_x
+                        # Clamp X to SETLKF frame width (Xerox auto-clamps)
+                        if self.page_frame_width and current_x > self.page_frame_width:
+                            current_x = self.page_frame_width
                         x_was_explicitly_set = True
                         y_was_explicitly_set = False  # Y becomes implicit (use SAME)
                         y_is_next_line = False  # MOVEH resets next-line flag, Y should be SAME
@@ -3195,11 +3202,11 @@ class VIPPToDFAConverter:
 
         # Add alignment if specified (JUSTIFY is NOT valid on OUTPUT — handled above)
         if alignment == 0:
-            self.add_line("ALIGN LEFT NOPAD")
+            self.add_line("ALIGN LEFT PAD")
         elif alignment == 1:
-            self.add_line("ALIGN RIGHT NOPAD")
+            self.add_line("ALIGN RIGHT PAD")
         elif alignment == 2:
-            self.add_line("ALIGN CENTER NOPAD")
+            self.add_line("ALIGN CENTER PAD")
 
         self.add_line(";")
         self.dedent()
@@ -4343,17 +4350,19 @@ class VIPPToDFAConverter:
         if not self.page_layout_position and self.dbm.raw_content:
             # Pattern to find SETLKF arrays before SETPAGEDEF
             # Looking for: [ [ x y width height flags ] ] SETLKF
-            setlkf_pattern = r'\[\s*\[\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+\d+(?:\.\d+)?\s+(\d+(?:\.\d+)?)\s+\d+\s*\]\s*\]'
+            setlkf_pattern = r'\[\s*\[\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+\d+\s*\]\s*\]'
             matches = re.findall(setlkf_pattern, self.dbm.raw_content)
             if matches:
-                # Get the first match (initial page layout frame)
-                # The first SETLKF defines the data area for the first section of pages.
-                # Later SETLKFs (for subsequent sections) are handled per-PREFIX-case.
+                # Groups: (x, y, width, height)
                 first_match = matches[0]
                 self.page_layout_position = (float(first_match[0]), float(first_match[1]))
                 logger.info(f"Found SETPAGEDEF layout position from raw content: {self.page_layout_position}")
+                # Capture frame widths — use max across all pages for X clamping
+                widths = [float(m[2]) for m in matches]
+                self.page_frame_width = max(widths) if widths else None
+                logger.info(f"Found SETPAGEDEF frame width: {self.page_frame_width}")
                 # Capture all frame heights for FRLEFT overflow threshold calculation
-                self.page_frame_heights = [float(m[2]) for m in matches]
+                self.page_frame_heights = [float(m[3]) for m in matches]
                 logger.info(f"Found SETPAGEDEF frame heights: {self.page_frame_heights}")
 
         # Backup ORITL detection from raw content if command parsing missed it.
@@ -4384,15 +4393,18 @@ class VIPPToDFAConverter:
 
                 # Look for patterns like [[x, y, w, h, 0]]
                 import re
-                # Pattern to match x, y, height from SETLKF arrays
-                setlkf_pattern = r'\[\s*\[\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+\d+(?:\.\d+)?\s+(\d+(?:\.\d+)?)\s+\d+\s*\]\s*\]'
+                # Pattern to match x, y, width, height from SETLKF arrays
+                setlkf_pattern = r'\[\s*\[\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+\d+\s*\]\s*\]'
                 matches = re.findall(setlkf_pattern, str(block_content))
 
                 if matches:
-                    # Get the last match (last page layout)
+                    # Groups: (x, y, width, height)
                     last_match = matches[-1]
                     last_setlkf_position = (float(last_match[0]), float(last_match[1]))
-                    frame_heights = [float(m[2]) for m in matches]
+                    widths = [float(m[2]) for m in matches]
+                    frame_heights = [float(m[3]) for m in matches]
+                    if widths:
+                        self.page_frame_width = max(widths)
                     logger.info(f"Found SETPAGEDEF layout position: {last_setlkf_position}")
                     logger.info(f"Found SETPAGEDEF frame heights: {frame_heights}")
 
@@ -4857,7 +4869,7 @@ class VIPPToDFAConverter:
         self.add_line(f"            OUTPUT {self.page_number_expr}")
         self.add_line("                FONT F5_1")
         self.add_line(f"                POSITION ({self.page_number_x}) {self.page_number_y}")
-        self.add_line(f"                ALIGN {self.page_number_align} NOPAD;")
+        self.add_line(f"                ALIGN {self.page_number_align} PAD;")
         if self.emit_page_index_marker:
             self.add_line(f"            INDEX PAGE_MARKER = {self.page_number_expr};")
         self.add_line("        ENDIO;")
@@ -4915,7 +4927,7 @@ class VIPPToDFAConverter:
             self.add_line(f"            OUTPUT {self.page_number_expr}")
             self.add_line("                FONT F5_1")
             self.add_line(f"                POSITION ({self.page_number_x}) {self.page_number_y}")
-            self.add_line(f"                ALIGN {self.page_number_align} NOPAD;")
+            self.add_line(f"                ALIGN {self.page_number_align} PAD;")
             if self.emit_page_index_marker:
                 self.add_line(f"            INDEX PAGE_MARKER = {self.page_number_expr};")
             self.add_line("        ENDIO;")
@@ -5841,8 +5853,12 @@ class VIPPToDFAConverter:
         #self.add_line("USE")
         #self.add_line("    FORMATGROUP MAIN;")
 
-        # Set margins
-        self.add_line("MARGIN TOP 0 MM BOTTOM 0 MM LEFT 0 MM RIGHT 0 MM;")
+        # Set margins from SETPAGEDEF/SETLKF frame origin
+        if self.page_layout_position:
+            mx, my = self.page_layout_position
+            self.add_line(f"MARGIN TOP {int(my)} MM BOTTOM 0 MM LEFT {int(mx)} MM RIGHT 0 MM;")
+        else:
+            self.add_line("MARGIN TOP 0 MM BOTTOM 0 MM LEFT 0 MM RIGHT 0 MM;")
 
         # Set line spacing if SETLSP was found in DBM
         if self.line_spacing is not None:
@@ -5924,8 +5940,10 @@ class VIPPToDFAConverter:
         self.add_line("/* Route to appropriate format based on PREFIX */")
         self.add_line("USE FORMAT REFERENCE('DF_'!PREFIX);")
         self.add_line("")
-        self.add_line("/* Reset Field Names/Number */")
-        self.add_line("D = CLEAR(FLD);")
+        self.add_line("/* Reset Field Names/Number — CLEARPREFIX avoids stale values */")
+        self.add_line("CATCHERROR;")
+        self.add_line("D = CLEARPREFIX('FLD');")
+        self.add_line("ENDCATCHERROR;")
 
         self.dedent()
         self.add_line("ELSE;")
@@ -6066,8 +6084,10 @@ class VIPPToDFAConverter:
         self.add_line("/* Route to appropriate format based on PREFIX (FLD[0]) */")
         self.add_line("USE FORMAT REFERENCE('DF_'!PREFIX);")
         self.add_line("")
-        self.add_line("/* Reset Field Names/Number */")
-        self.add_line("D = CLEAR(FLD);")
+        self.add_line("/* Reset Field Names/Number — CLEARPREFIX avoids stale values */")
+        self.add_line("CATCHERROR;")
+        self.add_line("D = CLEARPREFIX('FLD');")
+        self.add_line("ENDCATCHERROR;")
 
         if self.dfa_config.enable_document_boundaries:
             self.dedent()
@@ -6613,6 +6633,9 @@ class VIPPToDFAConverter:
                 if cmd.parameters:
                     try:
                         current_x = float(cmd.parameters[0])
+                        # Clamp X to SETLKF frame width (Xerox auto-clamps)
+                        if self.page_frame_width and current_x > self.page_frame_width:
+                            current_x = self.page_frame_width
                         x_was_explicitly_set = True
                         y_was_explicitly_set = False  # Y becomes implicit (use SAME)
                         y_is_next_line = False  # MOVEH/MOVEHR resets next-line flag, Y should be SAME
@@ -7552,6 +7575,15 @@ class VIPPToDFAConverter:
         # X position: pass raw numeric value if set (MM will be added by _format_position), SAME otherwise
         x_final = x_pos if x_was_set else 'SAME'
 
+        # SHp CENTER adjustment: shift X left by half the width so the text
+        # is centered ON the specified X coordinate (Xerox semantics).
+        if alignment == 2 and shp_width and x_was_set:
+            try:
+                x_num = float(x_final)
+                x_final = f"({x_num} MM-({shp_width} MM/#2))"
+            except (ValueError, TypeError):
+                pass  # Non-numeric X — keep as-is
+
         # Y position: use LASTMAX+6MM after TEXT, NEXT after NL, explicit value when positioned
         if y_is_next:
             # Check if previous command was TEXT - use LASTMAX+6MM after TEXT
@@ -7615,11 +7647,11 @@ class VIPPToDFAConverter:
 
             # Add alignment if specified (but NOT JUSTIFY - that's not valid for OUTPUT)
             if alignment == 0:
-                self.add_line("    ALIGN LEFT NOPAD;")
+                self.add_line("    ALIGN LEFT PAD;")
             elif alignment == 1:
-                self.add_line("    ALIGN RIGHT NOPAD;")
+                self.add_line("    ALIGN RIGHT PAD;")
             elif alignment == 2:
-                self.add_line("    ALIGN CENTER NOPAD;")
+                self.add_line("    ALIGN CENTER PAD;")
             else:
                 self.add_line("    ;")
             self.last_command_type = 'OUTPUT'
@@ -7870,7 +7902,14 @@ class VIPPToDFAConverter:
         elif cmd.name in ('MOVEH', 'MOVEHR'):
             # Horizontal positioning
             if len(cmd.parameters) >= 1:
-                x = cmd.parameters[0]
+                try:
+                    x_val = float(cmd.parameters[0])
+                    # Clamp X to SETLKF frame width (Xerox auto-clamps)
+                    if self.page_frame_width and x_val > self.page_frame_width:
+                        x_val = self.page_frame_width
+                    x = x_val
+                except (ValueError, TypeError):
+                    x = cmd.parameters[0]
                 self.add_line(f"POSITION {x} MM SAME;")
     
     def _convert_box_command(self, cmd: XeroxCommand):
