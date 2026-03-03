@@ -22,8 +22,28 @@ When new insights or bugs are being fixed write those in lessons.md so we can us
 | `universal_xerox_parser.py` | DBM + FRM | Database Mode: pipe-delimited records, PREFIX routing |
 | `xerox_jdt_dfa.py` | JDT | Line Mode: SETRCD conditions, RPE arrays, fixed-width records |
 | `command_mappings.py` | Shared | VIPP-to-DFA command mapping dictionaries |
-| `migrate_xerox_to_papyrus.py` | Shared | Automates the migration of a Xerox FreeFlow project starting into a properly structured
-Papyrus Designer project folder. |
+| `migrate_xerox_to_papyrus.py` | Shared | Automates the migration of a Xerox FreeFlow project into a Papyrus Designer project folder |
+
+## Source Utilities
+
+| File | BAT launcher | Description |
+|------|-------------|-------------|
+| `xerox_beautifier.py` | `beautify_xerox.bat` | Removes commented-out code, normalises indentation, preserves meaningful comments |
+| `xerox_annotator.py`  | `annotate_xerox.bat` | Like the beautifier, but also appends a natural-language `% comment` after every active VIPP instruction — makes code readable for non-Xerox experts |
+
+### xerox_annotator.py — how it works
+
+For every active line in the cleaned VIPP source it appends a comment explaining what
+the instruction does in plain English.  Lines that already carry an inline comment are
+left untouched.
+
+```
+/F7  /ARIALB  07  INDEXFONT    % Register font alias "F7" → Arial Bold at 7pt
+/IF_CND1  2  7  /eq  (Period:) SETRCD  % Define IF_CND1: chars 2–8 == "Period:"
+/IF_CND3  [IF_CND1 IF_CND2 /or]  SETRCD  % Define IF_CND3 = IF_CND1 OR IF_CND2
+131.3 04 MOVETO F7 (OCBC Bank...) SHL  % Print "OCBC Bank..." (left-aligned) at (131.3, 4)
+[1  0  2360  0  127  00  73  5  /Font14  BLACK]  % RPE: chars 73–77, right-aligned at (2360,127), font Font14, BLACK
+```
 
 ## Running the Converters
 
@@ -36,6 +56,12 @@ python xerox_jdt_dfa.py <file.jdt> --single_file -o <output_directory>
 
 # Automate migration - choosing if its DBM or JDT
 python -3 migrate_xerox_to_papyrus.py --source  <xerox_folder> --output  <target_dfa_project_folder> --project-name <project>
+
+# Beautify VIPP sources (clean up only)
+python -3 xerox_beautifier.py <source_dir> --output <output_dir>
+
+# Annotate VIPP sources (clean up + natural-language comments)
+python -3 xerox_annotator.py <source_dir> --output <output_dir>
 ```
 
 Generated DFA files from testing go to `C:\ISIS\samples_pdd\OCBC\TEST\<PROJECT>\docdef\`.
